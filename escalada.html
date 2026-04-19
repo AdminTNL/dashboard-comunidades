@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comunidades Escalada</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --text: #142033;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --success: #059669;
+      --success-soft: #d1fae5;
+      --warning: #d97706;
+      --warning-soft: #ffedd5;
+      --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 220px;
+      height: 220px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      max-width: 780px;
+      color: rgba(255,255,255,0.86);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field select,
+    .field button {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      color: var(--text);
+      padding: 0 14px;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(37, 99, 235, 0.35);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+      background: #fff;
+    }
+
+    .field button {
+      cursor: pointer;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+    }
+
+    .field button.secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .kpi {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .kpi .value {
+      font-size: clamp(24px, 3vw, 34px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .kpi .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 10px 0 18px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .section-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .campaign-group {
+  background: linear-gradient(135deg, #0f172a 0%, #172554 45%, #1e3a8a 100%);
+  border: 1px solid rgba(30, 58, 138, 0.28);
+  border-radius: 26px;
+  padding: 18px;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.18);
+  margin-bottom: 18px;
+}
+
+    .campaign-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .campaign-header h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.campaign-header .meta {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+}
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.primary {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .badge.success {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .badge.warning {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .message-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .message-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+      overflow: hidden;
+      transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+    }
+
+    .message-card:hover {
+      border-color: rgba(37, 99, 235, 0.42);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08), 0 14px 28px rgba(37, 99, 235, 0.10);
+      transform: translateY(-2px);
+    }
+
+    .message-summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .message-summary::-webkit-details-marker { display: none; }
+
+    .message-main {
+      min-width: 0;
+    }
+
+    .message-topline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .pill.gray {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .pill.green {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    .message-text {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.6;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .message-subinfo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .message-stats {
+      display: grid;
+      grid-auto-flow: row;
+      gap: 8px;
+      min-width: 190px;
+    }
+
+    .stat-chip {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: #fff;
+      min-width: 160px;
+    }
+
+    .stat-chip .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat-chip .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .details-panel {
+      border-top: 1px solid var(--line);
+      padding: 0 18px 18px;
+      background: #fcfdff;
+    }
+
+    .details-content {
+      padding-top: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .detail-block {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      padding: 14px;
+    }
+
+    .detail-block h4 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .person-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 13px;
+      border-radius: 14px;
+      background: var(--panel-soft);
+      border: 1px solid #edf1f6;
+      font-size: 14px;
+    }
+
+    .person-row strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .person-row span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .empty-state {
+      background: var(--panel);
+      border: 1px dashed #cbd5e1;
+      border-radius: 24px;
+      padding: 36px 24px;
+      text-align: center;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .empty-state h3 {
+      margin: 0 0 10px;
+      color: var(--text);
+    }
+
+    /* CSS herdado do projeto */
+    trix-editor {
+      display: block;
+    }
+
+    trix-editor:empty:not(:focus)::before {
+      content: attr(placeholder);
+      color: graytext;
+      cursor: text;
+      pointer-events: none;
+      white-space: pre-line;
+    }
+
+    trix-editor a[contenteditable=false] {
+      cursor: text;
+    }
+
+    trix-editor img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    trix-editor [data-trix-attachment] figcaption textarea {
+      resize: none;
+    }
+
+    trix-editor [data-trix-attachment] figcaption textarea.trix-autoresize-clone {
+      position: absolute;
+      left: -9999px;
+      max-height: 0px;
+    }
+
+    trix-editor [data-trix-attachment] figcaption[data-trix-placeholder]:empty::before {
+      content: attr(data-trix-placeholder);
+      color: graytext;
+    }
+
+    trix-editor [data-trix-cursor-target] {
+      display: inline-block !important;
+      width: 1px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+    }
+
+    trix-editor [data-trix-cursor-target=left] {
+      vertical-align: top !important;
+      margin-left: -1px !important;
+    }
+
+    trix-editor [data-trix-cursor-target=right] {
+      vertical-align: bottom !important;
+      margin-right: -1px !important;
+    }
+
+    @media (max-width: 980px) {
+      .toolbar,
+      .kpis,
+      .details-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .message-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .message-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        min-width: 0;
+      }
+
+      .stat-chip {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        padding: 14px;
+      }
+
+      .hero,
+      .toolbar,
+      .campaign-group,
+      .kpi {
+        border-radius: 20px;
+      }
+
+      .toolbar,
+      .kpis,
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .message-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .person-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <h1>Comunidades Escalada</h1>
+      <p>
+        Dashboard inicial para acompanhar mensagens enviadas nas comunidades do WhatsApp,
+        com filtro por período, projeto e campanha. Cada card exibe a mensagem, o total de
+        reações e votos únicos e, ao expandir, mostra a lista de pessoas e números vinculados.
+      </p>
+    </section>
+
+    <section class="toolbar">
+      <div class="field">
+        <label for="dateStart">Data inicial</label>
+        <input id="dateStart" type="date" />
+      </div>
+      <div class="field">
+        <label for="dateEnd">Data final</label>
+        <input id="dateEnd" type="date" />
+      </div>
+      <div class="field">
+        <label for="projectFilter">Projeto</label>
+        <select id="projectFilter">
+          <option value="todos">Todos os projetos</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="campaignFilter">Campanha</label>
+        <select id="campaignFilter">
+          <option value="todas">Todas as campanhas</option>
+        </select>
+      </div>
+      <div class="field">
+        <button id="applyFilters">Aplicar filtros</button>
+      </div>
+      <div class="field">
+        <button id="resetFilters" class="secondary">Limpar filtros</button>
+      </div>
+    </section>
+
+    <section class="kpis" id="kpis"></section>
+
+    <div class="section-title">
+      <div>
+        <h2>Mensagens por campanha</h2>
+        <p id="resultSummary">Carregando dados do projeto Escalada...</p>
+      </div>
+    </div>
+
+    <main id="dashboardContent"></main>
+  </div>
+
+  <script>
+    const DASHBOARD_KEY = 'escalada';
+    const WEBHOOK_URL = 'https://webhookn8n.tnledu.shop/webhook/dashboard-comunidades';
+
+    const dateStartInput = document.getElementById('dateStart');
+    const dateEndInput = document.getElementById('dateEnd');
+    const projectFilter = document.getElementById('projectFilter');
+    const campaignFilter = document.getElementById('campaignFilter');
+    const applyFiltersButton = document.getElementById('applyFilters');
+    const resetFiltersButton = document.getElementById('resetFilters');
+    const dashboardContent = document.getElementById('dashboardContent');
+    const resultSummary = document.getElementById('resultSummary');
+    const kpisContainer = document.getElementById('kpis');
+
+    let dashboardData = null;
+    let mensagensProcessadas = [];
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function formatDateTime(value) {
+      return new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+      }).format(new Date(value));
+    }
+
+    function formatDateOnly(value) {
+      const date = value instanceof Date ? value : new Date(value);
+      return new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short'
+      }).format(date);
+    }
+
+    function toInputDate(value) {
+      const date = new Date(value);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function setProjectFilter() {
+      const projeto = dashboardData?.projeto || 'Escalada';
+      projectFilter.innerHTML = `<option value="${escapeHtml(projeto)}">${escapeHtml(projeto)}</option>`;
+      projectFilter.value = projeto;
+      projectFilter.disabled = true;
+    }
+
+    function populateCampaignFilter() {
+      const campanhas = dashboardData?.campanhas_disponiveis || [];
+      campaignFilter.innerHTML = '<option value="todas">Todas as campanhas</option>';
+
+      campanhas.forEach(campaign => {
+        const option = document.createElement('option');
+        option.value = campaign;
+        option.textContent = campaign;
+        campaignFilter.appendChild(option);
+      });
+    }
+
+    function setDefaultDates() {
+      if (!mensagensProcessadas.length) return;
+
+      const dates = mensagensProcessadas
+        .map(item => new Date(item.data_evento))
+        .sort((a, b) => a - b);
+
+      dateStartInput.value = toInputDate(dates[0]);
+      dateEndInput.value = toInputDate(dates[dates.length - 1]);
+    }
+
+    function isWithinRange(dateValue, startValue, endValue) {
+      const current = new Date(dateValue);
+      const start = new Date(`${startValue}T00:00:00`);
+      const end = new Date(`${endValue}T23:59:59.999`);
+      return current >= start && current <= end;
+    }
+
+    function groupMessages(messages) {
+      const groups = new Map();
+
+      messages.forEach(message => {
+        const key = `${message.projeto}|||${message.campanha}`;
+
+        if (!groups.has(key)) {
+          groups.set(key, {
+            projeto: message.projeto,
+            campanha: message.campanha,
+            comunidade: message.comunidade,
+            messages: []
+          });
+        }
+
+        groups.get(key).messages.push(message);
+      });
+
+      return [...groups.values()];
+    }
+
+    function renderKpis(items) {
+      const totalMessages = items.length;
+      const totalUniqueReactions = items.reduce((sum, item) => sum + (item.total_reacoes || 0), 0);
+      const totalUniqueVotes = items.reduce((sum, item) => sum + (item.total_votos || 0), 0);
+      const withEngagement = items.filter(item => (item.total_engajamentos || 0) > 0).length;
+      const projetoAtual = dashboardData?.projeto || 'Escalada';
+
+      kpisContainer.innerHTML = `
+        <article class="kpi">
+          <div class="label">Mensagens no período</div>
+          <div class="value">${totalMessages}</div>
+          <div class="hint">Mensagens do projeto ${escapeHtml(projetoAtual)} dentro do período selecionado.</div>
+        </article>
+        <article class="kpi">
+          <div class="label">Reações únicas</div>
+          <div class="value">${totalUniqueReactions}</div>
+          <div class="hint">Contadas por telefone único em cada mensagem.</div>
+        </article>
+        <article class="kpi">
+          <div class="label">Votos únicos</div>
+          <div class="value">${totalUniqueVotes}</div>
+          <div class="hint">Enquetes podem receber votos e reações ao mesmo tempo.</div>
+        </article>
+        <article class="kpi">
+          <div class="label">Mensagens com engajamento</div>
+          <div class="value">${withEngagement}</div>
+          <div class="hint">Cards com pelo menos 1 voto ou 1 reação.</div>
+        </article>
+      `;
+    }
+
+    function renderEmptyState(message = 'Nenhuma mensagem encontrada') {
+      dashboardContent.innerHTML = `
+        <section class="empty-state">
+          <h3>${escapeHtml(message)}</h3>
+          <p>Revise o período ou a campanha para visualizar resultados.</p>
+        </section>
+      `;
+    }
+
+    function renderDashboard() {
+      if (!mensagensProcessadas.length) {
+        renderKpis([]);
+        renderEmptyState('Nenhum dado disponível');
+        resultSummary.textContent = 'Nenhuma mensagem recebida do endpoint.';
+        return;
+      }
+
+      const start = dateStartInput.value;
+      const end = dateEndInput.value;
+      const campaign = campaignFilter.value;
+
+      let filteredMessages = mensagensProcessadas.filter(item => isWithinRange(item.data_evento, start, end));
+
+      if (campaign !== 'todas') {
+        filteredMessages = filteredMessages.filter(item => item.campanha === campaign);
+      }
+
+      filteredMessages = [...filteredMessages].sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento));
+      const grouped = groupMessages(filteredMessages);
+
+      renderKpis(filteredMessages);
+      resultSummary.textContent = `${filteredMessages.length} mensagem(ns) encontradas entre ${formatDateOnly(start)} e ${formatDateOnly(end)}.`;
+
+      if (!grouped.length) {
+        renderEmptyState();
+        return;
+      }
+
+      dashboardContent.innerHTML = grouped.map(group => {
+        const totalMessages = group.messages.length;
+        const totalReacoes = group.messages.reduce((sum, item) => sum + (item.total_reacoes || 0), 0);
+        const totalVotos = group.messages.reduce((sum, item) => sum + (item.total_votos || 0), 0);
+
+        return `
+          <section class="campaign-group">
+            <header class="campaign-header">
+              <div>
+                <h3>Campanha: ${escapeHtml(group.campanha)} | Projeto: ${escapeHtml(group.projeto)}</h3>
+                <div class="meta">Comunidade principal: ${escapeHtml(group.comunidade || '—')}</div>
+              </div>
+              <div class="badges">
+                <span class="badge primary">${totalMessages} mensagens</span>
+                <span class="badge success">${totalReacoes} reações únicas</span>
+                <span class="badge warning">${totalVotos} votos únicos</span>
+              </div>
+            </header>
+
+            <div class="message-list">
+              ${group.messages.map(message => {
+                const reacoes = Array.isArray(message.reacoes) ? message.reacoes : [];
+                const votos = Array.isArray(message.votos) ? message.votos : [];
+                const totalReacoesMsg = message.total_reacoes || 0;
+                const totalVotosMsg = message.total_votos || 0;
+                const hasDetails = totalReacoesMsg > 0 || totalVotosMsg > 0;
+
+                return `
+                  <details class="message-card" ${hasDetails ? '' : 'disabled'}>
+                    <summary class="message-summary">
+                      <div class="message-main">
+                        <div class="message-topline">
+                          <span class="pill">${escapeHtml(message.tipo || 'mensagem')}</span>
+                          <span class="pill gray">${escapeHtml(formatDateTime(message.data_evento))}</span>
+                          <span class="pill green">Responsável: ${escapeHtml(message.responsavel_nome || '—')}</span>
+                        </div>
+                        <p class="message-text">${escapeHtml(message.texto_preview || '(Mensagem sem texto)')}</p>
+                        <div class="message-subinfo">
+                          <span><strong>ID:</strong> ${escapeHtml(message.id_mensagem || '—')}</span>
+                          <span><strong>Comunidade:</strong> ${escapeHtml(message.comunidade || '—')}</span>
+                          <span><strong>Remetente:</strong> ${escapeHtml(message.remetente_nome || '—')}</span>
+                        </div>
+                      </div>
+
+                      <div class="message-stats">
+                        <div class="stat-chip">
+                          <span class="stat-label">Reações</span>
+                          <span class="stat-value">${totalReacoesMsg}</span>
+                        </div>
+                        <div class="stat-chip">
+                          <span class="stat-label">Votos</span>
+                          <span class="stat-value">${totalVotosMsg}</span>
+                        </div>
+                        <div class="stat-chip">
+                          <span class="stat-label">Ação</span>
+                          <span class="stat-value" style="font-size:14px; line-height:1.4; letter-spacing:0;">${hasDetails ? 'Clique para ver a lista' : 'Sem engajamento'}</span>
+                        </div>
+                      </div>
+                    </summary>
+
+                    ${hasDetails ? `
+                      <div class="details-panel">
+                        <div class="details-content">
+                          <div class="details-grid">
+                            <section class="detail-block">
+                              <h4>Quem reagiu (${totalReacoesMsg})</h4>
+                              <div class="detail-list">
+                                ${reacoes.length ? reacoes.map(person => `
+                                  <div class="person-row">
+                                    <div>
+                                      <strong>${escapeHtml(person.nome_contato || 'Sem nome')}</strong>
+                                      <span>${escapeHtml(person.telefone || 'Sem telefone')}</span>
+                                    </div>
+                                  </div>
+                                `).join('') : '<div class="person-row"><div><strong>Nenhuma reação</strong><span>Essa mensagem não recebeu reações únicas no período.</span></div></div>'}
+                              </div>
+                            </section>
+
+                            <section class="detail-block">
+                              <h4>Quem votou (${totalVotosMsg})</h4>
+                              <div class="detail-list">
+                                ${votos.length ? votos.map(person => `
+                                  <div class="person-row">
+                                    <div>
+                                      <strong>${escapeHtml(person.nome_contato || 'Sem nome')}</strong>
+                                      <span>${escapeHtml(person.telefone || 'Sem telefone')}</span>
+                                    </div>
+                                  </div>
+                                `).join('') : '<div class="person-row"><div><strong>Nenhum voto</strong><span>Essa mensagem não recebeu votos únicos no período.</span></div></div>'}
+                              </div>
+                            </section>
+                          </div>
+                        </div>
+                      </div>
+                    ` : ''}
+                  </details>
+                `;
+              }).join('')}
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    async function carregarDados() {
+      resultSummary.textContent = 'Buscando dados do dashboard...';
+      dashboardContent.innerHTML = `
+        <section class="empty-state">
+          <h3>Carregando dashboard</h3>
+          <p>Aguarde enquanto os dados do n8n são carregados.</p>
+        </section>
+      `;
+
+      try {
+        const params = new URLSearchParams({ dashboard: DASHBOARD_KEY });
+        const response = await fetch(`${WEBHOOK_URL}?${params.toString()}`);
+
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar dados: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+
+        dashboardData = Array.isArray(responseData)
+          ? responseData[0]
+          : responseData;
+
+        if (!dashboardData || !Array.isArray(dashboardData.mensagens_processadas)) {
+          throw new Error('O endpoint não retornou mensagens_processadas no formato esperado.');
+        }
+
+        mensagensProcessadas = dashboardData.mensagens_processadas;
+
+        document.title = dashboardData.nome_dashboard || 'Comunidades Escalada';
+        document.querySelector('.hero h1').textContent = dashboardData.nome_dashboard || 'Comunidades Escalada';
+
+        setProjectFilter();
+        populateCampaignFilter();
+        setDefaultDates();
+        renderDashboard();
+      } catch (error) {
+        console.error(error);
+        renderKpis([]);
+        resultSummary.textContent = 'Não foi possível carregar os dados do dashboard.';
+        dashboardContent.innerHTML = `
+          <section class="empty-state">
+            <h3>Erro ao carregar os dados</h3>
+            <p>Verifique a URL do webhook no HTML e a resposta do fluxo no n8n.</p>
+          </section>
+        `;
+      }
+    }
+
+    applyFiltersButton.addEventListener('click', renderDashboard);
+
+    resetFiltersButton.addEventListener('click', () => {
+      campaignFilter.value = 'todas';
+      setDefaultDates();
+      renderDashboard();
+    });
+
+    carregarDados();
+  </script>
+</body>
+</html>
