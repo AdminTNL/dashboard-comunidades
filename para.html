@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Pará</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #020617;
+      color: #f1f5f9;
+      background-image:
+        radial-gradient(at top left, rgba(59, 130, 246, 0.05), transparent 60%),
+        radial-gradient(at bottom right, rgba(16, 185, 129, 0.05), transparent 60%);
+      background-attachment: fixed;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-panel:hover {
+      box-shadow: none !important;
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(30, 41, 59, 0.55);
+    }
+    .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.12); }
+    .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.12); }
+    .glow-yellow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.12); }
+    .glow-purple { box-shadow: 0 0 20px rgba(168, 85, 247, 0.12); }
+    .glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.12); }
+
+    .nav-btn {
+      position: relative;
+      padding-bottom: 4px;
+      color: #94a3b8;
+      transition: all .3s ease;
+      white-space: nowrap;
+    }
+    .nav-btn.active {
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-btn.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -4px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+    }
+    .tab-content { display: none; }
+    .tab-content.active {
+      display: block;
+      animation: slideUp .45s ease-out;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .custom-table th {
+      text-transform: uppercase;
+      font-size: .7rem;
+      color: #94a3b8;
+      padding: .85rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      letter-spacing: .05em;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      z-index: 1;
+    }
+    .custom-table td {
+      padding: .85rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: .87rem;
+      color: #e2e8f0;
+      vertical-align: top;
+    }
+    .custom-table tbody tr:hover {
+      background: rgba(255,255,255,0.04);
+    }
+    .compact-table th {
+      padding: .58rem .72rem;
+      font-size: .64rem;
+      line-height: 1.1;
+    }
+    .compact-table td {
+      padding: .52rem .72rem;
+      font-size: .78rem;
+      line-height: 1.15;
+    }
+    .scoreboard-card-header {
+      min-height: 0;
+    }
+    .scoreboard-section {
+      padding: 1rem;
+    }
+    @media (min-width: 640px) {
+      .scoreboard-section {
+        padding: 1.15rem;
+      }
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      border-radius: 999px;
+      padding: .28rem .6rem;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .badge-ok {
+      background: rgba(16,185,129,.13);
+      color: #6ee7b7;
+      border-color: rgba(16,185,129,.22);
+    }
+    .badge-info {
+      background: rgba(59,130,246,.13);
+      color: #93c5fd;
+      border-color: rgba(59,130,246,.22);
+    }
+    .badge-warn {
+      background: rgba(234,179,8,.13);
+      color: #fde68a;
+      border-color: rgba(234,179,8,.22);
+    }
+    .mono {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum";
+    }
+    .filter-chip {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 1rem;
+      padding: .9rem 1rem;
+    }
+    .date-input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+    }
+    .date-text-input {
+      width: 100%;
+      min-width: 0;
+      background: rgba(2, 6, 23, 0.82);
+      color: #fff;
+      outline: none;
+      border: 1px solid rgb(51 65 85 / 1);
+      border-radius: .95rem;
+      padding: .72rem .9rem;
+      font-size: .95rem;
+      letter-spacing: .01em;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .date-text-input:focus {
+      border-color: rgba(59, 130, 246, 0.95);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+      background: rgba(2, 6, 23, 0.95);
+    }
+    .date-text-input::placeholder {
+      color: #94a3b8;
+    }
+    .date-picker-btn {
+      width: 100%;
+      min-height: 2.65rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      border-radius: .95rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.92);
+      color: #cbd5e1;
+      flex-shrink: 0;
+      transition: all .2s ease;
+      font-size: .9rem;
+      font-weight: 600;
+    }
+    .date-picker-btn:hover {
+      background: rgba(30, 41, 59, 0.96);
+      color: #fff;
+      border-color: rgba(59,130,246,.35);
+    }
+    .native-date-input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+    }
+    .date-picker-btn span {
+      line-height: 1;
+    }
+    .empty-state {
+      border: 1px dashed rgba(148,163,184,0.35);
+      background: rgba(15,23,42,0.45);
+    }
+    .scoreboard-panel {
+  position: relative;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scoreboard-panel-blue {
+  border-color: rgba(59, 130, 246, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(59,130,246,0.06),
+    0 0 22px rgba(59,130,246,0.10);
+}
+
+.scoreboard-panel-yellow {
+  border-color: rgba(234, 179, 8, 0.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(234,179,8,0.06),
+    0 0 22px rgba(234,179,8,0.10);
+}
+
+.scoreboard-panel-emerald {
+  border-color: rgba(16, 185, 129, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(16,185,129,0.06),
+    0 0 22px rgba(16,185,129,0.10);
+}
+
+.scoreboard-panel-purple {
+  border-color: rgba(168, 85, 247, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(168,85,247,0.06),
+    0 0 22px rgba(168,85,247,0.10);
+}
+
+.scoreboard-header-blue {
+  border-bottom-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+.scoreboard-header-yellow {
+  border-bottom-color: rgba(234, 179, 8, 0.22) !important;
+}
+
+.scoreboard-header-emerald {
+  border-bottom-color: rgba(16, 185, 129, 0.22) !important;
+}
+
+.scoreboard-header-purple {
+  border-bottom-color: rgba(168, 85, 247, 0.22) !important;
+}
+
+.scoreboard-title {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  line-height: 1.2;
+}
+
+.scoreboard-title-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: .85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(15, 23, 42, 0.92);
+  flex-shrink: 0;
+}
+
+.scoreboard-title-icon-blue {
+  color: #93c5fd;
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.24);
+  box-shadow: 0 0 18px rgba(59,130,246,0.12);
+}
+
+.scoreboard-title-icon-yellow {
+  color: #fde68a;
+  background: rgba(234,179,8,0.12);
+  border-color: rgba(234,179,8,0.24);
+  box-shadow: 0 0 18px rgba(234,179,8,0.12);
+}
+
+.scoreboard-title-icon-emerald {
+  color: #6ee7b7;
+  background: rgba(16,185,129,0.12);
+  border-color: rgba(16,185,129,0.24);
+  box-shadow: 0 0 18px rgba(16,185,129,0.12);
+}
+
+.scoreboard-title-icon-purple {
+  color: #d8b4fe;
+  background: rgba(168,85,247,0.12);
+  border-color: rgba(168,85,247,0.24);
+  box-shadow: 0 0 18px rgba(168,85,247,0.12);
+}
+  
+
+.community-filter-input,
+    .community-filter-select {
+      width: 100%;
+      background: rgba(2, 6, 23, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      color: #fff;
+      border-radius: 0.95rem;
+      padding: 0.75rem 0.9rem;
+      outline: none;
+      transition: all .2s ease;
+    }
+
+    .community-filter-input:focus,
+    .community-filter-select:focus {
+      border-color: rgba(59, 130, 246, 0.58);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+    }
+
+    .community-kpi {
+      min-height: 132px;
+    }
+
+    .campaign-shell {
+      background: linear-gradient(135deg, #0f172a 0%, #172554 45%, #1e3a8a 100%);
+      border: 1px solid rgba(30, 58, 138, 0.28);
+    }
+
+    .message-card-community {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+    }
+
+    .message-card-community:hover {
+      border-color: rgba(59, 130, 246, 0.45);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10), 0 14px 28px rgba(59, 130, 246, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .soft-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      border-radius: 999px;
+      padding: .4rem .7rem;
+      font-size: .72rem;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .soft-pill-blue {
+      background: rgba(191, 219, 254, 0.92);
+      color: #1d4ed8;
+    }
+
+    .soft-pill-green {
+      background: rgba(209, 250, 229, 0.95);
+      color: #047857;
+    }
+
+    .soft-pill-yellow {
+      background: rgba(255, 237, 213, 0.95);
+      color: #b45309;
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+  <header class="sticky top-0 w-full z-40 glass-panel border-b border-white/5 bg-slate-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="w-11 h-11 rounded-2xl bg-blue-600/20 border border-blue-500/25 flex items-center justify-center shrink-0">
+          <i data-lucide="factory" class="w-6 h-6 text-blue-400"></i>
+        </div>
+        <div class="leading-tight min-w-0">
+          <h1 class="text-base sm:text-lg font-bold text-white tracking-wide truncate">Dashboard Pará</h1>
+          <p class="text-[11px] text-slate-400 uppercase tracking-[0.18em] font-semibold">Usinas da Paz • Usinas e Comunidades</p>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex gap-8 text-sm overflow-x-auto">
+        <button onclick="switchTab('usinas')" id="btn-usinas" class="nav-btn active">Usinas</button>
+        <button onclick="switchTab('comunidades')" id="btn-comunidades" class="nav-btn">Comunidades Pará</button>
+        <button onclick="switchTab('estrutura')" id="btn-estrutura" class="nav-btn">Estrutura</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+    <section id="tab-usinas" class="tab-content active space-y-8">
+      <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6">
+        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+          <div class="xl:max-w-[24rem] xl:pt-1 self-start">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Filtro principal</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">Usinas</h2>
+            <p class="text-slate-300 text-sm mt-2 max-w-3xl">
+              Selecione um período para responder perguntas como:
+              <span class="text-white font-semibold">“Quantas pessoas entraram na usina Marituba em um dia específico?”</span>
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3 w-full xl:w-auto xl:flex-1">
+            <label class="filter-chip relative">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
+              <div class="date-input-wrap">
+                <input id="start-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="start-date" aria-label="Abrir calendário da data inicial">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                  <span>Escolher no calendário</span>
+                </button>
+              </div>
+              <input id="start-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
+            </label>
+            <label class="filter-chip relative">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
+              <div class="date-input-wrap">
+                <input id="end-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="end-date" aria-label="Abrir calendário da data final">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                  <span>Escolher no calendário</span>
+                </button>
+              </div>
+              <input id="end-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
+            </label>
+            <div class="filter-chip">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Atalhos</span>
+              <div class="flex gap-2 flex-wrap">
+                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="all">Todo o tempo</button>
+                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="month">Mês atual</button>
+                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="30d">30 dias</button>
+              </div>
+            </div>
+            <div class="filter-chip flex flex-col justify-between">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Período aplicado</span>
+              <div id="applied-period" class="text-white font-semibold">Todo o tempo</div>
+            </div>
+            <div class="filter-chip flex flex-col justify-between">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Ação</span>
+              <button id="reset-btn" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[.99] text-white font-bold py-2.5 rounded-xl transition-all shadow-lg">
+                Redefinir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5" id="global-kpis"></div>
+
+      <div class="glass-panel glow-emerald rounded-3xl p-5 sm:p-6">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold mb-2">Visão consolidada</p>
+            <h3 class="text-xl font-bold text-white">Entradas por usina no período</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-ok">Somente considerar = true</span>
+            <span class="badge badge-info">Semana = segunda a domingo</span>
+          </div>
+        </div>
+        <div class="h-[360px]">
+          <canvas id="chart-overview"></canvas>
+        </div>
+      </div>
+
+      <div class="grid xl:grid-cols-2 gap-6" id="usina-cards"></div>
+
+      <div class="glass-panel glow-yellow rounded-3xl scoreboard-section">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-1.5">Gamificação</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Placar das Usinas</h3>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl leading-snug">
+              A líder da semana recebe 100 pontos e as demais recebem proporcionalmente:
+              <span class="text-white font-semibold">(entradas da usina / entradas da líder) × 100</span>.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 xl:justify-end xl:max-w-[38rem]">
+            <span class="badge badge-info" id="period-badge">Período analisado</span>
+            <span class="badge badge-warn" id="monthly-badge">Placar mensal</span>
+          </div>
+        </div>
+
+        <div class="grid xl:grid-cols-12 gap-3 items-start">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-purple rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
+  <div class="scoreboard-card-header mb-2.5">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-purple">
+        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+      </span>
+      Ranking por pontos no período
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação semanal acumulada considerando apenas o período selecionado.</p>
+  </div>
+  <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
+    <canvas id="chart-scoreboard"></canvas>
+  </div>
+</div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-blue rounded-3xl overflow-hidden xl:col-span-5">
+  <div class="scoreboard-card-header scoreboard-header-blue p-3.5 sm:p-4 border-b border-white/10">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-blue">
+        <i data-lucide="rows-3" class="w-4 h-4"></i>
+      </span>
+      Tabela do período
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Usina, pontuação acumulada e entradas dentro do filtro.</p>
+  </div>
+  <div class="max-h-[208px] overflow-auto">
+    <table class="w-full custom-table compact-table">
+                <thead>
+                  <tr>
+                    <th>Posição</th>
+                    <th>Usina</th>
+                    <th>Pontos</th>
+                    <th>Entradas</th>
+                  </tr>
+                </thead>
+                <tbody id="period-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-yellow rounded-3xl overflow-hidden xl:col-span-6">
+  <div class="scoreboard-card-header scoreboard-header-yellow p-3.5 sm:p-4 border-b border-white/10">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-yellow">
+        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+      </span>
+      Placar Mensal
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação total do mês selecionado. (Contam apenas semanas fechadas)</p>
+  </div>
+  <div class="max-h-[204px] overflow-auto">
+    <table class="w-full custom-table compact-table">
+                <thead>
+                  <tr>
+                    <th>Posição</th>
+                    <th>Usina</th>
+                    <th>Pontos</th>
+                    <th>Entradas</th>
+                  </tr>
+                </thead>
+                <tbody id="monthly-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-emerald rounded-3xl overflow-hidden xl:col-span-6">
+  <div class="scoreboard-card-header scoreboard-header-emerald p-3.5 sm:p-4 border-b border-white/10">
+    <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+      <span class="scoreboard-title-icon scoreboard-title-icon-emerald">
+        <i data-lucide="trophy" class="w-4 h-4"></i>
+      </span>
+      Placar Geral
+    </h4>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Acumulado de todas as semanas do projeto.</p>
+  </div>
+  <div class="max-h-[204px] overflow-auto">
+    <table class="w-full custom-table compact-table">
+                <thead>
+                  <tr>
+                    <th>Posição</th>
+                    <th>Usina</th>
+                    <th>Pontos</th>
+                    <th>Semanas pontuadas</th>
+                  </tr>
+                </thead>
+                <tbody id="general-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-comunidades" class="tab-content space-y-8">
+      <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6">
+        <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Engajamento das comunidades</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">Comunidades Pará</h2>
+            <p class="text-slate-300 text-sm mt-2 max-w-3xl">
+              Acompanhe mensagens enviadas, reações e votos únicos nas comunidades do WhatsApp do projeto Pará.
+            </p>
+          </div>
+
+          <div class="grid sm:grid-cols-4 gap-3 w-full xl:w-auto">
+            <label class="meeting-pill">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
+              <input id="comm-date-start" type="date" class="community-filter-input" />
+            </label>
+            <label class="meeting-pill">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
+              <input id="comm-date-end" type="date" class="community-filter-input" />
+            </label>
+            <label class="meeting-pill">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Projeto</span>
+              <select id="comm-project-filter" class="community-filter-select"></select>
+            </label>
+            <label class="meeting-pill">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Campanha</span>
+              <select id="comm-campaign-filter" class="community-filter-select"></select>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="community-status-banner" class="hidden glass-panel rounded-2xl p-4 border-l-4 border-yellow-500"></div>
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5" id="community-kpis"></div>
+
+      <div class="glass-panel rounded-3xl p-5 sm:p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+          <div>
+            <h3 class="text-xl font-bold text-white">Mensagens por campanha</h3>
+            <p id="community-result-summary" class="text-slate-400 text-sm mt-1">Carregando dados das comunidades.</p>
+          </div>
+          <div class="flex gap-3">
+            <button id="comm-apply-filters" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all">Aplicar filtros</button>
+            <button id="comm-reset-filters" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold border border-white/10 transition-all">Limpar filtros</button>
+          </div>
+        </div>
+
+        <div id="community-dashboard-content"></div>
+      </div>
+    </section>
+
+    <section id="tab-estrutura" class="tab-content space-y-6">
+      <div class="glass-panel glow-emerald rounded-3xl p-6 sm:p-8">
+        <h2 class="text-2xl font-black text-white mb-3">Estrutura preparada para crescer</h2>
+        <p class="text-slate-300 max-w-3xl">
+          Esta versão já nasce separada por abas. A aba <span class="text-white font-semibold">Usinas</span> está pronta
+          e você pode adicionar outras depois sem misturar a lógica.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="glass-panel rounded-3xl p-6">
+          <h3 class="text-lg font-bold text-white mb-2">Aba pronta</h3>
+          <p class="text-slate-300 text-sm">Usinas</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-6">
+          <h3 class="text-lg font-bold text-white mb-2">Fonte de dados esperada</h3>
+          <p class="text-slate-300 text-sm">JSON agregado diário por usina, sem expor os leads crus no front.</p>
+        </div>
+        <div class="glass-panel rounded-3xl p-6">
+          <h3 class="text-lg font-bold text-white mb-2">Próximas abas</h3>
+          <p class="text-slate-300 text-sm">Você pode reaproveitar o mesmo tema, navegação e helpers de período.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/5 bg-slate-950/90 py-8 text-center px-4">
+    <p id="footer-text" class="text-slate-500 text-[11px] uppercase tracking-[0.18em]"></p>
+  </footer>
+
+  <script>
+    // ============================================================
+    // CONFIGURAÇÃO DE DADOS
+    // secureAggregatesUrl:
+    //   endpoint que devolve SOMENTE dados agregados diários por usina.
+    //   Exemplo esperado:
+    //   {
+    //      generated_at: "2026-04-08T22:00:00Z",
+    //      timezone: "America/Belem",
+    //      projects: ["Cabanagem","Icuí","Jurunas","Marituba","Terra Firme"],
+    //      daily_counts: [{ date:"2026-04-04", projeto:"Marituba", entries:12 }, ...]
+    //   }
+    //
+    // useEmbeddedFallback:
+    //   mantém o dashboard funcional agora, usando o snapshot agregado
+    //   gerado a partir do CSV enviado.
+    // ============================================================
+    const DATA_CONFIG = {
+      secureAggregatesUrl: "https://script.google.com/macros/s/AKfycbxTZh5226sPi90-6FG8rWlvrtcRf6F5PmLdJzDnuDk86ImJ5SPgO5MhOmoWj9_2RqH7ig/exec",
+      jsonpCallbackParam: "prefix",
+      requestTimeoutMs: 15000,
+      useEmbeddedFallback: true,
+      communitiesWebhookUrl: 'https://webhookn8n.tnledu.shop/webhook/dashboard-comunidades',
+      communitiesDashboardKey: 'para'
+    };
+
+    const EMBEDDED_SNAPSHOT = {"generated_at":"2026-04-08T23:06:38.881268+00:00","timezone":"America/Belem","projects":["Cabanagem","Icuí","Jurunas","Marituba","Terra Firme"],"daily_counts":[{"date":"2025-09-24","projeto":"Cabanagem","entries":1},{"date":"2025-09-24","projeto":"Icuí","entries":1},{"date":"2025-09-24","projeto":"Jurunas","entries":1},{"date":"2025-09-24","projeto":"Marituba","entries":1},{"date":"2025-09-25","projeto":"Cabanagem","entries":10},{"date":"2025-09-26","projeto":"Cabanagem","entries":11},{"date":"2025-09-27","projeto":"Cabanagem","entries":138},{"date":"2025-09-28","projeto":"Cabanagem","entries":4},{"date":"2025-09-29","projeto":"Cabanagem","entries":20},{"date":"2025-09-29","projeto":"Icuí","entries":2},{"date":"2025-09-29","projeto":"Marituba","entries":1},{"date":"2025-09-30","projeto":"Cabanagem","entries":13},{"date":"2025-09-30","projeto":"Icuí","entries":1},{"date":"2025-09-30","projeto":"Marituba","entries":1},{"date":"2025-09-30","projeto":"Terra Firme","entries":1},{"date":"2025-10-01","projeto":"Cabanagem","entries":6},{"date":"2025-10-02","projeto":"Cabanagem","entries":3},{"date":"2025-10-03","projeto":"Cabanagem","entries":2},{"date":"2025-10-04","projeto":"Cabanagem","entries":1},{"date":"2025-10-07","projeto":"Cabanagem","entries":2},{"date":"2025-10-09","projeto":"Cabanagem","entries":3},{"date":"2025-10-09","projeto":"Icuí","entries":2},{"date":"2025-10-09","projeto":"Jurunas","entries":1},{"date":"2025-10-09","projeto":"Marituba","entries":1},{"date":"2025-10-13","projeto":"Cabanagem","entries":1},{"date":"2025-10-14","projeto":"Icuí","entries":172},{"date":"2025-10-14","projeto":"Jurunas","entries":1},{"date":"2025-10-15","projeto":"Icuí","entries":3},{"date":"2025-10-17","projeto":"Cabanagem","entries":42},{"date":"2025-10-17","projeto":"Icuí","entries":11},{"date":"2025-10-18","projeto":"Icuí","entries":1},{"date":"2025-10-20","projeto":"Icuí","entries":2},{"date":"2025-10-21","projeto":"Cabanagem","entries":24},{"date":"2025-10-21","projeto":"Icuí","entries":4},{"date":"2025-10-22","projeto":"Cabanagem","entries":7},{"date":"2025-10-22","projeto":"Icuí","entries":3},{"date":"2025-10-23","projeto":"Icuí","entries":85},{"date":"2025-10-24","projeto":"Icuí","entries":8},{"date":"2025-10-25","projeto":"Icuí","entries":9},{"date":"2025-10-28","projeto":"Cabanagem","entries":1},{"date":"2025-10-28","projeto":"Icuí","entries":1},{"date":"2025-10-29","projeto":"Cabanagem","entries":1},{"date":"2025-10-29","projeto":"Icuí","entries":4},{"date":"2025-10-30","projeto":"Icuí","entries":66},{"date":"2025-10-31","projeto":"Icuí","entries":17},{"date":"2025-11-01","projeto":"Icuí","entries":3},{"date":"2025-11-02","projeto":"Icuí","entries":3},{"date":"2025-11-03","projeto":"Cabanagem","entries":9},{"date":"2025-11-03","projeto":"Icuí","entries":6},{"date":"2025-11-04","projeto":"Cabanagem","entries":3},{"date":"2025-11-04","projeto":"Icuí","entries":97},{"date":"2025-11-05","projeto":"Icuí","entries":14},{"date":"2025-11-07","projeto":"Icuí","entries":2},{"date":"2025-11-10","projeto":"Icuí","entries":2},{"date":"2025-11-11","projeto":"Icuí","entries":5},{"date":"2025-11-12","projeto":"Icuí","entries":3},{"date":"2025-11-13","projeto":"Icuí","entries":3},{"date":"2025-11-14","projeto":"Cabanagem","entries":221},{"date":"2025-11-14","projeto":"Icuí","entries":2},{"date":"2025-11-15","projeto":"Cabanagem","entries":8},{"date":"2025-11-16","projeto":"Cabanagem","entries":4},{"date":"2025-11-17","projeto":"Cabanagem","entries":16},{"date":"2025-11-17","projeto":"Jurunas","entries":1},{"date":"2025-11-18","projeto":"Cabanagem","entries":37},{"date":"2025-11-19","projeto":"Cabanagem","entries":9},{"date":"2025-11-19","projeto":"Icuí","entries":6},{"date":"2025-11-20","projeto":"Cabanagem","entries":3},{"date":"2025-11-20","projeto":"Icuí","entries":1},{"date":"2025-11-22","projeto":"Cabanagem","entries":1},{"date":"2025-11-22","projeto":"Icuí","entries":1},{"date":"2025-11-24","projeto":"Cabanagem","entries":1},{"date":"2025-11-25","projeto":"Cabanagem","entries":1},{"date":"2025-11-25","projeto":"Icuí","entries":1},{"date":"2025-11-26","projeto":"Cabanagem","entries":4},{"date":"2025-11-26","projeto":"Icuí","entries":20},{"date":"2025-11-27","projeto":"Icuí","entries":11},{"date":"2025-11-28","projeto":"Icuí","entries":70},{"date":"2025-11-28","projeto":"Marituba","entries":2},{"date":"2025-12-01","projeto":"Cabanagem","entries":21},{"date":"2025-12-01","projeto":"Icuí","entries":2},{"date":"2025-12-02","projeto":"Cabanagem","entries":16},{"date":"2025-12-02","projeto":"Icuí","entries":3},{"date":"2025-12-03","projeto":"Cabanagem","entries":1},{"date":"2025-12-04","projeto":"Icuí","entries":5},{"date":"2025-12-05","projeto":"Cabanagem","entries":1},{"date":"2025-12-08","projeto":"Cabanagem","entries":2},{"date":"2025-12-09","projeto":"Icuí","entries":2},{"date":"2025-12-10","projeto":"Icuí","entries":1},{"date":"2025-12-11","projeto":"Jurunas","entries":2},{"date":"2025-12-16","projeto":"Icuí","entries":32},{"date":"2025-12-16","projeto":"Jurunas","entries":52},{"date":"2025-12-17","projeto":"Jurunas","entries":11},{"date":"2025-12-18","projeto":"Cabanagem","entries":1},{"date":"2025-12-19","projeto":"Icuí","entries":1},{"date":"2025-12-22","projeto":"Icuí","entries":1},{"date":"2025-12-22","projeto":"Jurunas","entries":1},{"date":"2025-12-23","projeto":"Jurunas","entries":115},{"date":"2025-12-24","projeto":"Jurunas","entries":8},{"date":"2025-12-25","projeto":"Jurunas","entries":1},{"date":"2025-12-26","projeto":"Jurunas","entries":3},{"date":"2025-12-29","projeto":"Icuí","entries":1},{"date":"2025-12-29","projeto":"Jurunas","entries":2},{"date":"2025-12-30","projeto":"Jurunas","entries":1},{"date":"2026-01-02","projeto":"Jurunas","entries":3},{"date":"2026-01-04","projeto":"Jurunas","entries":1},{"date":"2026-01-05","projeto":"Jurunas","entries":114},{"date":"2026-01-06","projeto":"Icuí","entries":3},{"date":"2026-01-06","projeto":"Jurunas","entries":70},{"date":"2026-01-07","projeto":"Jurunas","entries":62},{"date":"2026-01-08","projeto":"Cabanagem","entries":4},{"date":"2026-01-08","projeto":"Jurunas","entries":10},{"date":"2026-01-09","projeto":"Jurunas","entries":9},{"date":"2026-01-12","projeto":"Cabanagem","entries":28},{"date":"2026-01-12","projeto":"Icuí","entries":17},{"date":"2026-01-13","projeto":"Cabanagem","entries":16},{"date":"2026-01-13","projeto":"Icuí","entries":12},{"date":"2026-01-14","projeto":"Cabanagem","entries":6},{"date":"2026-01-14","projeto":"Icuí","entries":2},{"date":"2026-01-14","projeto":"Jurunas","entries":22},{"date":"2026-01-15","projeto":"Cabanagem","entries":19},{"date":"2026-01-15","projeto":"Icuí","entries":116},{"date":"2026-01-16","projeto":"Icuí","entries":2},{"date":"2026-01-17","projeto":"Icuí","entries":1},{"date":"2026-01-19","projeto":"Cabanagem","entries":1},{"date":"2026-01-19","projeto":"Icuí","entries":35},{"date":"2026-01-19","projeto":"Jurunas","entries":42},{"date":"2026-01-20","projeto":"Cabanagem","entries":12},{"date":"2026-01-20","projeto":"Icuí","entries":10},{"date":"2026-01-21","projeto":"Jurunas","entries":332},{"date":"2026-01-22","projeto":"Icuí","entries":11},{"date":"2026-01-22","projeto":"Jurunas","entries":8},{"date":"2026-01-23","projeto":"Jurunas","entries":1},{"date":"2026-01-24","projeto":"Icuí","entries":35},{"date":"2026-01-26","projeto":"Icuí","entries":29},{"date":"2026-01-26","projeto":"Jurunas","entries":1},{"date":"2026-01-27","projeto":"Icuí","entries":4},{"date":"2026-01-28","projeto":"Icuí","entries":1},{"date":"2026-01-29","projeto":"Cabanagem","entries":29},{"date":"2026-01-29","projeto":"Icuí","entries":2},{"date":"2026-01-29","projeto":"Jurunas","entries":18},{"date":"2026-01-30","projeto":"Icuí","entries":1},{"date":"2026-01-31","projeto":"Icuí","entries":2},{"date":"2026-02-02","projeto":"Cabanagem","entries":35},{"date":"2026-02-02","projeto":"Icuí","entries":12},{"date":"2026-02-02","projeto":"Marituba","entries":1},{"date":"2026-02-03","projeto":"Cabanagem","entries":26},{"date":"2026-02-03","projeto":"Icuí","entries":19},{"date":"2026-02-03","projeto":"Jurunas","entries":56},{"date":"2026-02-03","projeto":"Marituba","entries":76},{"date":"2026-02-04","projeto":"Cabanagem","entries":67},{"date":"2026-02-04","projeto":"Icuí","entries":14},{"date":"2026-02-04","projeto":"Jurunas","entries":1},{"date":"2026-02-04","projeto":"Marituba","entries":32},{"date":"2026-02-05","projeto":"Cabanagem","entries":27},{"date":"2026-02-05","projeto":"Icuí","entries":11},{"date":"2026-02-05","projeto":"Jurunas","entries":194},{"date":"2026-02-05","projeto":"Marituba","entries":21},{"date":"2026-02-06","projeto":"Icuí","entries":4},{"date":"2026-02-06","projeto":"Jurunas","entries":13},{"date":"2026-02-06","projeto":"Marituba","entries":7},{"date":"2026-02-07","projeto":"Jurunas","entries":1},{"date":"2026-02-07","projeto":"Marituba","entries":2},{"date":"2026-02-08","projeto":"Marituba","entries":1},{"date":"2026-02-09","projeto":"Cabanagem","entries":16},{"date":"2026-02-09","projeto":"Icuí","entries":2},{"date":"2026-02-09","projeto":"Jurunas","entries":4},{"date":"2026-02-09","projeto":"Marituba","entries":4},{"date":"2026-02-09","projeto":"Terra Firme","entries":4},{"date":"2026-02-10","projeto":"Marituba","entries":43},{"date":"2026-02-10","projeto":"Terra Firme","entries":13},{"date":"2026-02-11","projeto":"Icuí","entries":1},{"date":"2026-02-11","projeto":"Jurunas","entries":7},{"date":"2026-02-11","projeto":"Marituba","entries":59},{"date":"2026-02-11","projeto":"Terra Firme","entries":2},{"date":"2026-02-12","projeto":"Cabanagem","entries":31},{"date":"2026-02-12","projeto":"Jurunas","entries":5},{"date":"2026-02-12","projeto":"Marituba","entries":5},{"date":"2026-02-12","projeto":"Terra Firme","entries":5},{"date":"2026-02-13","projeto":"Icuí","entries":4},{"date":"2026-02-13","projeto":"Jurunas","entries":1},{"date":"2026-02-13","projeto":"Marituba","entries":8},{"date":"2026-02-13","projeto":"Terra Firme","entries":1},{"date":"2026-02-14","projeto":"Marituba","entries":1},{"date":"2026-02-15","projeto":"Terra Firme","entries":1},{"date":"2026-02-16","projeto":"Marituba","entries":2},{"date":"2026-02-18","projeto":"Marituba","entries":1},{"date":"2026-02-18","projeto":"Terra Firme","entries":1},{"date":"2026-02-19","projeto":"Icuí","entries":1},{"date":"2026-02-20","projeto":"Marituba","entries":102},{"date":"2026-02-23","projeto":"Cabanagem","entries":66},{"date":"2026-02-23","projeto":"Icuí","entries":1},{"date":"2026-02-23","projeto":"Jurunas","entries":4},{"date":"2026-02-23","projeto":"Marituba","entries":11},{"date":"2026-02-23","projeto":"Terra Firme","entries":9},{"date":"2026-02-24","projeto":"Cabanagem","entries":11},{"date":"2026-02-24","projeto":"Icuí","entries":9},{"date":"2026-02-24","projeto":"Jurunas","entries":2},{"date":"2026-02-24","projeto":"Marituba","entries":75},{"date":"2026-02-24","projeto":"Terra Firme","entries":2},{"date":"2026-02-25","projeto":"Cabanagem","entries":56},{"date":"2026-02-25","projeto":"Icuí","entries":47},{"date":"2026-02-25","projeto":"Jurunas","entries":2},{"date":"2026-02-25","projeto":"Marituba","entries":6},{"date":"2026-02-25","projeto":"Terra Firme","entries":1},{"date":"2026-02-27","projeto":"Jurunas","entries":91},{"date":"2026-02-27","projeto":"Marituba","entries":22},{"date":"2026-02-27","projeto":"Terra Firme","entries":1},{"date":"2026-02-28","projeto":"Terra Firme","entries":6},{"date":"2026-03-02","projeto":"Cabanagem","entries":33},{"date":"2026-03-02","projeto":"Icuí","entries":82},{"date":"2026-03-02","projeto":"Jurunas","entries":1},{"date":"2026-03-02","projeto":"Marituba","entries":4},{"date":"2026-03-02","projeto":"Terra Firme","entries":3},{"date":"2026-03-03","projeto":"Terra Firme","entries":4},{"date":"2026-03-04","projeto":"Cabanagem","entries":27},{"date":"2026-03-04","projeto":"Icuí","entries":48},{"date":"2026-03-04","projeto":"Jurunas","entries":1},{"date":"2026-03-04","projeto":"Marituba","entries":5},{"date":"2026-03-04","projeto":"Terra Firme","entries":2},{"date":"2026-03-05","projeto":"Cabanagem","entries":27},{"date":"2026-03-05","projeto":"Icuí","entries":20},{"date":"2026-03-05","projeto":"Jurunas","entries":5},{"date":"2026-03-05","projeto":"Marituba","entries":21},{"date":"2026-03-05","projeto":"Terra Firme","entries":4},{"date":"2026-03-06","projeto":"Icuí","entries":2},{"date":"2026-03-06","projeto":"Jurunas","entries":2},{"date":"2026-03-06","projeto":"Terra Firme","entries":1},{"date":"2026-03-09","projeto":"Cabanagem","entries":1},{"date":"2026-03-09","projeto":"Marituba","entries":71},{"date":"2026-03-09","projeto":"Terra Firme","entries":10},{"date":"2026-03-10","projeto":"Terra Firme","entries":4},{"date":"2026-03-11","projeto":"Icuí","entries":1},{"date":"2026-03-11","projeto":"Jurunas","entries":15},{"date":"2026-03-11","projeto":"Marituba","entries":8},{"date":"2026-03-11","projeto":"Terra Firme","entries":8},{"date":"2026-03-12","projeto":"Marituba","entries":9},{"date":"2026-03-12","projeto":"Terra Firme","entries":10},{"date":"2026-03-13","projeto":"Icuí","entries":1},{"date":"2026-03-13","projeto":"Marituba","entries":4},{"date":"2026-03-13","projeto":"Terra Firme","entries":4},{"date":"2026-03-16","projeto":"Cabanagem","entries":2},{"date":"2026-03-16","projeto":"Icuí","entries":1},{"date":"2026-03-16","projeto":"Marituba","entries":1},{"date":"2026-03-16","projeto":"Terra Firme","entries":2},{"date":"2026-03-17","projeto":"Icuí","entries":1},{"date":"2026-03-17","projeto":"Marituba","entries":5},{"date":"2026-03-17","projeto":"Terra Firme","entries":2},{"date":"2026-03-18","projeto":"Icuí","entries":4},{"date":"2026-03-18","projeto":"Marituba","entries":10},{"date":"2026-03-18","projeto":"Terra Firme","entries":4},{"date":"2026-03-19","projeto":"Marituba","entries":2},{"date":"2026-03-19","projeto":"Terra Firme","entries":4},{"date":"2026-03-20","projeto":"Terra Firme","entries":1},{"date":"2026-03-21","projeto":"Terra Firme","entries":1},{"date":"2026-03-23","projeto":"Terra Firme","entries":5},{"date":"2026-03-24","projeto":"Icuí","entries":4},{"date":"2026-03-24","projeto":"Jurunas","entries":2},{"date":"2026-03-24","projeto":"Marituba","entries":12},{"date":"2026-03-24","projeto":"Terra Firme","entries":8},{"date":"2026-03-25","projeto":"Terra Firme","entries":1},{"date":"2026-03-26","projeto":"Terra Firme","entries":2},{"date":"2026-03-27","projeto":"Terra Firme","entries":1},{"date":"2026-03-28","projeto":"Terra Firme","entries":1},{"date":"2026-03-30","projeto":"Icuí","entries":47},{"date":"2026-03-30","projeto":"Marituba","entries":17},{"date":"2026-04-08","projeto":"Cabanagem","entries":3},{"date":"2026-04-08","projeto":"Icuí","entries":1},{"date":"2026-04-08","projeto":"Marituba","entries":1}]};
+
+    const STATE = {
+      dataset: null,
+      filteredDaily: [],
+      charts: {},
+      rankingPeriod: [],
+      rankingMonthly: [],
+      rankingGeneral: [],
+      activeMonth: null
+    };
+
+    const COMMUNITY_STATE = {
+      dashboardData: null,
+      mensagensProcessadas: [],
+      filteredMessages: []
+    };
+
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function toInputDate(value) {
+      const date = new Date(value);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateTimeCommunity(value) {
+      return new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+      }).format(new Date(value));
+    }
+
+    function formatDateOnlyCommunity(value) {
+      const date = value instanceof Date ? value : new Date(value);
+      return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(date);
+    }
+
+    function showCommunityStatus(message, type = 'info') {
+      const el = $('community-status-banner');
+      const border = type === 'error' ? 'border-red-500' : type === 'success' ? 'border-emerald-500' : 'border-yellow-500';
+      el.className = `glass-panel rounded-2xl p-4 border-l-4 ${border}`;
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+
+    function hideCommunityStatus() {
+      $('community-status-banner').classList.add('hidden');
+    }
+
+    function setCommunityProjectFilter() {
+      const projeto = COMMUNITY_STATE.dashboardData?.projeto || 'Pará';
+      $('comm-project-filter').innerHTML = `<option value="${escapeHtml(projeto)}">${escapeHtml(projeto)}</option>`;
+      $('comm-project-filter').value = projeto;
+      $('comm-project-filter').disabled = true;
+    }
+
+    function populateCommunityCampaignFilter() {
+      const campanhas = COMMUNITY_STATE.dashboardData?.campanhas_disponiveis || [];
+      $('comm-campaign-filter').innerHTML = '<option value="todas">Todas as campanhas</option>';
+      campanhas.forEach(campaign => {
+        const option = document.createElement('option');
+        option.value = campaign;
+        option.textContent = campaign;
+        $('comm-campaign-filter').appendChild(option);
+      });
+    }
+
+    function setCommunityDefaultDates() {
+      if (!COMMUNITY_STATE.mensagensProcessadas.length) return;
+      const dates = COMMUNITY_STATE.mensagensProcessadas.map(item => new Date(item.data_evento)).sort((a, b) => a - b);
+      $('comm-date-start').value = toInputDate(dates[0]);
+      $('comm-date-end').value = toInputDate(dates[dates.length - 1]);
+    }
+
+    function communityDateInRange(dateValue, startValue, endValue) {
+      const current = new Date(dateValue);
+      const start = new Date(`${startValue}T00:00:00`);
+      const end = new Date(`${endValue}T23:59:59.999`);
+      return current >= start && current <= end;
+    }
+
+    function groupCommunityMessages(messages) {
+      const groups = new Map();
+      messages.forEach(message => {
+        const key = `${message.projeto}|||${message.campanha}`;
+        if (!groups.has(key)) {
+          groups.set(key, { projeto: message.projeto, campanha: message.campanha, comunidade: message.comunidade, messages: [] });
+        }
+        groups.get(key).messages.push(message);
+      });
+      return [...groups.values()];
+    }
+
+    function renderCommunityKpis(items) {
+      const totalMessages = items.length;
+      const totalUniqueReactions = items.reduce((sum, item) => sum + (item.total_reacoes || 0), 0);
+      const totalUniqueVotes = items.reduce((sum, item) => sum + (item.total_votos || 0), 0);
+      const withEngagement = items.filter(item => (item.total_engajamentos || 0) > 0).length;
+      const projetoAtual = COMMUNITY_STATE.dashboardData?.projeto || 'Pará';
+
+      $('community-kpis').innerHTML = `
+        <div class="glass-panel glow-blue rounded-3xl p-5 community-kpi">
+          <p class="text-xs uppercase tracking-[0.18em] text-blue-300 font-bold mb-2">Mensagens no período</p>
+          <div class="text-4xl font-black text-white mono">${totalMessages}</div>
+          <p class="text-slate-400 text-sm mt-2">Mensagens do projeto ${escapeHtml(projetoAtual)} dentro do período selecionado.</p>
+        </div>
+        <div class="glass-panel glow-emerald rounded-3xl p-5 community-kpi">
+          <p class="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold mb-2">Reações únicas</p>
+          <div class="text-4xl font-black text-white mono">${totalUniqueReactions}</div>
+          <p class="text-slate-400 text-sm mt-2">Contadas por telefone único em cada mensagem.</p>
+        </div>
+        <div class="glass-panel glow-yellow rounded-3xl p-5 community-kpi">
+          <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-2">Votos únicos</p>
+          <div class="text-4xl font-black text-white mono">${totalUniqueVotes}</div>
+          <p class="text-slate-400 text-sm mt-2">Mensagens de enquete podem receber votos e reações ao mesmo tempo.</p>
+        </div>
+        <div class="glass-panel glow-purple rounded-3xl p-5 community-kpi">
+          <p class="text-xs uppercase tracking-[0.18em] text-purple-300 font-bold mb-2">Mensagens com engajamento</p>
+          <div class="text-4xl font-black text-white mono">${withEngagement}</div>
+          <p class="text-slate-400 text-sm mt-2">Cards com pelo menos 1 voto ou 1 reação.</p>
+        </div>
+      `;
+    }
+
+    function renderCommunityEmptyState(message = 'Nenhuma mensagem encontrada') {
+      $('community-dashboard-content').innerHTML = `
+        <div class="empty-state rounded-3xl p-8 text-center text-slate-300">
+          <h3 class="text-xl font-bold text-white mb-2">${escapeHtml(message)}</h3>
+          <p>Revise o período ou a campanha para visualizar resultados.</p>
+        </div>
+      `;
+    }
+
+    function renderCommunityDashboard() {
+      if (!COMMUNITY_STATE.mensagensProcessadas.length) {
+        renderCommunityKpis([]);
+        renderCommunityEmptyState('Nenhum dado disponível');
+        $('community-result-summary').textContent = 'Nenhuma mensagem recebida do endpoint.';
+        return;
+      }
+
+      const start = $('comm-date-start').value;
+      const end = $('comm-date-end').value;
+      const campaign = $('comm-campaign-filter').value;
+
+      let filteredMessages = COMMUNITY_STATE.mensagensProcessadas.filter(item => communityDateInRange(item.data_evento, start, end));
+      if (campaign !== 'todas') {
+        filteredMessages = filteredMessages.filter(item => item.campanha === campaign);
+      }
+
+      filteredMessages = [...filteredMessages].sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento));
+      COMMUNITY_STATE.filteredMessages = filteredMessages;
+      renderCommunityKpis(filteredMessages);
+      $('community-result-summary').textContent = `${filteredMessages.length} mensagem(ns) encontradas entre ${formatDateOnlyCommunity(start)} e ${formatDateOnlyCommunity(end)}.`;
+
+      const grouped = groupCommunityMessages(filteredMessages);
+      if (!grouped.length) {
+        renderCommunityEmptyState();
+        return;
+      }
+
+      $('community-dashboard-content').innerHTML = grouped.map(group => {
+        const totalMessages = group.messages.length;
+        const totalReacoes = group.messages.reduce((sum, item) => sum + (item.total_reacoes || 0), 0);
+        const totalVotos = group.messages.reduce((sum, item) => sum + (item.total_votos || 0), 0);
+
+        return `
+          <section class="campaign-shell rounded-3xl p-5 sm:p-6 mb-5 shadow-xl">
+            <header class="flex items-start justify-between gap-4 flex-wrap border-b border-white/10 pb-4 mb-4">
+              <div>
+                <h3 class="text-xl font-black text-white">Campanha: ${escapeHtml(group.campanha)} | Projeto: ${escapeHtml(group.projeto)}</h3>
+                <p class="text-sm text-slate-300 mt-1">Comunidade principal: ${escapeHtml(group.comunidade || '—')}</p>
+              </div>
+              <div class="flex gap-2 flex-wrap">
+                <span class="soft-pill soft-pill-blue">${totalMessages} mensagens</span>
+                <span class="soft-pill soft-pill-green">${totalReacoes} reações únicas</span>
+                <span class="soft-pill soft-pill-yellow">${totalVotos} votos únicos</span>
+              </div>
+            </header>
+
+            <div class="space-y-4">
+              ${group.messages.map(message => {
+                const reacoes = Array.isArray(message.reacoes) ? message.reacoes : [];
+                const votos = Array.isArray(message.votos) ? message.votos : [];
+                const totalReacoesMsg = message.total_reacoes || 0;
+                const totalVotosMsg = message.total_votos || 0;
+                const hasDetails = totalReacoesMsg > 0 || totalVotosMsg > 0;
+
+                return `
+                  <details class="message-card-community rounded-3xl bg-white/95 text-slate-900 p-5">
+                    <summary class="list-none cursor-pointer grid grid-cols-1 xl:grid-cols-[1fr_210px] gap-4 items-start">
+                      <div>
+                        <div class="flex flex-wrap gap-2 items-center mb-3">
+                          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-blue-100 text-blue-700">${escapeHtml(message.tipo || 'mensagem')}</span>
+                          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-slate-100 text-slate-700">${escapeHtml(formatDateTimeCommunity(message.data_evento))}</span>
+                          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-emerald-100 text-emerald-700">Responsável: ${escapeHtml(message.responsavel_nome || '—')}</span>
+                        </div>
+                        <p class="text-xl font-bold text-slate-900 mb-3">${escapeHtml(message.texto_preview || '(Mensagem sem texto)')}</p>
+                        <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500">
+                          <span><strong class="text-slate-700">ID:</strong> ${escapeHtml(message.id_mensagem || '—')}</span>
+                          <span><strong class="text-slate-700">Comunidade:</strong> ${escapeHtml(message.comunidade || '—')}</span>
+                          <span><strong class="text-slate-700">Remetente:</strong> ${escapeHtml(message.remetente_nome || '—')}</span>
+                        </div>
+                      </div>
+
+                      <div class="grid gap-3">
+                        <div class="rounded-2xl border border-slate-200 p-3 bg-white">
+                          <span class="block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1">Reações</span>
+                          <span class="text-3xl font-black text-slate-900 mono">${totalReacoesMsg}</span>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 p-3 bg-white">
+                          <span class="block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1">Votos</span>
+                          <span class="text-3xl font-black text-slate-900 mono">${totalVotosMsg}</span>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 p-3 bg-white text-sm font-bold text-slate-900">
+                          ${hasDetails ? 'Clique para ver a lista' : 'Sem engajamento'}
+                        </div>
+                      </div>
+                    </summary>
+
+                    ${hasDetails ? `
+                      <div class="mt-5 pt-5 border-t border-slate-200 grid md:grid-cols-2 gap-4">
+                        <section class="rounded-2xl border border-slate-200 bg-white p-4">
+                          <h4 class="text-base font-bold text-slate-900 mb-3">Quem reagiu (${totalReacoesMsg})</h4>
+                          <div class="space-y-3">
+                            ${reacoes.length ? reacoes.map(person => `
+                              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                                <strong class="block text-slate-900">${escapeHtml(person.nome_contato || 'Sem nome')}</strong>
+                                <span class="block text-sm text-slate-500">${escapeHtml(person.telefone || 'Sem telefone')}</span>
+                              </div>
+                            `).join('') : `<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-slate-500">Nenhuma reação nesta mensagem.</div>`}
+                          </div>
+                        </section>
+                        <section class="rounded-2xl border border-slate-200 bg-white p-4">
+                          <h4 class="text-base font-bold text-slate-900 mb-3">Quem votou (${totalVotosMsg})</h4>
+                          <div class="space-y-3">
+                            ${votos.length ? votos.map(person => `
+                              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                                <strong class="block text-slate-900">${escapeHtml(person.nome_contato || 'Sem nome')}</strong>
+                                <span class="block text-sm text-slate-500">${escapeHtml(person.telefone || 'Sem telefone')}</span>
+                              </div>
+                            `).join('') : `<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-slate-500">Nenhum voto nesta mensagem.</div>`}
+                          </div>
+                        </section>
+                      </div>
+                    ` : ''}
+                  </details>
+                `;
+              }).join('')}
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    async function loadCommunityData() {
+      showCommunityStatus('Buscando dados das comunidades do projeto Pará.', 'info');
+      const params = new URLSearchParams({ dashboard: DATA_CONFIG.communitiesDashboardKey });
+      const response = await fetch(`${DATA_CONFIG.communitiesWebhookUrl}?${params.toString()}`);
+      if (!response.ok) throw new Error(`Falha ao carregar comunidades: ${response.status}`);
+      const responseData = await response.json();
+      COMMUNITY_STATE.dashboardData = Array.isArray(responseData) ? responseData[0] : responseData;
+      if (!COMMUNITY_STATE.dashboardData || !Array.isArray(COMMUNITY_STATE.dashboardData.mensagens_processadas)) {
+        throw new Error('O endpoint de comunidades não retornou mensagens_processadas no formato esperado.');
+      }
+      COMMUNITY_STATE.mensagensProcessadas = COMMUNITY_STATE.dashboardData.mensagens_processadas;
+      setCommunityProjectFilter();
+      populateCommunityCampaignFilter();
+      setCommunityDefaultDates();
+      renderCommunityDashboard();
+      hideCommunityStatus();
+      $('footer-text').textContent = COMMUNITY_STATE.dashboardData?.carregado_em
+        ? `Atualizado em ${formatDateTimeCommunity(COMMUNITY_STATE.dashboardData.carregado_em)} • webhook n8n`
+        : 'Fonte: webhook n8n';
+      document.title = COMMUNITY_STATE.dashboardData?.nome_dashboard || 'Comunidades Pará';
+    }
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      $('tab-' + tabName).classList.add('active');
+      $('btn-' + tabName).classList.add('active');
+      lucide.createIcons();
+    }
+
+    function parseISODateLocal(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d, 12, 0, 0, 0);
+    }
+
+    function toISODate(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateBR(dateStr) {
+      const date = parseISODateLocal(dateStr);
+      return new Intl.DateTimeFormat('pt-BR').format(date);
+    }
+
+    function formatMonthBR(monthStr) {
+      const [y, m] = monthStr.split('-').map(Number);
+      return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('pt-BR').format(Number(value || 0));
+    }
+
+    function getDateBounds() {
+      const dates = STATE.dataset.daily_counts.map(row => row.date).sort();
+      return { min: dates[0], max: dates[dates.length - 1] };
+    }
+
+    function formatDateInputValue(value) {
+      const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    }
+
+    function parseDateBRToISO(value) {
+      const match = String(value || '').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!match) return null;
+      const [, dd, mm, yyyy] = match;
+      const iso = `${yyyy}-${mm}-${dd}`;
+      const parsed = parseISODateLocal(iso);
+      if (Number.isNaN(parsed.getTime())) return null;
+      if (toISODate(parsed) !== iso) return null;
+      return iso;
+    }
+
+    function syncTextInputFromNative(nativeId, textId) {
+      const nativeInput = $(nativeId);
+      const textInput = $(textId);
+      textInput.value = nativeInput.value ? formatDateBR(nativeInput.value) : '';
+    }
+
+    function applyTextDateValue(nativeId, textId, shouldRender = true) {
+      const nativeInput = $(nativeId);
+      const textInput = $(textId);
+      textInput.value = formatDateInputValue(textInput.value);
+      const iso = parseDateBRToISO(textInput.value);
+
+      if (iso) {
+        nativeInput.value = iso;
+        textInput.value = formatDateBR(iso);
+      } else if (!textInput.value.trim()) {
+        nativeInput.value = '';
+      } else {
+        syncTextInputFromNative(nativeId, textId);
+      }
+
+      if (shouldRender) renderDashboard();
+    }
+
+    function getSelectedRange() {
+      const start = $('start-date').value || null;
+      const end = $('end-date').value || null;
+      return { start, end };
+    }
+
+    function normalizeRange(range) {
+      const bounds = getDateBounds();
+      let start = range.start || bounds.min;
+      let end = range.end || bounds.max;
+      if (start > end) [start, end] = [end, start];
+      return { start, end };
+    }
+
+    function getFilteredDaily() {
+      const { start, end } = normalizeRange(getSelectedRange());
+      return STATE.dataset.daily_counts.filter(row => row.date >= start && row.date <= end);
+    }
+
+    function getProjects() {
+      return [...STATE.dataset.projects];
+    }
+
+    function getProjectTotals(rows) {
+      const totals = Object.fromEntries(getProjects().map(project => [project, 0]));
+      rows.forEach(row => {
+        totals[row.projeto] = (totals[row.projeto] || 0) + Number(row.entries || 0);
+      });
+      return totals;
+    }
+
+    function getTotalEntries(rows) {
+      return rows.reduce((sum, row) => sum + Number(row.entries || 0), 0);
+    }
+
+    function getUniqueDates(rows) {
+      return [...new Set(rows.map(row => row.date))].sort();
+    }
+
+    function getWeekStart(dateStr) {
+      const date = parseISODateLocal(dateStr);
+      const day = (date.getDay() + 6) % 7; // segunda = 0
+      date.setDate(date.getDate() - day);
+      return toISODate(date);
+    }
+
+    function getWeekEndFromStart(weekStartStr) {
+      const date = parseISODateLocal(weekStartStr);
+      date.setDate(date.getDate() + 6);
+      return toISODate(date);
+    }
+
+    function getMonthKey(dateStr) {
+      return dateStr.slice(0, 7);
+    }
+
+    function buildWeeklyScoreRows(rows) {
+      const weekProjectMap = new Map();
+      rows.forEach(row => {
+        const weekStart = getWeekStart(row.date);
+        const key = `${weekStart}|${row.projeto}`;
+        weekProjectMap.set(key, (weekProjectMap.get(key) || 0) + Number(row.entries || 0));
+      });
+
+      const weeklyMap = new Map();
+      for (const project of getProjects()) {
+        weeklyMap.set(project, { project, points: 0, entries: 0, weeks: 0 });
+      }
+
+      const weeks = [...new Set(rows.map(row => getWeekStart(row.date)))].sort();
+      weeks.forEach(weekStart => {
+        const weekEntries = getProjects().map(project => {
+          const key = `${weekStart}|${project}`;
+          return {
+            project,
+            entries: weekProjectMap.get(key) || 0
+          };
+        });
+        const leader = Math.max(...weekEntries.map(item => item.entries), 0);
+        weekEntries.forEach(item => {
+          if (!item.entries || leader === 0) return;
+          const points = Number(((item.entries / leader) * 100).toFixed(2));
+          const current = weeklyMap.get(item.project);
+          current.points += points;
+          current.entries += item.entries;
+          current.weeks += 1;
+        });
+      });
+
+      return [...weeklyMap.values()]
+        .map(item => ({
+          ...item,
+          points: Number(item.points.toFixed(2))
+        }))
+        .sort((a, b) => b.points - a.points || b.entries - a.entries || a.project.localeCompare(b.project));
+    }
+
+    function buildMonthlyScoreRows(rows, monthKey) {
+  const datasetMaxDate = getDateBounds().max;
+
+  const validWeekStarts = [...new Set(rows.map(row => getWeekStart(row.date)))]
+    .filter(weekStart => getMonthKey(weekStart) === monthKey)
+    .filter(weekStart => getWeekEndFromStart(weekStart) <= datasetMaxDate)
+    .sort();
+
+  const monthlyRows = rows.filter(row => validWeekStarts.includes(getWeekStart(row.date)));
+  return buildWeeklyScoreRows(monthlyRows);
+    }
+
+    function buildDailySeries(rows, project) {
+      const filtered = rows.filter(row => row.projeto === project).sort((a, b) => a.date.localeCompare(b.date));
+      const byDate = new Map(filtered.map(row => [row.date, Number(row.entries || 0)]));
+      const allDates = getUniqueDates(rows);
+      return allDates.map(date => ({
+        date,
+        entries: byDate.get(date) || 0
+      }));
+    }
+
+    function getActiveMonthKey() {
+      const { start } = normalizeRange(getSelectedRange());
+      if ($('start-date').value) return start.slice(0, 7);
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function setAppliedPeriodLabel() {
+      const raw = getSelectedRange();
+      if (!raw.start && !raw.end) {
+        $('applied-period').textContent = 'Todo o tempo';
+        return;
+      }
+      const { start, end } = normalizeRange(raw);
+      $('applied-period').textContent = `${formatDateBR(start)} até ${formatDateBR(end)}`;
+    }
+
+    function getAnalyzedPeriodLabel() {
+      const raw = getSelectedRange();
+      const bounds = !raw.start && !raw.end ? getDateBounds() : normalizeRange(raw);
+      return `Período analisado: ${formatDateBR(bounds.start || bounds.min)} a ${formatDateBR(bounds.end || bounds.max)}`;
+    }
+
+    function renderGlobalKpis(rows) {
+      const totals = getProjectTotals(rows);
+      const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      const leader = entries[0] || ['—', 0];
+      const totalEntries = getTotalEntries(rows);
+      const { start, end } = normalizeRange(getSelectedRange());
+
+      const startDate = parseISODateLocal(start);
+      const endDate = parseISODateLocal(end);
+
+      const diffMs = endDate - startDate;
+      const totalDays = Math.max(Math.floor(diffMs / 86400000) + 1, 1);
+
+      const avgDaily = totalEntries / totalDays;
+      
+      const cards = [
+        {
+          title: 'Leads no período',
+          value: formatNumber(totalEntries),
+          detail: 'Somando todas as usinas',
+          glow: 'glow-blue',
+          icon: 'users'
+        },
+        {
+          title: 'Usina líder',
+          value: leader[0],
+          detail: `${formatNumber(leader[1])} entrada(s)`,
+          glow: 'glow-emerald',
+          icon: 'trophy'
+        },
+        {
+          title: 'Média diária',
+          value: avgDaily.toFixed(1).replace('.', ','),
+          detail: 'Entradas por dia no filtro',
+          glow: 'glow-yellow',
+          icon: 'activity'
+        },
+        {
+          title: 'Usinas monitoradas',
+          value: formatNumber(getProjects().length),
+          detail: getProjects().join(' • '),
+          glow: 'glow-purple',
+          icon: 'factory'
+        }
+      ];
+
+      $('global-kpis').innerHTML = cards.map(card => `
+        <div class="glass-panel ${card.glow} rounded-3xl p-5 sm:p-6 min-h-[130px]">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-3">${card.title}</p>
+              <h3 class="text-2xl sm:text-3xl font-black text-white break-words">${card.value}</h3>
+              <p class="text-sm text-slate-300 mt-3">${card.detail}</p>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-white/10 flex items-center justify-center shrink-0">
+              <i data-lucide="${card.icon}" class="w-5 h-5 text-blue-300"></i>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function destroyChart(name) {
+      if (STATE.charts[name]) {
+        STATE.charts[name].destroy();
+        delete STATE.charts[name];
+      }
+    }
+
+    function buildLineChart(canvasId, labels, data, label) {
+      destroyChart(canvasId);
+      const ctx = $(canvasId).getContext('2d');
+      STATE.charts[canvasId] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label,
+            data,
+            borderWidth: 3,
+            tension: 0.28,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#cbd5e1'
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8', maxRotation: 0, autoSkip: true },
+              grid: { color: 'rgba(148,163,184,0.08)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#94a3b8' },
+              grid: { color: 'rgba(148,163,184,0.08)' }
+            }
+          }
+        }
+      });
+    }
+
+    function buildBarChart(canvasId, labels, data, label) {
+      destroyChart(canvasId);
+      const ctx = $(canvasId).getContext('2d');
+      STATE.charts[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label,
+            data,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#cbd5e1' }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { color: '#94a3b8' },
+              grid: { color: 'rgba(148,163,184,0.08)' }
+            },
+            y: {
+              ticks: { color: '#e2e8f0' },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderOverviewChart(rows) {
+      const totals = getProjectTotals(rows);
+      const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      buildBarChart('chart-overview', entries.map(item => item[0]), entries.map(item => item[1]), 'Entradas');
+    }
+
+    function renderUsinaCards(rows) {
+      const container = $('usina-cards');
+      const totals = getProjectTotals(rows);
+      container.innerHTML = getProjects().map((project, index) => `
+        <div class="glass-panel rounded-3xl p-5 sm:p-6">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-2">Usina</p>
+              <h3 class="text-xl font-bold text-white">${project}</h3>
+              <p class="text-slate-300 text-sm mt-2">Leads no período: <span class="font-bold text-white mono">${formatNumber(totals[project] || 0)}</span></p>
+            </div>
+            <span class="badge badge-info">Série temporal</span>
+          </div>
+          <div class="h-[260px]">
+            <canvas id="chart-usina-${index}"></canvas>
+          </div>
+        </div>
+      `).join('');
+
+      getProjects().forEach((project, index) => {
+        const series = buildDailySeries(rows, project);
+        buildLineChart(
+          `chart-usina-${index}`,
+          series.map(item => formatDateBR(item.date)),
+          series.map(item => item.entries),
+          project
+        );
+      });
+    }
+
+    function renderScoreboard(rows) {
+  const periodRanking = buildWeeklyScoreRows(rows);
+  const activeMonth = getActiveMonthKey();
+  const monthlyRanking = buildMonthlyScoreRows(STATE.dataset.daily_counts, activeMonth);
+      const generalRanking = buildWeeklyScoreRows(STATE.dataset.daily_counts).map(item => ({
+        project: item.project,
+        points: item.points,
+        weeks: item.weeks
+      }));
+
+      STATE.rankingPeriod = periodRanking;
+      STATE.rankingMonthly = monthlyRanking;
+      STATE.rankingGeneral = generalRanking;
+      STATE.activeMonth = activeMonth;
+
+      $('period-badge').textContent = getAnalyzedPeriodLabel();
+      $('monthly-badge').textContent = `Placar mensal: ${formatMonthBR(activeMonth)}`;
+
+      buildBarChart(
+        'chart-scoreboard',
+        periodRanking.map(item => item.project),
+        periodRanking.map(item => item.points),
+        'Pontos'
+      );
+
+      $('period-table-body').innerHTML = periodRanking.map((item, idx) => `
+        <tr>
+          <td class="mono">${idx + 1}</td>
+          <td class="font-bold text-white">${item.project}</td>
+          <td class="mono">${item.points.toFixed(2).replace('.', ',')}</td>
+          <td class="mono">${formatNumber(item.entries)}</td>
+        </tr>
+      `).join('') || `
+        <tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados no período.</div></td></tr>
+      `;
+
+      $('monthly-table-body').innerHTML = monthlyRanking.map((item, idx) => `
+        <tr>
+          <td class="mono">${idx + 1}</td>
+          <td class="font-bold text-white">${item.project}</td>
+          <td class="mono">${item.points.toFixed(2).replace('.', ',')}</td>
+          <td class="mono">${formatNumber(item.entries)}</td>
+        </tr>
+      `).join('') || `
+        <tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados para esse mês.</div></td></tr>
+      `;
+
+      $('general-table-body').innerHTML = generalRanking.map((item, idx) => `
+        <tr>
+          <td class="mono">${idx + 1}</td>
+          <td class="font-bold text-white">${item.project}</td>
+          <td class="mono">${item.points.toFixed(2).replace('.', ',')}</td>
+          <td class="mono">${formatNumber(item.weeks)}</td>
+        </tr>
+      `).join('') || `
+        <tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados disponíveis.</div></td></tr>
+      `;
+    }
+
+    function renderDashboard() {
+      const rows = getFilteredDaily();
+      STATE.filteredDaily = rows;
+      setAppliedPeriodLabel();
+      renderGlobalKpis(rows);
+      renderOverviewChart(rows);
+      renderUsinaCards(rows);
+      renderScoreboard(rows);
+
+      const bounds = getDateBounds();
+      const sourceLabel = DATA_CONFIG.secureAggregatesUrl ? 'Apps Script agregado via JSONP' : 'snapshot embutido';
+      const generatedAt = STATE.dataset.generated_at || STATE.dataset.generatedAt || new Date().toISOString();
+      $('footer-text').textContent = `Fonte atual: ${sourceLabel} • Datas disponíveis: ${formatDateBR(bounds.min)} até ${formatDateBR(bounds.max)} • Atualizado em: ${new Date(generatedAt).toLocaleString('pt-BR')}`;
+      lucide.createIcons();
+    }
+
+    function applyPreset(preset) {
+      const bounds = getDateBounds();
+      const max = parseISODateLocal(bounds.max);
+      let start = null;
+      let end = bounds.max;
+
+      if (preset === 'all') {
+        start = '';
+        end = '';
+      } else if (preset === 'month') {
+        const now = new Date();
+        start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+      } else if (preset === '30d') {
+        const startDate = new Date(max);
+        startDate.setDate(startDate.getDate() - 29);
+        start = toISODate(startDate);
+      }
+
+      $('start-date').value = start || '';
+      $('end-date').value = start ? end : '';
+      renderDashboard();
+    }
+
+    function normalizeAggregatedPayload(payload) {
+      if (!payload || typeof payload !== 'object') {
+        throw new Error('Payload inválido do Apps Script.');
+      }
+
+      if (payload.ok === false) {
+        throw new Error(payload.message || 'O Apps Script retornou erro.');
+      }
+
+      const dailyCounts = Array.isArray(payload.daily_counts) ? payload.daily_counts : [];
+      const projects = Array.isArray(payload.projects) ? payload.projects : [];
+
+      const normalizedRows = dailyCounts
+        .map(row => ({
+          date: String(row.date || '').trim(),
+          projeto: String(row.projeto || '').trim(),
+          entries: Number(row.entries || 0)
+        }))
+        .filter(row =>
+          /^\d{4}-\d{2}-\d{2}$/.test(row.date) &&
+          row.projeto &&
+          Number.isFinite(row.entries) &&
+          row.entries >= 0
+        )
+        .sort((a, b) => a.date.localeCompare(b.date) || a.projeto.localeCompare(b.projeto));
+
+      const inferredProjects = normalizedRows.map(row => row.projeto);
+      const finalProjects = [...new Set([...projects, ...inferredProjects].filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+      if (!normalizedRows.length) {
+        throw new Error('O Apps Script respondeu, mas não trouxe daily_counts válidos.');
+      }
+
+      return {
+        generated_at: payload.generatedAt || payload.generated_at || new Date().toISOString(),
+        timezone: payload.timezone || 'America/Belem',
+        projects: finalProjects,
+        daily_counts: normalizedRows
+      };
+    }
+
+    function loadJsonp(url, callbackParam = 'prefix') {
+  return new Promise((resolve, reject) => {
+    const callbackName = `jsonp_cb_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+    const script = document.createElement('script');
+    const separator = url.includes('?') ? '&' : '?';
+    const cacheBuster = `_=${Date.now()}`;
+    let finished = false;
+
+    window[callbackName] = function(data) {
+      finished = true;
+      cleanup();
+      resolve(data);
+    };
+
+    function cleanup() {
+      try { delete window[callbackName]; } catch (_) {}
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    script.onerror = function() {
+      if (finished) return;
+      cleanup();
+      reject(new Error('Falha ao carregar o Apps Script via JSONP.'));
+    };
+
+    script.src = `${url}${separator}${callbackParam}=${encodeURIComponent(callbackName)}&${cacheBuster}`;
+    document.head.appendChild(script);
+
+    setTimeout(() => {
+      if (finished) return;
+      cleanup();
+      reject(new Error('Tempo esgotado ao carregar o Apps Script.'));
+    }, 15000);
+  });
+}
+
+    async function loadDataset() {
+      let lastError = null;
+
+      if (DATA_CONFIG.secureAggregatesUrl) {
+        try {
+          const payload = await loadJsonp(
+            DATA_CONFIG.secureAggregatesUrl,
+            DATA_CONFIG.jsonpCallbackParam,
+            DATA_CONFIG.requestTimeoutMs
+          );
+          return normalizeAggregatedPayload(payload);
+        } catch (error) {
+          lastError = error;
+          console.error('Erro ao carregar Apps Script:', error);
+        }
+      }
+
+      if (DATA_CONFIG.useEmbeddedFallback) {
+        console.warn('Usando snapshot embutido como fallback.');
+        return EMBEDDED_SNAPSHOT;
+      }
+
+      throw lastError || new Error('Nenhuma fonte de dados configurada');
+    }
+
+    function bindEvents() {
+      $('start-date').addEventListener('change', () => {
+        syncTextInputFromNative('start-date', 'start-date-text');
+        renderDashboard();
+      });
+      $('end-date').addEventListener('change', () => {
+        syncTextInputFromNative('end-date', 'end-date-text');
+        renderDashboard();
+      });
+
+      [['start-date', 'start-date-text'], ['end-date', 'end-date-text']].forEach(([nativeId, textId]) => {
+        const textInput = $(textId);
+        textInput.addEventListener('input', () => {
+          textInput.value = formatDateInputValue(textInput.value);
+        });
+        textInput.addEventListener('blur', () => applyTextDateValue(nativeId, textId));
+        textInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            applyTextDateValue(nativeId, textId);
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-picker-target]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = $(btn.dataset.pickerTarget);
+          if (typeof input.showPicker === 'function') {
+            input.showPicker();
+          } else {
+            input.focus();
+            input.click();
+          }
+        });
+      });
+
+      $('reset-btn').addEventListener('click', () => {
+        $('start-date').value = '';
+        $('end-date').value = '';
+        syncTextInputFromNative('start-date', 'start-date-text');
+        syncTextInputFromNative('end-date', 'end-date-text');
+        renderDashboard();
+      });
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+      });
+    }
+
+    $('comm-apply-filters').addEventListener('click', renderCommunityDashboard);
+    $('comm-reset-filters').addEventListener('click', () => {
+      $('comm-campaign-filter').value = 'todas';
+      setCommunityDefaultDates();
+      renderCommunityDashboard();
+    });
+
+    async function init() {
+      try {
+        STATE.dataset = await loadDataset();
+        const bounds = getDateBounds();
+        $('start-date').min = bounds.min;
+        $('start-date').max = bounds.max;
+        $('end-date').min = bounds.min;
+        $('end-date').max = bounds.max;
+        syncTextInputFromNative('start-date', 'start-date-text');
+        syncTextInputFromNative('end-date', 'end-date-text');
+        bindEvents();
+        renderDashboard();
+      } catch (error) {
+        console.error(error);
+        document.body.innerHTML = `
+          <main class="min-h-screen flex items-center justify-center p-6">
+            <div class="glass-panel rounded-3xl p-8 max-w-xl w-full">
+              <h1 class="text-2xl font-black text-white mb-3">Erro ao carregar o dashboard</h1>
+              <p class="text-slate-300">${error.message}</p>
+            </div>
+          </main>
+        `;
+        return;
+      }
+
+      try {
+        await loadCommunityData();
+      } catch (error) {
+        console.error(error);
+        showCommunityStatus('Não foi possível carregar os dados das comunidades. Confira o webhook do n8n.', 'error');
+        renderCommunityKpis([]);
+        renderCommunityEmptyState('Erro ao carregar os dados');
+      }
+
+      lucide.createIcons();
+    }
+
+    init();
+  </script>
+</body>
+</html>
