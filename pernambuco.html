@@ -417,7 +417,7 @@
        Mantém o dashboard funcional já no primeiro upload.
        Depois você pode trocar para Google Sheets sem mexer na interface.
     ============================================================ */
-    const EMBEDDED_PRESENCA_CSV = String.raw`Telefone,Data,Reunião,Comunidade
+    const EMBEDDED_PRESENCA_CSV = String.raw`Numero formatado,Data,Reunião,Comunidade
 558196814150,25/03/2026 18:29:45,MobilizaPE ,❌
 558799939069,25/03/2026 19:08:27,MobilizaPE ,❌
 558798031201,25/03/2026 19:08:32,MobilizaPE ,✅
@@ -2026,7 +2026,7 @@ xVVeYqy,9qEbvb1,2026-04-07 20:12:42,Agean Tenório De Carvalho - Águas Belas,PF
       const deduped = [];
 
       for (const row of STATE.raw.presenca) {
-        const numero = normalizePhone(row['Telefone']);
+        const numero = normalizePhone(row['Numero formatado']);
         const data = normalizeDateOnly(row['Data']);
         const reuniao = normalizeMeeting(row['Reunião']);
         if (!numero || !data || !reuniao) continue;
