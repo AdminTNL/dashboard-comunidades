@@ -7,7 +7,7 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -20,556 +20,779 @@
         radial-gradient(at top left, rgba(59, 130, 246, 0.05), transparent 60%),
         radial-gradient(at bottom right, rgba(16, 185, 129, 0.05), transparent 60%);
       background-attachment: fixed;
+      overflow-x: hidden;
     }
 
     .glass-panel {
-      background: rgba(15, 23, 42, 0.72);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
 
-    .glass-panel:hover {
-      box-shadow: none !important;
-      transform: translateY(-4px);
-      border-color: rgba(255, 255, 255, 0.16);
-      background: rgba(30, 41, 59, 0.55);
-    }
-
-    .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.12); }
-    .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.12); }
-    .glow-yellow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.12); }
-    .glow-purple { box-shadow: 0 0 20px rgba(168, 85, 247, 0.12); }
-
-    .nav-btn {
-      position: relative;
-      padding-bottom: 4px;
-      color: #94a3b8;
-      transition: all .3s ease;
-      white-space: nowrap;
-    }
-
-    .nav-btn.active {
-      color: #fff;
-      font-weight: 600;
-    }
-
-    .nav-btn.active::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -4px;
-      height: 2px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #3b82f6, #10b981);
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active {
-      display: block;
-      animation: slideUp .45s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .meeting-pill {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15, 23, 42, 0.7);
-      border-radius: 1rem;
-      padding: .9rem 1rem;
-    }
-
-    .empty-state {
-      border: 1px dashed rgba(148,163,184,0.35);
-      background: rgba(15,23,42,0.45);
-    }
-
-    .mono {
-      font-variant-numeric: tabular-nums;
-      font-feature-settings: "tnum";
-    }
-
-    .community-filter-input,
-    .community-filter-select {
-      width: 100%;
-      background: rgba(2, 6, 23, 0.82);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      color: #fff;
-      border-radius: 0.95rem;
-      padding: 0.75rem 0.9rem;
-      outline: none;
-      transition: all .2s ease;
-    }
-
-    .community-filter-input:focus,
-    .community-filter-select:focus {
-      border-color: rgba(59, 130, 246, 0.58);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
-    }
-
-    .community-kpi {
-      min-height: 132px;
-    }
-
-    .campaign-shell {
-      background: linear-gradient(135deg, #0f172a 0%, #172554 45%, #1e3a8a 100%);
-      border: 1px solid rgba(30, 58, 138, 0.28);
-    }
-
-    .message-card-community {
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
-    }
-
-    .message-card-community:hover {
-      border-color: rgba(59, 130, 246, 0.45);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10), 0 14px 28px rgba(59, 130, 246, 0.08);
-      transform: translateY(-2px);
-    }
-
-    .soft-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      border-radius: 999px;
-      padding: .4rem .7rem;
-      font-size: .72rem;
-      font-weight: 700;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .soft-pill-blue {
-      background: rgba(191, 219, 254, 0.92);
-      color: #1d4ed8;
-    }
-
-    .soft-pill-green {
-      background: rgba(209, 250, 229, 0.95);
-      color: #047857;
-    }
-
-    .soft-pill-yellow {
-      background: rgba(255, 237, 213, 0.95);
-      color: #b45309;
+    input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
-  <header class="sticky top-0 w-full z-40 glass-panel border-b border-white/5 bg-slate-950/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-4 min-w-0">
-        <div class="w-11 h-11 rounded-2xl bg-blue-600/20 border border-blue-500/25 flex items-center justify-center shrink-0">
-          <i data-lucide="layout-dashboard" class="w-6 h-6 text-blue-400"></i>
-        </div>
-        <div class="leading-tight min-w-0">
-          <h1 class="text-base sm:text-lg font-bold text-white tracking-wide truncate">Comunidades MS</h1>
-          <p class="text-[11px] text-slate-400 uppercase tracking-[0.18em] font-semibold">Central de Engajamento • Mato Grosso do Sul</p>
-        </div>
-      </div>
+<body class="antialiased min-h-screen flex">
 
-      <nav class="hidden md:flex gap-8 text-sm overflow-x-auto">
-        <button onclick="switchTab('comunidades')" id="btn-comunidades" class="nav-btn active">Comunidades MS</button>
-        <button onclick="switchTab('estrutura')" id="btn-estrutura" class="nav-btn">Estrutura do Dashboard</button>
-      </nav>
+  <header class="fixed top-0 w-full glass-panel border-b border-slate-800 z-50 h-16 flex items-center px-4 justify-between">
+    <div class="flex items-center gap-4">
+      <button id="sidebar-toggle" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+          <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-400"></i>
+        </div>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400" id="header-title">Comunidades</h1>
+      </div>
     </div>
+    <div class="text-xs text-slate-500" id="footer-text">Carregando...</div>
   </header>
 
-  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
-    <section id="tab-comunidades" class="tab-content active space-y-8">
-      <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6">
-        <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Engajamento das comunidades</p>
-            <h2 class="text-2xl sm:text-3xl font-black text-white">Comunidades MS</h2>
-            <p class="text-slate-300 text-sm mt-2 max-w-3xl">
-              Acompanhe mensagens enviadas, reações e votos únicos nas comunidades do WhatsApp do projeto Mato Grosso do Sul.
-            </p>
-          </div>
+  <aside id="sidebar" class="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] glass-panel border-r border-slate-800 transform -translate-x-full transition-transform duration-300 z-40 overflow-y-auto">
+    <div class="p-4 space-y-2">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
+      
+      <button class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all" data-tab="comunidades">
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+        Comunidades MS
+      </button>
+      
+      <button class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="estrutura">
+        <i data-lucide="network" class="w-5 h-5"></i>
+        Estrutura do Dashboard
+      </button>
+    </div>
+  </aside>
 
-          <div class="grid sm:grid-cols-4 gap-3 w-full xl:w-auto">
-            <label class="meeting-pill">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
-              <input id="comm-date-start" type="date" class="community-filter-input" />
-            </label>
-            <label class="meeting-pill">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
-              <input id="comm-date-end" type="date" class="community-filter-input" />
-            </label>
-            <label class="meeting-pill">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Projeto</span>
-              <select id="comm-project-filter" class="community-filter-select"></select>
-            </label>
-            <label class="meeting-pill">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Campanha</span>
-              <select id="comm-campaign-filter" class="community-filter-select"></select>
-            </label>
+  <main id="main-content" class="flex-1 transition-all duration-300 pt-24 px-4 md:px-8 pb-12 min-w-0">
+    
+    <section id="tab-comunidades" class="tab-content max-w-7xl mx-auto space-y-6">
+      
+      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20">
+        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+          <h3 class="text-sm font-semibold text-slate-200">Filtros da Busca</h3>
+        </div>
+        
+        <p id="history-range-label" class="text-[10px] font-medium text-blue-400/80 uppercase tracking-widest mb-4 ml-1">
+          Histórico: Carregando...
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
+            <input type="date" id="comm-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Fim</label>
+            <input type="date" id="comm-end-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Projeto</label>
+            <select id="comm-project-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="todos">Todos os Projetos</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanha</label>
+            <select id="comm-campaign-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="todas">Todas as Campanhas</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Exibir por vez</label>
+            <select id="comm-limit-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="10">10 resultados</option>
+              <option value="25">25 resultados</option>
+              <option value="50">50 resultados</option>
+            </select>
+          </div>
+          <div class="flex gap-2 lg:col-span-1">
+            <button id="comm-reset-filters" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-1" title="Limpar Filtros">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <button id="comm-apply-filters" class="flex-[3] py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-2 shadow-lg shadow-blue-500/20">
+              Aplicar
+            </button>
           </div>
         </div>
       </div>
 
-      <div id="community-status-banner" class="hidden glass-panel rounded-2xl p-4 border-l-4 border-yellow-500"></div>
-      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5" id="community-kpis"></div>
+      <div id="comm-kpis-container" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
 
-      <div class="glass-panel rounded-3xl p-5 sm:p-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-          <div>
-            <h3 class="text-xl font-bold text-white">Mensagens por campanha</h3>
-            <p id="community-result-summary" class="text-slate-400 text-sm mt-1">Carregando dados das comunidades.</p>
+      <div id="comm-bi-container" class="hidden mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          
+          <div class="lg:col-span-2 glass-panel rounded-2xl p-5 border border-slate-700/50">
+            <div class="flex items-center gap-2 mb-4">
+              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+              <h3 class="text-sm font-semibold text-slate-200">Evolução do Engajamento no Período</h3>
+            </div>
+            <div class="h-56 w-full relative">
+              <canvas id="engagementChart"></canvas>
+            </div>
           </div>
-          <div class="flex gap-3">
-            <button id="comm-apply-filters" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all">Aplicar filtros</button>
-            <button id="comm-reset-filters" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold border border-white/10 transition-all">Limpar filtros</button>
+
+          <div class="flex flex-col gap-4">
+            
+            <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1">
+              <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                <h3 class="text-sm font-semibold text-slate-200">Top 5 Engajados</h3>
+              </div>
+              <div id="bi-ranking-list" class="space-y-1">
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1 flex flex-col justify-between">
+              <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
+                <h3 class="text-sm font-semibold text-slate-200">Maior Engajamento</h3>
+              </div>
+              <div id="bi-top-msg">
+                </div>
+            </div>
+
           </div>
         </div>
-
-        <div id="community-dashboard-content"></div>
       </div>
+
+      <div id="comm-campaigns-container" class="space-y-6"></div>
     </section>
 
-    <section id="tab-estrutura" class="tab-content space-y-6">
-      <div class="glass-panel glow-emerald rounded-3xl p-6 sm:p-8">
-        <h2 class="text-2xl font-black text-white mb-3">Estrutura do Dashboard</h2>
-        <p class="text-slate-300 max-w-3xl">
-          Este HTML foi preparado para crescer em abas no futuro. A primeira aba concentra as métricas das comunidades do projeto Mato Grosso do Sul.
-        </p>
-      </div>
-
-      <div class="grid lg:grid-cols-3 gap-6">
-        <div class="glass-panel rounded-3xl p-6">
-          <h3 class="text-lg font-bold text-white mb-2">Aba pronta</h3>
-          <p class="text-slate-300 text-sm">Comunidades MS</p>
-        </div>
-        <div class="glass-panel rounded-3xl p-6">
-          <h3 class="text-lg font-bold text-white mb-2">Próxima expansão</h3>
-          <p class="text-slate-300 text-sm">Novas abas podem ser adicionadas sem bagunçar a estrutura principal.</p>
-        </div>
-        <div class="glass-panel rounded-3xl p-6">
-          <h3 class="text-lg font-bold text-white mb-2">Conexão de dados</h3>
-          <p class="text-slate-300 text-sm">As comunidades consomem o webhook do n8n usando a chave de dashboard configurada para MS.</p>
-        </div>
-      </div>
+    <section id="tab-estrutura" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+       <div class="glass-panel rounded-2xl p-6 text-center">
+         <h2 class="text-xl font-bold text-slate-200">Estrutura de Dados</h2>
+         <p class="text-slate-400 mt-2">Visão geral das tabelas e integrações do Supabase.</p>
+       </div>
     </section>
   </main>
 
-  <footer class="border-t border-white/5 bg-slate-950/90 py-8 text-center px-4">
-    <p id="footer-text" class="text-slate-500 text-[11px] uppercase tracking-[0.18em]"></p>
-  </footer>
-
   <script>
-    const DATA_CONFIG = {
-      communitiesWebhookUrl: 'https://webhookn8n.tnledu.shop/webhook/dashboard-comunidades',
-      communitiesDashboardKey: 'ms'
-    };
-
+    // ESTADO GLOBAL E GRÁFICOS
     const COMMUNITY_STATE = {
       dashboardData: null,
       mensagensProcessadas: [],
-      filteredMessages: []
+      pagination: {}
     };
+    
+    let engagementChartInstance = null; // Guarda a instância do Chart.js
 
-    const $ = (id) => document.getElementById(id);
-
-    function switchTab(tab) {
-      ['comunidades', 'estrutura'].forEach(key => {
-        $('tab-' + key).classList.toggle('active', key === tab);
-        $('btn-' + key).classList.toggle('active', key === tab);
-      });
-      lucide.createIcons();
+    function escapeHtml(unsafe) {
+      return (unsafe || '').toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+    function formatDateTimeCommunity(isoString) {
+      if (!isoString) return '';
+      const d = new Date(isoString);
+      return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    function toInputDate(value) {
-      const date = new Date(value);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
+    // CONTROLE DA BARRA LATERAL
+    let sidebarOpen = false;
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      sidebarOpen = !sidebarOpen;
+      const sidebar = document.getElementById('sidebar');
+      const main = document.getElementById('main-content');
+      
+      if (sidebarOpen) {
+        sidebar.classList.remove('-translate-x-full');
+        if (window.innerWidth >= 768) main.classList.add('md:ml-64');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        main.classList.remove('md:ml-64');
+      }
+    });
 
-    function formatDateTimeCommunity(value) {
-      return new Intl.DateTimeFormat('pt-BR', {
-        dateStyle: 'short',
-        timeStyle: 'short'
-      }).format(new Date(value));
-    }
+    document.addEventListener('click', (e) => {
+      const sidebar = document.getElementById('sidebar');
+      const toggleBtn = document.getElementById('sidebar-toggle');
+      if (window.innerWidth < 768 && sidebarOpen && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+        sidebarOpen = false;
+        sidebar.classList.add('-translate-x-full');
+        document.getElementById('main-content').classList.remove('md:ml-64');
+      }
+    });
 
-    function formatDateOnlyCommunity(value) {
-      const date = value instanceof Date ? value : new Date(value);
-      return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(date);
-    }
+    // ABAS
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.className = "tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium";
+        });
+        btn.className = "tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all";
 
-    function showCommunityStatus(message, type = 'info') {
-      const el = $('community-status-banner');
-      const border = type === 'error' ? 'border-red-500' : type === 'success' ? 'border-emerald-500' : 'border-yellow-500';
-      el.className = `glass-panel rounded-2xl p-4 border-l-4 ${border}`;
-      el.textContent = message;
-      el.classList.remove('hidden');
-    }
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+        const targetId = `tab-${btn.getAttribute('data-tab')}`;
+        document.getElementById(targetId).classList.remove('hidden');
 
-    function hideCommunityStatus() {
-      $('community-status-banner').classList.add('hidden');
-    }
-
-    function setCommunityProjectFilter() {
-      const projeto = COMMUNITY_STATE.dashboardData?.projeto || 'Mato Grosso do Sul';
-      $('comm-project-filter').innerHTML = `<option value="${escapeHtml(projeto)}">${escapeHtml(projeto)}</option>`;
-      $('comm-project-filter').value = projeto;
-      $('comm-project-filter').disabled = true;
-    }
-
-    function populateCommunityCampaignFilter() {
-      const campanhas = COMMUNITY_STATE.dashboardData?.campanhas_disponiveis || [];
-      $('comm-campaign-filter').innerHTML = '<option value="todas">Todas as campanhas</option>';
-      campanhas.forEach(campaign => {
-        const option = document.createElement('option');
-        option.value = campaign;
-        option.textContent = campaign;
-        $('comm-campaign-filter').appendChild(option);
-      });
-    }
-
-    function setCommunityDefaultDates() {
-      if (!COMMUNITY_STATE.mensagensProcessadas.length) return;
-      const dates = COMMUNITY_STATE.mensagensProcessadas.map(item => new Date(item.data_evento)).sort((a, b) => a - b);
-      $('comm-date-start').value = toInputDate(dates[0]);
-      $('comm-date-end').value = toInputDate(dates[dates.length - 1]);
-    }
-
-    function communityDateInRange(dateValue, startValue, endValue) {
-      const current = new Date(dateValue);
-      const start = new Date(`${startValue}T00:00:00`);
-      const end = new Date(`${endValue}T23:59:59.999`);
-      return current >= start && current <= end;
-    }
-
-    function groupCommunityMessages(messages) {
-      const groups = new Map();
-      messages.forEach(message => {
-        const key = `${message.projeto}|||${message.campanha}`;
-        if (!groups.has(key)) {
-          groups.set(key, { projeto: message.projeto, campanha: message.campanha, comunidade: message.comunidade, messages: [] });
+        if (window.innerWidth < 768) {
+          sidebarOpen = false;
+          document.getElementById('sidebar').classList.add('-translate-x-full');
         }
-        groups.get(key).messages.push(message);
       });
-      return [...groups.values()];
+    });
+
+    // VER TUDO / VER MENOS
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('toggle-preview-btn')) {
+        const container = e.target.closest('.preview-container');
+        const textSpan = container.querySelector('.preview-text');
+        const isExpanded = container.classList.contains('is-expanded');
+
+        if (isExpanded) {
+          textSpan.innerHTML = container.getAttribute('data-short');
+          e.target.textContent = 'Ver tudo';
+          container.classList.remove('is-expanded');
+        } else {
+          textSpan.innerHTML = container.getAttribute('data-full').replace(/\n/g, '<br>');
+          e.target.textContent = 'Ver menos';
+          container.classList.add('is-expanded');
+        }
+      }
+    });
+
+    function toggleInteractions(msgId, tipo) {
+      const container = document.getElementById(`list-${msgId}`);
+      const content = document.getElementById(`list-content-${msgId}`);
+      const title = document.getElementById(`list-title-${msgId}`);
+      
+      const msg = COMMUNITY_STATE.mensagensProcessadas.find(m => m.id_mensagem === msgId);
+      if (!msg) return;
+
+      const lista = tipo === 'reacoes' ? (msg.reacoes || []) : (msg.votos || []);
+      const cor = tipo === 'reacoes' ? 'rose' : 'amber';
+      
+      title.textContent = tipo === 'reacoes' ? 'Quem Reagiu' : 'Quem Votou';
+      title.className = `text-xs font-bold uppercase tracking-widest text-${cor}-400`;
+
+      content.innerHTML = lista.map(p => `
+        <div class="flex items-center gap-3 p-2 bg-slate-900/40 rounded-lg border border-slate-800">
+          <div class="w-8 h-8 rounded-full bg-${cor}-500/10 flex items-center justify-center text-${cor}-400 text-[10px] font-bold">
+            ${(p.nome_contato || 'P').substring(0,1).toUpperCase()}
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-slate-200 truncate">${escapeHtml(p.nome_contato || 'Participante')}</p>
+            <p class="text-[10px] text-slate-500 font-mono">${escapeHtml(p.telefone || '')}</p>
+          </div>
+        </div>
+      `).join('');
+
+      container.classList.remove('hidden');
     }
 
-    function renderCommunityKpis(items) {
-      const totalMessages = items.length;
-      const totalUniqueReactions = items.reduce((sum, item) => sum + (item.total_reacoes || 0), 0);
-      const totalUniqueVotes = items.reduce((sum, item) => sum + (item.total_votos || 0), 0);
-      const withEngagement = items.filter(item => (item.total_engajamentos || 0) > 0).length;
-      const projetoAtual = COMMUNITY_STATE.dashboardData?.projeto || 'Mato Grosso do Sul';
+    function scrollToMessage(msgId) {
+      // 1. Acha a mensagem no banco de dados local
+      const msg = COMMUNITY_STATE.mensagensProcessadas.find(m => m.id_mensagem === msgId);
+      if (!msg) return;
 
-      $('community-kpis').innerHTML = `
-        <div class="glass-panel glow-blue rounded-3xl p-5 community-kpi">
-          <p class="text-xs uppercase tracking-[0.18em] text-blue-300 font-bold mb-2">Mensagens no período</p>
-          <div class="text-4xl font-black text-white mono">${totalMessages}</div>
-          <p class="text-slate-400 text-sm mt-2">Mensagens do projeto ${escapeHtml(projetoAtual)} dentro do período selecionado.</p>
-        </div>
-        <div class="glass-panel glow-emerald rounded-3xl p-5 community-kpi">
-          <p class="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold mb-2">Reações únicas</p>
-          <div class="text-4xl font-black text-white mono">${totalUniqueReactions}</div>
-          <p class="text-slate-400 text-sm mt-2">Contadas por telefone único em cada mensagem.</p>
-        </div>
-        <div class="glass-panel glow-yellow rounded-3xl p-5 community-kpi">
-          <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-2">Votos únicos</p>
-          <div class="text-4xl font-black text-white mono">${totalUniqueVotes}</div>
-          <p class="text-slate-400 text-sm mt-2">Mensagens de enquete podem receber votos e reações ao mesmo tempo.</p>
-        </div>
-        <div class="glass-panel glow-purple rounded-3xl p-5 community-kpi">
-          <p class="text-xs uppercase tracking-[0.18em] text-purple-300 font-bold mb-2">Mensagens com engajamento</p>
-          <div class="text-4xl font-black text-white mono">${withEngagement}</div>
-          <p class="text-slate-400 text-sm mt-2">Cards com pelo menos 1 voto ou 1 reação.</p>
-        </div>
-      `;
+      const campanhaAlvo = msg.campanha || 'Campanha Desconhecida';
+
+      // 2. Filtra as mensagens para saber exatamente a posição dela na tela atual
+      const projectFilter = document.getElementById('comm-project-filter').value;
+      const campaignFilter = document.getElementById('comm-campaign-filter').value;
+      const startDate = document.getElementById('comm-start-date').value;
+      const endDate = document.getElementById('comm-end-date').value;
+
+      let filtered = COMMUNITY_STATE.mensagensProcessadas.filter(m => {
+        if (projectFilter !== 'todos' && m.projeto !== projectFilter) return false;
+        if (campaignFilter !== 'todas' && m.campanha !== campaignFilter) return false;
+        if (startDate || endDate) {
+          const msgDateStr = (m.data_evento || '').split('T')[0];
+          if (msgDateStr) {
+            if (startDate && msgDateStr < startDate) return false;
+            if (endDate && msgDateStr > endDate) return false;
+          }
+        }
+        return true;
+      });
+
+      // Pega as mensagens apenas da campanha onde o alvo está
+      const msgsDaCampanha = filtered.filter(m => (m.campanha || 'Campanha Desconhecida') === campanhaAlvo);
+      
+      // Encontra em qual posição (índice) a mensagem alvo está
+      const posicaoAlvo = msgsDaCampanha.findIndex(m => m.id_mensagem === msgId);
+
+      if (posicaoAlvo !== -1) {
+        // Se ela for, por exemplo, a 35ª mensagem, a lista precisa exibir pelo menos 35 itens
+        const itensNecessarios = posicaoAlvo + 1;
+        const limiteAtual = COMMUNITY_STATE.pagination[campanhaAlvo] || parseInt(document.getElementById('comm-limit-filter').value) || 10;
+
+        // Se a mensagem está escondida pela paginação, nós aumentamos a paginação
+        if (itensNecessarios > limiteAtual) {
+          COMMUNITY_STATE.pagination[campanhaAlvo] = itensNecessarios;
+          // Renderiza novamente a tela para fazer o HTML do card nascer
+          renderCommunityDashboard();
+        }
+      }
+
+      // 3. Agora fazemos a rolagem. 
+      // O setTimeout de 100ms garante que o navegador teve tempo de desenhar o card antes de tentar ir até ele.
+      setTimeout(() => {
+        const element = document.getElementById(`msg-${msgId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Pisca a mensagem para chamar atenção
+          element.classList.add('ring-2', 'ring-blue-500', 'bg-blue-500/10', 'transform', 'scale-[1.02]');
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-500/10', 'transform', 'scale-[1.02]');
+          }, 2000);
+        }
+      }, 100);
     }
 
-    function renderCommunityEmptyState(message = 'Nenhuma mensagem encontrada') {
-      $('community-dashboard-content').innerHTML = `
-        <div class="empty-state rounded-3xl p-8 text-center text-slate-300">
-          <h3 class="text-xl font-bold text-white mb-2">${escapeHtml(message)}</h3>
-          <p>Revise o período ou a campanha para visualizar resultados.</p>
+    // NOVO: LÓGICA DO DASHBOARD DE BI
+    function renderCommunityBI(msgs) {
+      const container = document.getElementById('comm-bi-container');
+      if (!msgs || msgs.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+
+      const userMap = {};
+      const dateMap = {};
+
+      // 1. Processar dados iterando as mensagens filtradas
+      msgs.forEach(msg => {
+        const processEngagement = (eng, tipo) => {
+          // Ranking
+          const id = eng.telefone || eng.nome_contato || 'anon';
+          if (!userMap[id]) {
+            userMap[id] = { nome: eng.nome_contato || 'Participante', telefone: eng.telefone || '', total: 0 };
+          }
+          userMap[id].total++;
+
+          // Gráfico Temporal
+          const dateStr = (eng.data_evento || msg.data_evento || '').split('T')[0];
+          if (dateStr) {
+            if (!dateMap[dateStr]) dateMap[dateStr] = 0;
+            dateMap[dateStr]++;
+          }
+        };
+
+        (msg.reacoes || []).forEach(r => processEngagement(r, 'reacao'));
+        (msg.votos || []).forEach(v => processEngagement(v, 'voto'));
+      });
+
+      // 2. Renderizar Ranking (Top 5)
+      const topUsers = Object.values(userMap).sort((a, b) => b.total - a.total).slice(0, 5);
+      const rankingHTML = topUsers.map((u, i) => `
+        <div class="flex items-center justify-between p-1.5 hover:bg-slate-800/50 rounded-lg transition-colors border border-transparent hover:border-slate-700">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 shrink-0">
+              ${i + 1}º
+            </div>
+            <p class="text-xs font-semibold text-slate-200 truncate" title="${escapeHtml(u.nome)}">${escapeHtml(u.nome)}</p>
+          </div>
+          <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 font-bold shrink-0">${u.total} <span class="hidden sm:inline font-normal opacity-80">ações</span></span>
+        </div>
+      `).join('') || '<p class="text-xs text-slate-500 text-center py-4">Sem interações</p>';
+      
+      document.getElementById('bi-ranking-list').innerHTML = rankingHTML;
+
+      // 3. Renderizar Mensagem Top 1
+      const topMsg = [...msgs].sort((a, b) => (b.total_engajamentos || 0) - (a.total_engajamentos || 0))[0];
+      const topMsgContainer = document.getElementById('bi-top-msg');
+      
+      if (topMsg && topMsg.total_engajamentos > 0) {
+        const preview = topMsg.texto_preview || '';
+        const shortPreview = preview.length > 70 ? preview.substring(0, 70) + '...' : preview;
+        topMsgContainer.innerHTML = `
+          <p class="text-xs text-slate-300 italic mb-3 leading-relaxed">"${escapeHtml(shortPreview)}"</p>
+          <div class="flex gap-3 mt-auto">
+              <div class="flex-1 bg-slate-800/50 p-2 rounded-lg text-center border border-slate-700/50">
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Reações</p>
+                <p class="text-sm font-bold text-rose-400">${topMsg.reacoes?.length || 0}</p>
+              </div>
+              <div class="flex-1 bg-slate-800/50 p-2 rounded-lg text-center border border-slate-700/50">
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Votos</p>
+                <p class="text-sm font-bold text-amber-400">${topMsg.votos?.length || 0}</p>
+              </div>
+              <button onclick="scrollToMessage('${topMsg.id_mensagem}')" class="w-full mt-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-blue-500/20 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="eye" class="w-3 h-3"></i> Ver mensagem
+              </button>
+          </div>
+        `;
+      } else {
+        topMsgContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Nenhuma mensagem engajada no filtro</p>';
+      }
+
+      // 4. Renderizar Gráfico de Linha (Chart.js)
+      const sortedDates = Object.keys(dateMap).sort();
+      const chartLabels = sortedDates.map(d => d.split('-').reverse().slice(0,2).join('/')); // Formato DD/MM
+      const chartData = sortedDates.map(d => dateMap[d]);
+
+      const ctx = document.getElementById('engagementChart').getContext('2d');
+      if (engagementChartInstance) engagementChartInstance.destroy(); // Limpa gráfico anterior
+      
+      engagementChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Total de Engajamentos',
+            data: chartData,
+            borderColor: '#34d399', // emerald-400
+            backgroundColor: 'rgba(52, 211, 153, 0.1)',
+            borderWidth: 2,
+            tension: 0.4, // Curva suave
+            fill: true,
+            pointBackgroundColor: '#020617',
+            pointBorderColor: '#34d399',
+            pointBorderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              titleColor: '#f1f5f9',
+              bodyColor: '#34d399',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: false
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#64748b', maxRotation: 45, minRotation: 45 } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    function renderCommunityKpis(msgs) {
+      const container = document.getElementById('comm-kpis-container');
+      
+      const totalMensagens = msgs.length;
+      let reacoes = 0;
+      let votos = 0;
+      
+      msgs.forEach(m => {
+        reacoes += (m.reacoes || []).length;
+        votos += (m.votos || []).length;
+      });
+      
+      const engajamentosTotais = reacoes + votos;
+
+      const kpis = [
+        { title: 'Mensagens', value: totalMensagens, icon: 'message-square', color: 'blue' },
+        { title: 'Engajamentos', value: engajamentosTotais, icon: 'activity', color: 'emerald' },
+        { title: 'Total de Reações', value: reacoes, icon: 'heart', color: 'rose' },
+        { title: 'Total de Votos', value: votos, icon: 'bar-chart', color: 'amber' }
+      ];
+
+      container.innerHTML = kpis.map(k => `
+        <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-${k.color}-500 relative overflow-hidden group">
+          <div class="absolute -right-4 -top-4 w-24 h-24 bg-${k.color}-500/10 rounded-full blur-xl group-hover:bg-${k.color}-500/20 transition-colors"></div>
+          <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-2">
+              <i data-lucide="${k.icon}" class="w-5 h-5 text-${k.color}-400"></i>
+              <h3 class="text-sm font-medium text-slate-400">${k.title}</h3>
+            </div>
+            <p class="text-3xl font-bold text-slate-100">${k.value.toLocaleString('pt-BR')}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function createMessageCard(msg) {
+      const reacoes = msg.reacoes || [];
+      const votos = msg.votos || [];
+
+      const MAX_LENGTH = 150;
+      const textoReal = msg.texto_preview || "(Sem texto)";
+      const isLong = textoReal.length > MAX_LENGTH;
+      const textoCurto = isLong ? textoReal.substring(0, MAX_LENGTH) + '...' : textoReal;
+
+      const card = document.createElement('div');
+      card.className = "bg-slate-800/40 rounded-xl p-5 border border-slate-700/50 hover:border-slate-600 transition-colors";
+      card.id = `msg-${msg.id_mensagem}`;
+
+      card.innerHTML = `
+        <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-1 bg-slate-900/80 rounded-md text-xs font-medium text-slate-300 border border-slate-700">
+                ${escapeHtml(msg.tipo || 'Mensagem')}
+              </span>
+              <span class="text-xs text-slate-400">${formatDateTimeCommunity(msg.data_evento)}</span>
+            </div>
+            <h4 class="text-sm font-medium text-slate-200 mt-2">${escapeHtml(msg.comunidade || 'Comunidade')}</h4>
+          </div>
+          
+          <div class="flex gap-4 text-center">
+            <div class="flex flex-col gap-1">
+                <div class="px-3 py-1.5 bg-rose-500/10 rounded-lg border border-rose-500/20">
+                  <p class="text-xs text-rose-400/80 font-medium mb-0.5">Reações</p>
+                  <p class="text-lg font-bold text-rose-400">${reacoes.length}</p>
+                </div>
+                ${reacoes.length > 0 ? `<button onclick="toggleInteractions('${msg.id_mensagem}', 'reacoes')" class="text-[10px] text-rose-400 hover:text-rose-300 underline underline-offset-2">Ver Lista</button>` : ''}
+            </div>
+            <div class="flex flex-col gap-1">
+                <div class="px-3 py-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                  <p class="text-xs text-amber-400/80 font-medium mb-0.5">Votos</p>
+                  <p class="text-lg font-bold text-amber-400">${votos.length}</p>
+                </div>
+                ${votos.length > 0 ? `<button onclick="toggleInteractions('${msg.id_mensagem}', 'votos')" class="text-[10px] text-amber-400 hover:text-amber-300 underline underline-offset-2">Ver Lista</button>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 bg-slate-900/60 rounded-lg p-4 border border-slate-700/50">
+          <div class="flex items-start gap-3">
+            <i data-lucide="message-circle" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i>
+            <div class="text-sm text-slate-300 leading-relaxed preview-container" 
+                 data-full="${escapeHtml(textoReal)}" 
+                 data-short="${escapeHtml(textoCurto)}">
+              <span class="preview-text whitespace-pre-wrap">${escapeHtml(textoCurto)}</span>
+              ${isLong ? `<button class="toggle-preview-btn text-blue-400 hover:text-blue-300 ml-1 font-semibold underline decoration-blue-500/30 underline-offset-2">Ver tudo</button>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div id="list-${msg.id_mensagem}" class="hidden mt-4 pt-4 border-t border-slate-700/50 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div class="flex items-center justify-between mb-3">
+               <h5 id="list-title-${msg.id_mensagem}" class="text-xs font-bold uppercase tracking-widest text-slate-400">Participantes</h5>
+               <button onclick="document.getElementById('list-${msg.id_mensagem}').classList.add('hidden')" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="list-content-${msg.id_mensagem}" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll">
+            </div>
         </div>
       `;
+      return card;
     }
 
     function renderCommunityDashboard() {
-      if (!COMMUNITY_STATE.mensagensProcessadas.length) {
-        renderCommunityKpis([]);
-        renderCommunityEmptyState('Nenhum dado disponível');
-        $('community-result-summary').textContent = 'Nenhuma mensagem recebida do endpoint.';
-        return;
-      }
+      const msgs = COMMUNITY_STATE.mensagensProcessadas || [];
+      const projectFilter = document.getElementById('comm-project-filter').value;
+      const campaignFilter = document.getElementById('comm-campaign-filter').value;
+      const startDate = document.getElementById('comm-start-date').value;
+      const endDate = document.getElementById('comm-end-date').value;
+      const limitPerPage = parseInt(document.getElementById('comm-limit-filter').value) || 10;
 
-      const start = $('comm-date-start').value;
-      const end = $('comm-date-end').value;
-      const campaign = $('comm-campaign-filter').value;
+      let filtered = msgs.filter(msg => {
+        let isValid = true;
+        
+        if (projectFilter !== 'todos' && msg.projeto !== projectFilter) isValid = false;
+        if (campaignFilter !== 'todas' && msg.campanha !== campaignFilter) isValid = false;
+        
+        if (startDate || endDate) {
+          const msgDateStr = (msg.data_evento || '').split('T')[0];
+          if (msgDateStr) {
+            if (startDate && msgDateStr < startDate) isValid = false;
+            if (endDate && msgDateStr > endDate) isValid = false;
+          }
+        }
+        return isValid;
+      });
 
-      let filteredMessages = COMMUNITY_STATE.mensagensProcessadas.filter(item => communityDateInRange(item.data_evento, start, end));
-      if (campaign !== 'todas') {
-        filteredMessages = filteredMessages.filter(item => item.campanha === campaign);
-      }
+      // 1. Atualiza KPIs superiores
+      renderCommunityKpis(filtered);
+      
+      // 2. Atualiza o Dashboard Visual (Gráfico, Ranking e Top Msg)
+      renderCommunityBI(filtered);
 
-      filteredMessages = [...filteredMessages].sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento));
-      COMMUNITY_STATE.filteredMessages = filteredMessages;
-      renderCommunityKpis(filteredMessages);
-      $('community-result-summary').textContent = `${filteredMessages.length} mensagem(ns) encontradas entre ${formatDateOnlyCommunity(start)} e ${formatDateOnlyCommunity(end)}.`;
+      // 3. Renderiza a lista de campanhas e mensagens
+      const msgsByCampaign = {};
+      filtered.forEach(msg => {
+        const camp = msg.campanha || 'Campanha Desconhecida';
+        if (!msgsByCampaign[camp]) msgsByCampaign[camp] = [];
+        msgsByCampaign[camp].push(msg);
+      });
 
-      const grouped = groupCommunityMessages(filteredMessages);
-      if (!grouped.length) {
-        renderCommunityEmptyState();
-        return;
-      }
+      const container = document.getElementById('comm-campaigns-container');
+      container.innerHTML = '';
 
-      $('community-dashboard-content').innerHTML = grouped.map(group => {
-        const totalMessages = group.messages.length;
-        const totalReacoes = group.messages.reduce((sum, item) => sum + (item.total_reacoes || 0), 0);
-        const totalVotos = group.messages.reduce((sum, item) => sum + (item.total_votos || 0), 0);
-
-        return `
-          <section class="campaign-shell rounded-3xl p-5 sm:p-6 mb-5 shadow-xl">
-            <header class="flex items-start justify-between gap-4 flex-wrap border-b border-white/10 pb-4 mb-4">
-              <div>
-                <h3 class="text-xl font-black text-white">Campanha: ${escapeHtml(group.campanha)} | Projeto: ${escapeHtml(group.projeto)}</h3>
-                <p class="text-sm text-slate-300 mt-1">Comunidade principal: ${escapeHtml(group.comunidade || '—')}</p>
-              </div>
-              <div class="flex gap-2 flex-wrap">
-                <span class="soft-pill soft-pill-blue">${totalMessages} mensagens</span>
-                <span class="soft-pill soft-pill-green">${totalReacoes} reações únicas</span>
-                <span class="soft-pill soft-pill-yellow">${totalVotos} votos únicos</span>
-              </div>
-            </header>
-
-            <div class="space-y-4">
-              ${group.messages.map(message => {
-                const reacoes = Array.isArray(message.reacoes) ? message.reacoes : [];
-                const votos = Array.isArray(message.votos) ? message.votos : [];
-                const totalReacoesMsg = message.total_reacoes || 0;
-                const totalVotosMsg = message.total_votos || 0;
-                const hasDetails = totalReacoesMsg > 0 || totalVotosMsg > 0;
-
-                return `
-                  <details class="message-card-community rounded-3xl bg-white/95 text-slate-900 p-5">
-                    <summary class="list-none cursor-pointer grid grid-cols-1 xl:grid-cols-[1fr_210px] gap-4 items-start">
-                      <div>
-                        <div class="flex flex-wrap gap-2 items-center mb-3">
-                          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-blue-100 text-blue-700">${escapeHtml(message.tipo || 'mensagem')}</span>
-                          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-slate-100 text-slate-700">${escapeHtml(formatDateTimeCommunity(message.data_evento))}</span>
-                          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold bg-emerald-100 text-emerald-700">Responsável: ${escapeHtml(message.responsavel_nome || '—')}</span>
-                        </div>
-                        <p class="text-xl font-bold text-slate-900 mb-3">${escapeHtml(message.texto_preview || '(Mensagem sem texto)')}</p>
-                        <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500">
-                          <span><strong class="text-slate-700">ID:</strong> ${escapeHtml(message.id_mensagem || '—')}</span>
-                          <span><strong class="text-slate-700">Comunidade:</strong> ${escapeHtml(message.comunidade || '—')}</span>
-                          <span><strong class="text-slate-700">Remetente:</strong> ${escapeHtml(message.remetente_nome || '—')}</span>
-                        </div>
-                      </div>
-
-                      <div class="grid gap-3">
-                        <div class="rounded-2xl border border-slate-200 p-3 bg-white">
-                          <span class="block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1">Reações</span>
-                          <span class="text-3xl font-black text-slate-900 mono">${totalReacoesMsg}</span>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 p-3 bg-white">
-                          <span class="block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 mb-1">Votos</span>
-                          <span class="text-3xl font-black text-slate-900 mono">${totalVotosMsg}</span>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 p-3 bg-white text-sm font-bold text-slate-900">
-                          ${hasDetails ? 'Clique para ver a lista' : 'Sem engajamento'}
-                        </div>
-                      </div>
-                    </summary>
-
-                    ${hasDetails ? `
-                      <div class="mt-5 pt-5 border-t border-slate-200 grid md:grid-cols-2 gap-4">
-                        <section class="rounded-2xl border border-slate-200 bg-white p-4">
-                          <h4 class="text-base font-bold text-slate-900 mb-3">Quem reagiu (${totalReacoesMsg})</h4>
-                          <div class="space-y-3">
-                            ${reacoes.length ? reacoes.map(person => `
-                              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                                <strong class="block text-slate-900">${escapeHtml(person.nome_contato || 'Sem nome')}</strong>
-                                <span class="block text-sm text-slate-500">${escapeHtml(person.telefone || 'Sem telefone')}</span>
-                              </div>
-                            `).join('') : `<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-slate-500">Nenhuma reação nesta mensagem.</div>`}
-                          </div>
-                        </section>
-                        <section class="rounded-2xl border border-slate-200 bg-white p-4">
-                          <h4 class="text-base font-bold text-slate-900 mb-3">Quem votou (${totalVotosMsg})</h4>
-                          <div class="space-y-3">
-                            ${votos.length ? votos.map(person => `
-                              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                                <strong class="block text-slate-900">${escapeHtml(person.nome_contato || 'Sem nome')}</strong>
-                                <span class="block text-sm text-slate-500">${escapeHtml(person.telefone || 'Sem telefone')}</span>
-                              </div>
-                            `).join('') : `<div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-slate-500">Nenhum voto nesta mensagem.</div>`}
-                          </div>
-                        </section>
-                      </div>
-                    ` : ''}
-                  </details>
-                `;
-              }).join('')}
-            </div>
-          </section>
+      const campanhas = Object.keys(msgsByCampaign).sort();
+      
+      if (campanhas.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 glass-panel rounded-2xl">
+            <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+            <h3 class="text-lg font-medium text-slate-300">Nenhum resultado</h3>
+            <p class="text-slate-500 mt-1">Altere os filtros para ver mais dados.</p>
+          </div>
         `;
-      }).join('');
-    }
-
-    async function loadCommunityData() {
-      showCommunityStatus('Buscando dados das comunidades do projeto Mato Grosso do Sul.', 'info');
-      const params = new URLSearchParams({ dashboard: DATA_CONFIG.communitiesDashboardKey });
-      const response = await fetch(`${DATA_CONFIG.communitiesWebhookUrl}?${params.toString()}`);
-      if (!response.ok) throw new Error(`Falha ao carregar comunidades: ${response.status}`);
-      const responseData = await response.json();
-      COMMUNITY_STATE.dashboardData = Array.isArray(responseData) ? responseData[0] : responseData;
-      if (!COMMUNITY_STATE.dashboardData || !Array.isArray(COMMUNITY_STATE.dashboardData.mensagens_processadas)) {
-        throw new Error('O endpoint de comunidades não retornou mensagens_processadas no formato esperado.');
+        lucide.createIcons();
+        return;
       }
-      COMMUNITY_STATE.mensagensProcessadas = COMMUNITY_STATE.dashboardData.mensagens_processadas;
-      setCommunityProjectFilter();
-      populateCommunityCampaignFilter();
-      setCommunityDefaultDates();
-      renderCommunityDashboard();
-      hideCommunityStatus();
-      $('footer-text').textContent = COMMUNITY_STATE.dashboardData?.carregado_em
-        ? `Atualizado em ${formatDateTimeCommunity(COMMUNITY_STATE.dashboardData.carregado_em)} • webhook n8n`
-        : 'Fonte: webhook n8n';
-      document.title = COMMUNITY_STATE.dashboardData?.nome_dashboard || 'Comunidades MS';
+
+      campanhas.forEach(campanha => {
+        const campanhaMsgs = msgsByCampaign[campanha];
+        
+        if (!COMMUNITY_STATE.pagination[campanha]) {
+          COMMUNITY_STATE.pagination[campanha] = limitPerPage;
+        }
+        
+        const currentLimit = COMMUNITY_STATE.pagination[campanha];
+        const msgsToShow = campanhaMsgs.slice(0, currentLimit);
+
+        const campBlock = document.createElement('div');
+        campBlock.className = "glass-panel rounded-2xl p-6 border border-slate-700/50";
+        
+        const campHeader = document.createElement('div');
+        campHeader.className = "flex items-center gap-3 mb-6 pb-4 border-b border-slate-800";
+        campHeader.innerHTML = `
+          <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+            <i data-lucide="folder" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-200">${escapeHtml(campanha)}</h3>
+            <p class="text-xs text-slate-500 mt-0.5">${campanhaMsgs.length} mensagem(ns) no total</p>
+          </div>
+        `;
+        campBlock.appendChild(campHeader);
+
+        const cardsGrid = document.createElement('div');
+        cardsGrid.className = "space-y-4";
+        
+        msgsToShow.forEach(msg => {
+          cardsGrid.appendChild(createMessageCard(msg));
+        });
+        
+        campBlock.appendChild(cardsGrid);
+
+        if (campanhaMsgs.length > currentLimit) {
+          const restantes = campanhaMsgs.length - currentLimit;
+          const loadMoreBtn = document.createElement('button');
+          loadMoreBtn.className = "w-full py-3 mt-5 border border-dashed border-slate-700 rounded-xl text-slate-400 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all text-sm font-medium flex items-center justify-center gap-2 group";
+          loadMoreBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 group-hover:rotate-90 transition-transform"></i> Ver mais resultados (${restantes} restantes)`;
+          
+          loadMoreBtn.onclick = () => {
+            COMMUNITY_STATE.pagination[campanha] += limitPerPage;
+            renderCommunityDashboard(); 
+          };
+          
+          campBlock.appendChild(loadMoreBtn);
+        }
+
+        container.appendChild(campBlock);
+      });
+
+      lucide.createIcons();
     }
 
-    $('comm-apply-filters').addEventListener('click', renderCommunityDashboard);
-    $('comm-reset-filters').addEventListener('click', () => {
-      $('comm-campaign-filter').value = 'todas';
-      setCommunityDefaultDates();
+    function setCommunityDefaultDates() {
+      const msgs = COMMUNITY_STATE.mensagensProcessadas;
+      if (!msgs || msgs.length === 0) return;
+
+      const timestamps = msgs.map(m => new Date(m.data_evento).getTime()).filter(t => !isNaN(t));
+      if (timestamps.length === 0) return;
+
+      const minTs = Math.min(...timestamps);
+      const maxTs = Math.max(...timestamps);
+
+      const firstDate = new Date(minTs).toISOString().split('T')[0];
+      const lastDate = new Date(maxTs).toISOString().split('T')[0];
+
+      document.getElementById('comm-start-date').value = firstDate;
+      document.getElementById('comm-end-date').value = lastDate;
+
+      const label = document.getElementById('history-range-label');
+      if (label) {
+        const d1 = new Date(minTs).toLocaleDateString('pt-BR');
+        const d2 = new Date(maxTs).toLocaleDateString('pt-BR');
+        label.textContent = `Histórico Detectado: ${d1} até ${d2}`;
+      }
+    }
+
+    function populateCommunityCampaignFilter() {
+      const campSelect = document.getElementById('comm-campaign-filter');
+      const projSelect = document.getElementById('comm-project-filter');
+      
+      const campanhas = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.campanha).filter(Boolean))].sort();
+      const projetos = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.projeto).filter(Boolean))].sort();
+
+      campSelect.innerHTML = '<option value="todas">Todas as Campanhas</option>';
+      projSelect.innerHTML = '<option value="todos">Todos os Projetos</option>';
+
+      campanhas.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        campSelect.appendChild(opt);
+      });
+
+      projetos.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        projSelect.appendChild(opt);
+      });
+    }
+
+    document.getElementById('comm-apply-filters').addEventListener('click', () => {
+      COMMUNITY_STATE.pagination = {}; 
+      renderCommunityDashboard();
+    });
+    
+    document.getElementById('comm-reset-filters').addEventListener('click', () => {
+      document.getElementById('comm-project-filter').value = 'todos';
+      document.getElementById('comm-campaign-filter').value = 'todas';
+      document.getElementById('comm-limit-filter').value = '10';
+      setCommunityDefaultDates(); 
+      COMMUNITY_STATE.pagination = {}; 
       renderCommunityDashboard();
     });
 
-    (async function init() {
+    async function loadCommunityData() {
       try {
-        await loadCommunityData();
+        const res = await fetch('https://webhookn8n.tnledu.shop/webhook/dashboard-comunidades?dashboard=ms');
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          COMMUNITY_STATE.dashboardData = data[0];
+        } else {
+          COMMUNITY_STATE.dashboardData = data;
+        }
+
+        COMMUNITY_STATE.mensagensProcessadas = COMMUNITY_STATE.dashboardData.mensagens_processadas || [];
+        
+        populateCommunityCampaignFilter();
+        setCommunityDefaultDates();
+        renderCommunityDashboard();
+        
+        const footerElement = document.getElementById('footer-text');
+        if (footerElement) footerElement.textContent = `Atualizado em ${formatDateTimeCommunity(COMMUNITY_STATE.dashboardData.carregado_em)}`;
+        
+        document.title = COMMUNITY_STATE.dashboardData.nome_dashboard || 'Comunidades MS';
+        const headerElement = document.getElementById('header-title');
+        if (headerElement) headerElement.textContent = COMMUNITY_STATE.dashboardData.nome_dashboard || 'Comunidades MS';
+        
       } catch (error) {
-        console.error(error);
-        showCommunityStatus('Não foi possível carregar os dados das comunidades. Confira o webhook do n8n.', 'error');
-        renderCommunityKpis([]);
-        renderCommunityEmptyState('Erro ao carregar os dados');
+        console.error("Erro ao carregar:", error);
+        document.getElementById('comm-campaigns-container').innerHTML = `<div class="text-center py-10 text-rose-400">Erro ao comunicar com n8n.</div>`;
       }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCommunityData();
       lucide.createIcons();
-    })();
+    });
   </script>
 </body>
 </html>
