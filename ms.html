@@ -7,7 +7,8 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -39,6 +40,24 @@
       filter: invert(1);
       cursor: pointer;
     }
+
+    /* Estilos do Multi-Select Customizado */
+    .multi-select-container { position: relative; width: 100%; }
+    .multi-select-dropdown {
+      position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px;
+      overflow-y: auto; z-index: 100; background: #0f172a;
+      border: 1px solid #334155; border-top: none;
+      border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
+      display: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .multi-select-item {
+      padding: 8px 12px; cursor: pointer; display: flex; align-items: center;
+      gap: 8px; font-size: 13px; color: #94a3b8; transition: all 0.2s;
+    }
+    .multi-select-item:hover { background: #1e293b; color: #f1f5f9; }
+    .multi-select-item.selected { color: #3b82f6; background: rgba(59, 130, 246, 0.05); font-weight: 500; }
+    
+    .people-list-scroll { max-height: 350px; overflow-y: auto; }
   </style>
 </head>
 <body class="antialiased min-h-screen flex">
@@ -62,14 +81,14 @@
     <div class="p-4 space-y-2">
       <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
       
-      <button class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all" data-tab="comunidades">
+     <button class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all" data-tab="comunidades">
         <i data-lucide="message-square" class="w-5 h-5"></i>
-        Comunidades MS
+        Engajamento
       </button>
-      
-      <button class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="estrutura">
-        <i data-lucide="network" class="w-5 h-5"></i>
-        Estrutura do Dashboard
+
+      <button class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="movimentacao">
+        <i data-lucide="users" class="w-5 h-5"></i>
+        Movimentação da Base
       </button>
     </div>
   </aside>
@@ -78,7 +97,7 @@
     
     <section id="tab-comunidades" class="tab-content max-w-7xl mx-auto space-y-6">
       
-      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20">
+      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20 relative z-50"></div>
         <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
           <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
           <h3 class="text-sm font-semibold text-slate-200">Filtros da Busca</h3>
@@ -103,12 +122,23 @@
               <option value="todos">Todos os Projetos</option>
             </select>
           </div>
+          
           <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanha</label>
-            <select id="comm-campaign-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-              <option value="todas">Todas as Campanhas</option>
-            </select>
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanhas</label>
+            <div class="multi-select-container" id="container-campanhas-comm">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Campanhas</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
           </div>
+
           <div class="space-y-1">
             <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Exibir por vez</label>
             <select id="comm-limit-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
@@ -132,7 +162,6 @@
 
       <div id="comm-bi-container" class="hidden mb-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          
           <div class="lg:col-span-2 glass-panel rounded-2xl p-5 border border-slate-700/50">
             <div class="flex items-center gap-2 mb-4">
               <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
@@ -142,27 +171,21 @@
               <canvas id="engagementChart"></canvas>
             </div>
           </div>
-
           <div class="flex flex-col gap-4">
-            
             <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1">
               <div class="flex items-center gap-2 mb-3">
                 <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
                 <h3 class="text-sm font-semibold text-slate-200">Top 5 Engajados</h3>
               </div>
-              <div id="bi-ranking-list" class="space-y-1">
-                </div>
+              <div id="bi-ranking-list" class="space-y-1"></div>
             </div>
-
             <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1 flex flex-col justify-between">
               <div class="flex items-center gap-2 mb-2">
                 <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
                 <h3 class="text-sm font-semibold text-slate-200">Maior Engajamento</h3>
               </div>
-              <div id="bi-top-msg">
-                </div>
+              <div id="bi-top-msg"></div>
             </div>
-
           </div>
         </div>
       </div>
@@ -170,31 +193,112 @@
       <div id="comm-campaigns-container" class="space-y-6"></div>
     </section>
 
-    <section id="tab-estrutura" class="tab-content hidden max-w-7xl mx-auto space-y-6">
-       <div class="glass-panel rounded-2xl p-6 text-center">
-         <h2 class="text-xl font-bold text-slate-200">Estrutura de Dados</h2>
-         <p class="text-slate-400 mt-2">Visão geral das tabelas e integrações do Supabase.</p>
-       </div>
+    <section id="tab-movimentacao" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      
+      <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+        <i data-lucide="users" class="w-5 h-5 text-slate-400"></i>
+        <h2 class="text-lg font-bold text-slate-200">Visão Geral da Base de Membros</h2>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20 mb-6 relative z-50">
+        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+          <h3 class="text-sm font-semibold text-slate-200">Filtros da Busca</h3>
+        </div>
+        
+        <p id="mov-history-range-label" class="text-[10px] font-medium text-blue-400/80 uppercase tracking-widest mb-4 ml-1">
+          Histórico: Carregando...
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
+            <input type="date" id="mov-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Fim</label>
+            <input type="date" id="mov-end-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Projeto</label>
+            <select id="mov-project-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="todos">Todos os Projetos</option>
+            </select>
+          </div>
+          
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanhas</label>
+            <div class="multi-select-container" id="container-campanhas-mov">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Campanhas</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex gap-2 lg:col-span-1">
+            <button id="mov-reset-filters" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-1" title="Limpar Filtros">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <button id="mov-apply-filters" class="flex-[3] py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-2 shadow-lg shadow-blue-500/20">
+              Aplicar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mov-kpis-container" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-200">Crescimento vs. Evasão</h3>
+            <p class="text-xs text-slate-500 mt-1">Evolução diária de entradas e saídas baseado no filtro.</p>
+          </div>
+        </div>
+        <div class="h-80 w-full relative">
+          <canvas id="movimentacaoChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-panel rounded-2xl p-5 border border-emerald-500/10">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
+            <h3 class="text-sm font-semibold text-slate-200">Novas Entradas no Período</h3>
+          </div>
+          <div id="mov-list-entradas" class="people-list-scroll space-y-2 pr-2 custom-scroll"></div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border border-rose-500/10">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="user-minus" class="w-4 h-4 text-rose-400"></i>
+            <h3 class="text-sm font-semibold text-slate-200">Saídas no Período</h3>
+          </div>
+          <div id="mov-list-saidas" class="people-list-scroll space-y-2 pr-2 custom-scroll"></div>
+        </div>
+      </div>
+
     </section>
   </main>
 
   <script>
     // ESTADO GLOBAL E GRÁFICOS
-    const COMMUNITY_STATE = {
-      dashboardData: null,
-      mensagensProcessadas: [],
-      pagination: {}
-    };
+    const COMMUNITY_STATE = { dashboardData: null, mensagensProcessadas: [], pagination: {} };
+    const MOVIMENTACAO_STATE = { data: null, isLoaded: false };
     
-    let engagementChartInstance = null; // Guarda a instância do Chart.js
+    let engagementChartInstance = null; 
+    let movChartInstance = null;
 
+    // === UTILITÁRIOS GERAIS ===
     function escapeHtml(unsafe) {
-      return (unsafe || '').toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+      return (unsafe || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     function formatDateTimeCommunity(isoString) {
@@ -203,13 +307,82 @@
       return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // CONTROLE DA BARRA LATERAL
+    // === CONTROLES DO MULTI-SELECT ===
+    function toggleMultiSelect(btn) {
+      const dropdown = btn.nextElementSibling;
+      const isVisible = dropdown.style.display === 'block';
+      document.querySelectorAll('.multi-select-dropdown').forEach(d => d.style.display = 'none');
+      dropdown.style.display = isVisible ? 'none' : 'block';
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.multi-select-container')) {
+        document.querySelectorAll('.multi-select-dropdown').forEach(d => d.style.display = 'none');
+      }
+    });
+
+    function toggleOption(item) {
+      // Removida a linha que dava o duplo toggle fantasma!
+      const container = item.closest('.multi-select-container');
+      const selected = container.querySelectorAll('.multi-select-item.selected:not([onclick^="selectAll"])');
+      const label = container.querySelector('.selected-label');
+      
+      if (selected.length === 0) label.textContent = "Todas as Campanhas";
+      else if (selected.length === 1) label.textContent = selected[0].textContent.trim();
+      else label.textContent = `${selected.length} Campanhas`;
+    }
+
+    function selectAllCampaigns(btn) {
+      const container = btn.closest('.multi-select-container');
+      const items = container.querySelectorAll('.multi-select-item:not([onclick^="selectAll"])');
+      
+      items.forEach(i => {
+        i.classList.remove('selected');
+        // Adicionado para limpar a cor azul da caixinha quando clicar em Selecionar Todas
+        const box = i.querySelector('.icon-box');
+        if(box) box.classList.remove('bg-blue-500', 'border-blue-500'); 
+      });
+      
+      container.querySelector('.selected-label').textContent = "Todas as Campanhas";
+      btn.parentElement.style.display = 'none';
+    }
+
+    function getSelectedCampaigns(containerId) {
+      const container = document.getElementById(containerId);
+      if(!container) return [];
+      return Array.from(container.querySelectorAll('.multi-select-item.selected:not([onclick^="selectAll"])')).map(el => el.textContent.trim());
+    }
+
+    function populateMultiSelect(containerId, optionsList) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const listElement = container.querySelector('.options-list');
+      listElement.innerHTML = '';
+      optionsList.forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'multi-select-item';
+        div.innerHTML = `<div class="w-3 h-3 rounded border border-slate-500 mr-1 flex items-center justify-center icon-box"></div> ${escapeHtml(opt)}`;
+        div.onclick = function(e) { 
+          e.stopPropagation(); 
+          this.classList.toggle('selected');
+          const box = this.querySelector('.icon-box');
+          if(this.classList.contains('selected')) {
+             box.classList.add('bg-blue-500', 'border-blue-500');
+          } else {
+             box.classList.remove('bg-blue-500', 'border-blue-500');
+          }
+          toggleOption(this); 
+        };
+        listElement.appendChild(div);
+      });
+    }
+
+    // === CONTROLE DA BARRA LATERAL E ABAS ===
     let sidebarOpen = false;
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
       sidebarOpen = !sidebarOpen;
       const sidebar = document.getElementById('sidebar');
       const main = document.getElementById('main-content');
-      
       if (sidebarOpen) {
         sidebar.classList.remove('-translate-x-full');
         if (window.innerWidth >= 768) main.classList.add('md:ml-64');
@@ -219,17 +392,6 @@
       }
     });
 
-    document.addEventListener('click', (e) => {
-      const sidebar = document.getElementById('sidebar');
-      const toggleBtn = document.getElementById('sidebar-toggle');
-      if (window.innerWidth < 768 && sidebarOpen && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-        sidebarOpen = false;
-        sidebar.classList.add('-translate-x-full');
-        document.getElementById('main-content').classList.remove('md:ml-64');
-      }
-    });
-
-    // ABAS
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => {
@@ -241,6 +403,8 @@
         const targetId = `tab-${btn.getAttribute('data-tab')}`;
         document.getElementById(targetId).classList.remove('hidden');
 
+        if (targetId === 'tab-movimentacao') loadMovimentacaoData();
+
         if (window.innerWidth < 768) {
           sidebarOpen = false;
           document.getElementById('sidebar').classList.add('-translate-x-full');
@@ -248,13 +412,12 @@
       });
     });
 
-    // VER TUDO / VER MENOS
+    // === MÓDULO 1: COMUNIDADES MS ===
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('toggle-preview-btn')) {
         const container = e.target.closest('.preview-container');
         const textSpan = container.querySelector('.preview-text');
         const isExpanded = container.classList.contains('is-expanded');
-
         if (isExpanded) {
           textSpan.innerHTML = container.getAttribute('data-short');
           e.target.textContent = 'Ver tudo';
@@ -271,7 +434,6 @@
       const container = document.getElementById(`list-${msgId}`);
       const content = document.getElementById(`list-content-${msgId}`);
       const title = document.getElementById(`list-title-${msgId}`);
-      
       const msg = COMMUNITY_STATE.mensagensProcessadas.find(m => m.id_mensagem === msgId);
       if (!msg) return;
 
@@ -292,128 +454,89 @@
           </div>
         </div>
       `).join('');
-
       container.classList.remove('hidden');
     }
 
     function scrollToMessage(msgId) {
-      // 1. Acha a mensagem no banco de dados local
       const msg = COMMUNITY_STATE.mensagensProcessadas.find(m => m.id_mensagem === msgId);
       if (!msg) return;
 
       const campanhaAlvo = msg.campanha || 'Campanha Desconhecida';
-
-      // 2. Filtra as mensagens para saber exatamente a posição dela na tela atual
       const projectFilter = document.getElementById('comm-project-filter').value;
-      const campaignFilter = document.getElementById('comm-campaign-filter').value;
+      const selectedCampaigns = getSelectedCampaigns('container-campanhas-comm');
       const startDate = document.getElementById('comm-start-date').value;
       const endDate = document.getElementById('comm-end-date').value;
 
       let filtered = COMMUNITY_STATE.mensagensProcessadas.filter(m => {
         if (projectFilter !== 'todos' && m.projeto !== projectFilter) return false;
-        if (campaignFilter !== 'todas' && m.campanha !== campaignFilter) return false;
+        if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(m.campanha)) return false;
         if (startDate || endDate) {
           const msgDateStr = (m.data_evento || '').split('T')[0];
-          if (msgDateStr) {
-            if (startDate && msgDateStr < startDate) return false;
-            if (endDate && msgDateStr > endDate) return false;
-          }
+          if (startDate && msgDateStr < startDate) return false;
+          if (endDate && msgDateStr > endDate) return false;
         }
         return true;
       });
 
-      // Pega as mensagens apenas da campanha onde o alvo está
       const msgsDaCampanha = filtered.filter(m => (m.campanha || 'Campanha Desconhecida') === campanhaAlvo);
-      
-      // Encontra em qual posição (índice) a mensagem alvo está
       const posicaoAlvo = msgsDaCampanha.findIndex(m => m.id_mensagem === msgId);
 
       if (posicaoAlvo !== -1) {
-        // Se ela for, por exemplo, a 35ª mensagem, a lista precisa exibir pelo menos 35 itens
         const itensNecessarios = posicaoAlvo + 1;
         const limiteAtual = COMMUNITY_STATE.pagination[campanhaAlvo] || parseInt(document.getElementById('comm-limit-filter').value) || 10;
-
-        // Se a mensagem está escondida pela paginação, nós aumentamos a paginação
         if (itensNecessarios > limiteAtual) {
           COMMUNITY_STATE.pagination[campanhaAlvo] = itensNecessarios;
-          // Renderiza novamente a tela para fazer o HTML do card nascer
           renderCommunityDashboard();
         }
       }
 
-      // 3. Agora fazemos a rolagem. 
-      // O setTimeout de 100ms garante que o navegador teve tempo de desenhar o card antes de tentar ir até ele.
       setTimeout(() => {
         const element = document.getElementById(`msg-${msgId}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // Pisca a mensagem para chamar atenção
           element.classList.add('ring-2', 'ring-blue-500', 'bg-blue-500/10', 'transform', 'scale-[1.02]');
-          setTimeout(() => {
-            element.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-500/10', 'transform', 'scale-[1.02]');
-          }, 2000);
+          setTimeout(() => { element.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-500/10', 'transform', 'scale-[1.02]'); }, 2000);
         }
       }, 100);
     }
 
-    // NOVO: LÓGICA DO DASHBOARD DE BI
     function renderCommunityBI(msgs) {
       const container = document.getElementById('comm-bi-container');
-      if (!msgs || msgs.length === 0) {
-        container.classList.add('hidden');
-        return;
-      }
+      if (!msgs || msgs.length === 0) { container.classList.add('hidden'); return; }
       container.classList.remove('hidden');
 
-      const userMap = {};
-      const dateMap = {};
-
-      // 1. Processar dados iterando as mensagens filtradas
+      const userMap = {}; const dateMap = {};
       msgs.forEach(msg => {
         const processEngagement = (eng, tipo) => {
-          // Ranking
           const id = eng.telefone || eng.nome_contato || 'anon';
-          if (!userMap[id]) {
-            userMap[id] = { nome: eng.nome_contato || 'Participante', telefone: eng.telefone || '', total: 0 };
-          }
+          if (!userMap[id]) userMap[id] = { nome: eng.nome_contato || 'Participante', telefone: eng.telefone || '', total: 0 };
           userMap[id].total++;
 
-          // Gráfico Temporal
           const dateStr = (eng.data_evento || msg.data_evento || '').split('T')[0];
           if (dateStr) {
             if (!dateMap[dateStr]) dateMap[dateStr] = 0;
             dateMap[dateStr]++;
           }
         };
-
         (msg.reacoes || []).forEach(r => processEngagement(r, 'reacao'));
         (msg.votos || []).forEach(v => processEngagement(v, 'voto'));
       });
 
-      // 2. Renderizar Ranking (Top 5)
       const topUsers = Object.values(userMap).sort((a, b) => b.total - a.total).slice(0, 5);
-      const rankingHTML = topUsers.map((u, i) => `
+      document.getElementById('bi-ranking-list').innerHTML = topUsers.map((u, i) => `
         <div class="flex items-center justify-between p-1.5 hover:bg-slate-800/50 rounded-lg transition-colors border border-transparent hover:border-slate-700">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 shrink-0">
-              ${i + 1}º
-            </div>
+            <div class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 shrink-0">${i + 1}º</div>
             <p class="text-xs font-semibold text-slate-200 truncate" title="${escapeHtml(u.nome)}">${escapeHtml(u.nome)}</p>
           </div>
           <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 font-bold shrink-0">${u.total} <span class="hidden sm:inline font-normal opacity-80">ações</span></span>
         </div>
       `).join('') || '<p class="text-xs text-slate-500 text-center py-4">Sem interações</p>';
-      
-      document.getElementById('bi-ranking-list').innerHTML = rankingHTML;
 
-      // 3. Renderizar Mensagem Top 1
       const topMsg = [...msgs].sort((a, b) => (b.total_engajamentos || 0) - (a.total_engajamentos || 0))[0];
       const topMsgContainer = document.getElementById('bi-top-msg');
-      
       if (topMsg && topMsg.total_engajamentos > 0) {
-        const preview = topMsg.texto_preview || '';
-        const shortPreview = preview.length > 70 ? preview.substring(0, 70) + '...' : preview;
+        const shortPreview = (topMsg.texto_preview || '').length > 70 ? (topMsg.texto_preview || '').substring(0, 70) + '...' : (topMsg.texto_preview || '');
         topMsgContainer.innerHTML = `
           <p class="text-xs text-slate-300 italic mb-3 leading-relaxed">"${escapeHtml(shortPreview)}"</p>
           <div class="flex gap-3 mt-auto">
@@ -426,58 +549,32 @@
                 <p class="text-sm font-bold text-amber-400">${topMsg.votos?.length || 0}</p>
               </div>
               <button onclick="scrollToMessage('${topMsg.id_mensagem}')" class="w-full mt-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-blue-500/20 transition-all flex items-center justify-center gap-2">
-                <i data-lucide="eye" class="w-3 h-3"></i> Ver mensagem
+                <i data-lucide="eye" class="w-3 h-3"></i> Ver
               </button>
-          </div>
-        `;
+          </div>`;
       } else {
         topMsgContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Nenhuma mensagem engajada no filtro</p>';
       }
 
-      // 4. Renderizar Gráfico de Linha (Chart.js)
       const sortedDates = Object.keys(dateMap).sort();
-      const chartLabels = sortedDates.map(d => d.split('-').reverse().slice(0,2).join('/')); // Formato DD/MM
-      const chartData = sortedDates.map(d => dateMap[d]);
-
       const ctx = document.getElementById('engagementChart').getContext('2d');
-      if (engagementChartInstance) engagementChartInstance.destroy(); // Limpa gráfico anterior
-      
+      if (engagementChartInstance) engagementChartInstance.destroy();
       engagementChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: chartLabels,
+          labels: sortedDates.map(d => d.split('-').reverse().slice(0,2).join('/')),
           datasets: [{
-            label: 'Total de Engajamentos',
-            data: chartData,
-            borderColor: '#34d399', // emerald-400
-            backgroundColor: 'rgba(52, 211, 153, 0.1)',
-            borderWidth: 2,
-            tension: 0.4, // Curva suave
-            fill: true,
-            pointBackgroundColor: '#020617',
-            pointBorderColor: '#34d399',
-            pointBorderWidth: 2,
-            pointRadius: 3,
-            pointHoverRadius: 6
+            label: 'Engajamentos', data: sortedDates.map(d => dateMap[d]),
+            borderColor: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.1)',
+            borderWidth: 2, tension: 0.4, fill: true,
+            pointBackgroundColor: '#020617', pointBorderColor: '#34d399', pointBorderWidth: 2, pointRadius: 3
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-              titleColor: '#f1f5f9',
-              bodyColor: '#34d399',
-              borderColor: 'rgba(255,255,255,0.1)',
-              borderWidth: 1,
-              padding: 10,
-              displayColors: false
-            }
-          },
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
           scales: {
-            x: { grid: { display: false }, ticks: { color: '#64748b', maxRotation: 45, minRotation: 45 } },
+            x: { grid: { display: false }, ticks: { color: '#64748b' } },
             y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', stepSize: 1 } }
           }
         }
@@ -485,27 +582,15 @@
     }
 
     function renderCommunityKpis(msgs) {
-      const container = document.getElementById('comm-kpis-container');
-      
-      const totalMensagens = msgs.length;
-      let reacoes = 0;
-      let votos = 0;
-      
-      msgs.forEach(m => {
-        reacoes += (m.reacoes || []).length;
-        votos += (m.votos || []).length;
-      });
-      
-      const engajamentosTotais = reacoes + votos;
-
+      let reacoes = 0; let votos = 0;
+      msgs.forEach(m => { reacoes += (m.reacoes || []).length; votos += (m.votos || []).length; });
       const kpis = [
-        { title: 'Mensagens', value: totalMensagens, icon: 'message-square', color: 'blue' },
-        { title: 'Engajamentos', value: engajamentosTotais, icon: 'activity', color: 'emerald' },
+        { title: 'Mensagens', value: msgs.length, icon: 'message-square', color: 'blue' },
+        { title: 'Engajamentos', value: reacoes + votos, icon: 'activity', color: 'emerald' },
         { title: 'Total de Reações', value: reacoes, icon: 'heart', color: 'rose' },
         { title: 'Total de Votos', value: votos, icon: 'bar-chart', color: 'amber' }
       ];
-
-      container.innerHTML = kpis.map(k => `
+      document.getElementById('comm-kpis-container').innerHTML = kpis.map(k => `
         <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-${k.color}-500 relative overflow-hidden group">
           <div class="absolute -right-4 -top-4 w-24 h-24 bg-${k.color}-500/10 rounded-full blur-xl group-hover:bg-${k.color}-500/20 transition-colors"></div>
           <div class="relative z-10">
@@ -520,30 +605,23 @@
     }
 
     function createMessageCard(msg) {
-      const reacoes = msg.reacoes || [];
-      const votos = msg.votos || [];
-
-      const MAX_LENGTH = 150;
+      const reacoes = msg.reacoes || []; const votos = msg.votos || [];
       const textoReal = msg.texto_preview || "(Sem texto)";
-      const isLong = textoReal.length > MAX_LENGTH;
-      const textoCurto = isLong ? textoReal.substring(0, MAX_LENGTH) + '...' : textoReal;
+      const isLong = textoReal.length > 150;
+      const textoCurto = isLong ? textoReal.substring(0, 150) + '...' : textoReal;
 
       const card = document.createElement('div');
       card.className = "bg-slate-800/40 rounded-xl p-5 border border-slate-700/50 hover:border-slate-600 transition-colors";
       card.id = `msg-${msg.id_mensagem}`;
-
       card.innerHTML = `
         <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
-              <span class="px-2.5 py-1 bg-slate-900/80 rounded-md text-xs font-medium text-slate-300 border border-slate-700">
-                ${escapeHtml(msg.tipo || 'Mensagem')}
-              </span>
+              <span class="px-2.5 py-1 bg-slate-900/80 rounded-md text-xs font-medium text-slate-300 border border-slate-700">${escapeHtml(msg.tipo || 'Mensagem')}</span>
               <span class="text-xs text-slate-400">${formatDateTimeCommunity(msg.data_evento)}</span>
             </div>
             <h4 class="text-sm font-medium text-slate-200 mt-2">${escapeHtml(msg.comunidade || 'Comunidade')}</h4>
           </div>
-          
           <div class="flex gap-4 text-center">
             <div class="flex flex-col gap-1">
                 <div class="px-3 py-1.5 bg-rose-500/10 rounded-lg border border-rose-500/20">
@@ -561,26 +639,21 @@
             </div>
           </div>
         </div>
-
         <div class="mt-3 bg-slate-900/60 rounded-lg p-4 border border-slate-700/50">
           <div class="flex items-start gap-3">
             <i data-lucide="message-circle" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i>
-            <div class="text-sm text-slate-300 leading-relaxed preview-container" 
-                 data-full="${escapeHtml(textoReal)}" 
-                 data-short="${escapeHtml(textoCurto)}">
+            <div class="text-sm text-slate-300 leading-relaxed preview-container" data-full="${escapeHtml(textoReal)}" data-short="${escapeHtml(textoCurto)}">
               <span class="preview-text whitespace-pre-wrap">${escapeHtml(textoCurto)}</span>
               ${isLong ? `<button class="toggle-preview-btn text-blue-400 hover:text-blue-300 ml-1 font-semibold underline decoration-blue-500/30 underline-offset-2">Ver tudo</button>` : ''}
             </div>
           </div>
         </div>
-
         <div id="list-${msg.id_mensagem}" class="hidden mt-4 pt-4 border-t border-slate-700/50 animate-in fade-in slide-in-from-top-2 duration-300">
             <div class="flex items-center justify-between mb-3">
                <h5 id="list-title-${msg.id_mensagem}" class="text-xs font-bold uppercase tracking-widest text-slate-400">Participantes</h5>
                <button onclick="document.getElementById('list-${msg.id_mensagem}').classList.add('hidden')" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div id="list-content-${msg.id_mensagem}" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll">
-            </div>
+            <div id="list-content-${msg.id_mensagem}" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll"></div>
         </div>
       `;
       return card;
@@ -589,34 +662,25 @@
     function renderCommunityDashboard() {
       const msgs = COMMUNITY_STATE.mensagensProcessadas || [];
       const projectFilter = document.getElementById('comm-project-filter').value;
-      const campaignFilter = document.getElementById('comm-campaign-filter').value;
+      const selectedCampaigns = getSelectedCampaigns('container-campanhas-comm');
       const startDate = document.getElementById('comm-start-date').value;
       const endDate = document.getElementById('comm-end-date').value;
       const limitPerPage = parseInt(document.getElementById('comm-limit-filter').value) || 10;
 
       let filtered = msgs.filter(msg => {
-        let isValid = true;
-        
-        if (projectFilter !== 'todos' && msg.projeto !== projectFilter) isValid = false;
-        if (campaignFilter !== 'todas' && msg.campanha !== campaignFilter) isValid = false;
-        
+        if (projectFilter !== 'todos' && msg.projeto !== projectFilter) return false;
+        if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(msg.campanha)) return false;
         if (startDate || endDate) {
           const msgDateStr = (msg.data_evento || '').split('T')[0];
-          if (msgDateStr) {
-            if (startDate && msgDateStr < startDate) isValid = false;
-            if (endDate && msgDateStr > endDate) isValid = false;
-          }
+          if (startDate && msgDateStr < startDate) return false;
+          if (endDate && msgDateStr > endDate) return false;
         }
-        return isValid;
+        return true;
       });
 
-      // 1. Atualiza KPIs superiores
       renderCommunityKpis(filtered);
-      
-      // 2. Atualiza o Dashboard Visual (Gráfico, Ranking e Top Msg)
       renderCommunityBI(filtered);
 
-      // 3. Renderiza a lista de campanhas e mensagens
       const msgsByCampaign = {};
       filtered.forEach(msg => {
         const camp = msg.campanha || 'Campanha Desconhecida';
@@ -626,169 +690,303 @@
 
       const container = document.getElementById('comm-campaigns-container');
       container.innerHTML = '';
-
       const campanhas = Object.keys(msgsByCampaign).sort();
       
       if (campanhas.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 glass-panel rounded-2xl">
-            <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
-            <h3 class="text-lg font-medium text-slate-300">Nenhum resultado</h3>
-            <p class="text-slate-500 mt-1">Altere os filtros para ver mais dados.</p>
-          </div>
-        `;
+        container.innerHTML = `<div class="text-center py-12 glass-panel rounded-2xl"><i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i><h3 class="text-lg font-medium text-slate-300">Nenhum resultado</h3></div>`;
         lucide.createIcons();
         return;
       }
 
       campanhas.forEach(campanha => {
         const campanhaMsgs = msgsByCampaign[campanha];
-        
-        if (!COMMUNITY_STATE.pagination[campanha]) {
-          COMMUNITY_STATE.pagination[campanha] = limitPerPage;
-        }
+        if (!COMMUNITY_STATE.pagination[campanha]) COMMUNITY_STATE.pagination[campanha] = limitPerPage;
         
         const currentLimit = COMMUNITY_STATE.pagination[campanha];
         const msgsToShow = campanhaMsgs.slice(0, currentLimit);
 
         const campBlock = document.createElement('div');
         campBlock.className = "glass-panel rounded-2xl p-6 border border-slate-700/50";
+        campBlock.innerHTML = `<div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800"><div class="p-2 bg-blue-500/10 rounded-lg text-blue-400"><i data-lucide="folder" class="w-5 h-5"></i></div><div><h3 class="text-lg font-bold text-slate-200">${escapeHtml(campanha)}</h3><p class="text-xs text-slate-500 mt-0.5">${campanhaMsgs.length} mensagem(ns) no total</p></div></div>`;
         
-        const campHeader = document.createElement('div');
-        campHeader.className = "flex items-center gap-3 mb-6 pb-4 border-b border-slate-800";
-        campHeader.innerHTML = `
-          <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-            <i data-lucide="folder" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-200">${escapeHtml(campanha)}</h3>
-            <p class="text-xs text-slate-500 mt-0.5">${campanhaMsgs.length} mensagem(ns) no total</p>
-          </div>
-        `;
-        campBlock.appendChild(campHeader);
-
         const cardsGrid = document.createElement('div');
         cardsGrid.className = "space-y-4";
-        
-        msgsToShow.forEach(msg => {
-          cardsGrid.appendChild(createMessageCard(msg));
-        });
-        
+        msgsToShow.forEach(msg => cardsGrid.appendChild(createMessageCard(msg)));
         campBlock.appendChild(cardsGrid);
 
         if (campanhaMsgs.length > currentLimit) {
-          const restantes = campanhaMsgs.length - currentLimit;
           const loadMoreBtn = document.createElement('button');
-          loadMoreBtn.className = "w-full py-3 mt-5 border border-dashed border-slate-700 rounded-xl text-slate-400 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all text-sm font-medium flex items-center justify-center gap-2 group";
-          loadMoreBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 group-hover:rotate-90 transition-transform"></i> Ver mais resultados (${restantes} restantes)`;
-          
-          loadMoreBtn.onclick = () => {
-            COMMUNITY_STATE.pagination[campanha] += limitPerPage;
-            renderCommunityDashboard(); 
-          };
-          
+          loadMoreBtn.className = "w-full py-3 mt-5 border border-dashed border-slate-700 rounded-xl text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all text-sm font-medium flex items-center justify-center gap-2 group";
+          loadMoreBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 group-hover:rotate-90 transition-transform"></i> Ver mais resultados (${campanhaMsgs.length - currentLimit} restantes)`;
+          loadMoreBtn.onclick = () => { COMMUNITY_STATE.pagination[campanha] += limitPerPage; renderCommunityDashboard(); };
           campBlock.appendChild(loadMoreBtn);
         }
-
         container.appendChild(campBlock);
       });
-
       lucide.createIcons();
     }
 
     function setCommunityDefaultDates() {
       const msgs = COMMUNITY_STATE.mensagensProcessadas;
       if (!msgs || msgs.length === 0) return;
-
       const timestamps = msgs.map(m => new Date(m.data_evento).getTime()).filter(t => !isNaN(t));
       if (timestamps.length === 0) return;
-
+      
       const minTs = Math.min(...timestamps);
       const maxTs = Math.max(...timestamps);
 
-      const firstDate = new Date(minTs).toISOString().split('T')[0];
-      const lastDate = new Date(maxTs).toISOString().split('T')[0];
-
-      document.getElementById('comm-start-date').value = firstDate;
-      document.getElementById('comm-end-date').value = lastDate;
+      document.getElementById('comm-start-date').value = new Date(minTs).toISOString().split('T')[0];
+      document.getElementById('comm-end-date').value = new Date(maxTs).toISOString().split('T')[0];
 
       const label = document.getElementById('history-range-label');
-      if (label) {
-        const d1 = new Date(minTs).toLocaleDateString('pt-BR');
-        const d2 = new Date(maxTs).toLocaleDateString('pt-BR');
-        label.textContent = `Histórico Detectado: ${d1} até ${d2}`;
-      }
+      if (label) label.textContent = `Histórico Detectado: ${new Date(minTs).toLocaleDateString('pt-BR')} até ${new Date(maxTs).toLocaleDateString('pt-BR')}`;
     }
 
-    function populateCommunityCampaignFilter() {
-      const campSelect = document.getElementById('comm-campaign-filter');
-      const projSelect = document.getElementById('comm-project-filter');
-      
+    function populateCommunityFilters() {
       const campanhas = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.campanha).filter(Boolean))].sort();
       const projetos = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.projeto).filter(Boolean))].sort();
 
-      campSelect.innerHTML = '<option value="todas">Todas as Campanhas</option>';
+      populateMultiSelect('container-campanhas-comm', campanhas);
+      
+      const projSelect = document.getElementById('comm-project-filter');
       projSelect.innerHTML = '<option value="todos">Todos os Projetos</option>';
-
-      campanhas.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = c;
-        campSelect.appendChild(opt);
-      });
-
       projetos.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p;
-        opt.textContent = p;
+        const opt = document.createElement('option'); opt.value = p; opt.textContent = p;
         projSelect.appendChild(opt);
       });
     }
 
     document.getElementById('comm-apply-filters').addEventListener('click', () => {
-      COMMUNITY_STATE.pagination = {}; 
-      renderCommunityDashboard();
+      COMMUNITY_STATE.pagination = {}; renderCommunityDashboard();
     });
     
     document.getElementById('comm-reset-filters').addEventListener('click', () => {
       document.getElementById('comm-project-filter').value = 'todos';
-      document.getElementById('comm-campaign-filter').value = 'todas';
       document.getElementById('comm-limit-filter').value = '10';
+      selectAllCampaigns(document.querySelector('#container-campanhas-comm .multi-select-item'));
       setCommunityDefaultDates(); 
-      COMMUNITY_STATE.pagination = {}; 
-      renderCommunityDashboard();
+      COMMUNITY_STATE.pagination = {}; renderCommunityDashboard();
     });
 
     async function loadCommunityData() {
       try {
-        const res = await fetch('https://webhookn8n.tnledu.shop/webhook/dashboard-comunidades?dashboard=ms');
+        const res = await fetch('https://webhookn8n.tnledu.shop/webhook/dashboard-engajamento?dashboard=ms')
         const data = await res.json();
-        
-        if (Array.isArray(data)) {
-          COMMUNITY_STATE.dashboardData = data[0];
-        } else {
-          COMMUNITY_STATE.dashboardData = data;
-        }
-
+        COMMUNITY_STATE.dashboardData = Array.isArray(data) ? data[0] : data;
         COMMUNITY_STATE.mensagensProcessadas = COMMUNITY_STATE.dashboardData.mensagens_processadas || [];
         
-        populateCommunityCampaignFilter();
+        populateCommunityFilters();
         setCommunityDefaultDates();
         renderCommunityDashboard();
         
         const footerElement = document.getElementById('footer-text');
         if (footerElement) footerElement.textContent = `Atualizado em ${formatDateTimeCommunity(COMMUNITY_STATE.dashboardData.carregado_em)}`;
-        
-        document.title = COMMUNITY_STATE.dashboardData.nome_dashboard || 'Comunidades MS';
         const headerElement = document.getElementById('header-title');
         if (headerElement) headerElement.textContent = COMMUNITY_STATE.dashboardData.nome_dashboard || 'Comunidades MS';
-        
       } catch (error) {
-        console.error("Erro ao carregar:", error);
         document.getElementById('comm-campaigns-container').innerHTML = `<div class="text-center py-10 text-rose-400">Erro ao comunicar com n8n.</div>`;
       }
     }
 
+    // === MÓDULO 2: MOVIMENTAÇÃO DA BASE ===
+    async function loadMovimentacaoData() {
+      if (MOVIMENTACAO_STATE.isLoaded) return; 
+      try {
+        document.getElementById('mov-kpis-container').innerHTML = '<p class="text-slate-400 text-sm">Buscando histórico...</p>';
+        const res = await fetch('https://webhookn8n.tnledu.shop/webhook/dashboard-movimentacoes?dashboard=ms');
+        const data = await res.json();
+        
+        let payload = Array.isArray(data) ? data[0] : data;
+        // Puxa direto o nó do banco se estiver envelopado
+        if(payload.get_movimentacao_detalhada) payload = payload.get_movimentacao_detalhada;
+        
+        MOVIMENTACAO_STATE.data = payload;
+        MOVIMENTACAO_STATE.isLoaded = true;
+
+        populateMovimentacaoFilters();
+        setMovimentacaoDefaultDates();
+        renderMovimentacaoDashboard();
+      } catch (error) {
+        document.getElementById('mov-kpis-container').innerHTML = '<p class="text-rose-400 text-sm">Erro ao carregar dados de movimentação.</p>';
+      }
+    }
+
+    function populateMovimentacaoFilters() {
+      const logs = MOVIMENTACAO_STATE.data.logs_brutos || [];
+      const campanhas = [...new Set(logs.map(m => m.campanha).filter(Boolean))].sort();
+      populateMultiSelect('container-campanhas-mov', campanhas);
+    }
+
+    function setMovimentacaoDefaultDates() {
+      const logs = MOVIMENTACAO_STATE.data.logs_brutos || [];
+      if (!logs || logs.length === 0) return;
+      const timestamps = logs.map(m => new Date(m.data_evento).getTime()).filter(t => !isNaN(t));
+      if (timestamps.length === 0) return;
+
+      const minTs = Math.min(...timestamps);
+      const maxTs = Math.max(...timestamps);
+
+      document.getElementById('mov-start-date').value = new Date(minTs).toISOString().split('T')[0];
+      document.getElementById('mov-end-date').value = new Date(maxTs).toISOString().split('T')[0];
+
+      const label = document.getElementById('mov-history-range-label');
+      if (label) label.textContent = `Histórico Detectado: ${new Date(minTs).toLocaleDateString('pt-BR')} até ${new Date(maxTs).toLocaleDateString('pt-BR')}`;
+    }
+
+    document.getElementById('mov-apply-filters').addEventListener('click', renderMovimentacaoDashboard);
+    document.getElementById('mov-reset-filters').addEventListener('click', () => {
+      document.getElementById('mov-project-filter').value = 'todos';
+      selectAllCampaigns(document.querySelector('#container-campanhas-mov .multi-select-item'));
+      setMovimentacaoDefaultDates(); 
+      renderMovimentacaoDashboard();
+    });
+
+    function renderMovimentacaoDashboard() {
+      const data = MOVIMENTACAO_STATE.data;
+      if (!data || !data.logs_brutos) return;
+
+      const projectFilter = document.getElementById('mov-project-filter').value;
+      const selectedCampaigns = getSelectedCampaigns('container-campanhas-mov');
+      const startDate = document.getElementById('mov-start-date').value;
+      const endDate = document.getElementById('mov-end-date').value;
+
+      // 1. Organiza todos os logs do mais antigo para o mais novo
+      const allLogs = [...data.logs_brutos].sort((a, b) => new Date(a.data_evento) - new Date(b.data_evento));
+      
+      // 2. Filtra pelas campanhas (isso permite recalcular o acumulado corretamente só para essas campanhas)
+      const campaignFilteredLogs = allLogs.filter(log => {
+          if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(log.campanha)) return false;
+          return true;
+      });
+
+      // 3. Monta o histórico dia a dia
+      const dailyStats = {};
+      let runningTotal = 0;
+      
+      campaignFilteredLogs.forEach(log => {
+          const dateStr = (log.data_evento || '').split('T')[0];
+          if(!dateStr) return;
+          
+          if (!dailyStats[dateStr]) dailyStats[dateStr] = { dia: dateStr, entradas: 0, saidas: 0 };
+          
+          if (log.acao === 'entrada') { dailyStats[dateStr].entradas++; runningTotal++; } 
+          else if (log.acao === 'saida') { dailyStats[dateStr].saidas++; runningTotal--; }
+          
+          dailyStats[dateStr].saldo_diario = dailyStats[dateStr].entradas - dailyStats[dateStr].saidas;
+          dailyStats[dateStr].total_acumulado = runningTotal; 
+      });
+
+      // 4. Aplica o filtro de Datas APENAS para a exibição (KPIs e Gráfico)
+      let historicoCompleto = Object.values(dailyStats).sort((a, b) => a.dia.localeCompare(b.dia));
+      
+      let entradasPeriodo = 0; let saidasPeriodo = 0;
+      let historicoFiltrado = historicoCompleto.filter(stat => {
+          let isValid = true;
+          if (startDate && stat.dia < startDate) isValid = false;
+          if (endDate && stat.dia > endDate) isValid = false;
+          
+          if (isValid) {
+              entradasPeriodo += stat.entradas;
+              saidasPeriodo += stat.saidas;
+          }
+          return isValid;
+      });
+
+      const totalMembrosAtual = historicoCompleto.length > 0 ? historicoCompleto[historicoCompleto.length - 1].total_acumulado : 0;
+      const saldoPeriodo = entradasPeriodo - saidasPeriodo;
+
+      // 5. Renderizar KPIs
+      const kpisHtml = [
+        { title: 'Total da Base (Filtro)', val: totalMembrosAtual, icon: 'users', color: 'blue' },
+        { title: 'Entradas no Período', val: entradasPeriodo, icon: 'user-plus', color: 'emerald' },
+        { title: 'Saídas no Período', val: saidasPeriodo, icon: 'user-minus', color: 'rose' },
+        { title: 'Saldo do Período', val: saldoPeriodo, icon: 'activity', color: saldoPeriodo >= 0 ? 'emerald' : 'rose' }
+      ];
+
+      document.getElementById('mov-kpis-container').innerHTML = kpisHtml.map(k => `
+        <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-${k.color}-500 relative overflow-hidden">
+          <div class="flex items-center gap-3 mb-2">
+            <i data-lucide="${k.icon}" class="w-5 h-5 text-${k.color}-400"></i>
+            <h3 class="text-sm font-medium text-slate-400">${k.title}</h3>
+          </div>
+          <p class="text-3xl font-bold text-slate-100">${k.val}</p>
+        </div>
+      `).join('');
+      
+      lucide.createIcons();
+
+      // 6. Renderizar Gráfico
+      const labels = historicoFiltrado.map(d => d.dia.split('-').reverse().slice(0,2).join('/'));
+      const ctx = document.getElementById('movimentacaoChart').getContext('2d');
+      if (movChartInstance) movChartInstance.destroy();
+
+      movChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'line', label: 'Membros Acumulados', data: historicoFiltrado.map(d => d.total_acumulado),
+              borderColor: '#3b82f6', borderWidth: 2, pointRadius: 0, tension: 0.3, yAxisID: 'y'
+            },
+            {
+              type: 'bar', label: 'Entradas', data: historicoFiltrado.map(d => d.entradas),
+              backgroundColor: 'rgba(52, 211, 153, 0.8)', borderRadius: 4, yAxisID: 'y1'
+            },
+            {
+              type: 'bar', label: 'Saídas', data: historicoFiltrado.map(d => -d.saidas),
+              backgroundColor: 'rgba(244, 63, 94, 0.8)', borderRadius: 4, yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: '#cbd5e1' } },
+            tooltip: { callbacks: { label: function(c) { let l = c.dataset.label||''; let v = c.parsed.y; if(l==='Saídas') v = Math.abs(v); return `${l}: ${v}`; } } }
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false }, ticks: { color: '#64748b' } },
+            y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#3b82f6' } },
+            y1: { type: 'linear', display: false, position: 'right', stacked: true, grid: { display: false } }
+          }
+        }
+      });
+
+      // 7. Renderizar Listas Nominais (Apenas do período filtrado)
+      const logsNoPeriodo = campaignFilteredLogs.filter(log => {
+          const logDate = (log.data_evento || '').split('T')[0];
+          if (startDate && logDate < startDate) return false;
+          if (endDate && logDate > endDate) return false;
+          return true;
+      }).sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento)); // Mais recentes no topo
+
+      const listEntradas = logsNoPeriodo.filter(l => l.acao === 'entrada');
+      const listSaidas = logsNoPeriodo.filter(l => l.acao === 'saida');
+
+      const renderPerson = (p, cor) => `
+        <div class="flex items-center gap-3 p-2 bg-slate-900/40 rounded-lg border border-slate-800">
+          <div class="w-8 h-8 rounded-full bg-${cor}-500/10 flex items-center justify-center text-${cor}-400 text-[10px] font-bold">
+            ${(p.telefone || 'P').substring(0,2)}
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-semibold text-slate-200 truncate">${escapeHtml(p.telefone || 'Participante')}</p>
+            <p class="text-[10px] text-slate-500 truncate">${escapeHtml(p.campanha || '')}</p>
+          </div>
+          <div class="text-[10px] text-slate-500 whitespace-nowrap">${formatDateTimeCommunity(p.data_evento).split(' às ')[0]}</div>
+        </div>
+      `;
+
+      document.getElementById('mov-list-entradas').innerHTML = listEntradas.length > 0 
+          ? listEntradas.map(p => renderPerson(p, 'emerald')).join('') 
+          : '<p class="text-xs text-slate-500 py-2">Nenhuma entrada neste período.</p>';
+
+      document.getElementById('mov-list-saidas').innerHTML = listSaidas.length > 0 
+          ? listSaidas.map(p => renderPerson(p, 'rose')).join('') 
+          : '<p class="text-xs text-slate-500 py-2">Nenhuma saída neste período.</p>';
+    }
+
+    // INIT
     window.addEventListener('DOMContentLoaded', () => {
       loadCommunityData();
       lucide.createIcons();
