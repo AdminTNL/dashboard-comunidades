@@ -253,7 +253,7 @@
         </div>
       </div>
 
-      <div id="mov-kpis-container" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+      <div id="mov-kpis-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
 
       <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
         <div class="flex items-center justify-between mb-6">
@@ -895,12 +895,11 @@
       const totalMembrosAtual = historicoCompleto.length > 0 ? historicoCompleto[historicoCompleto.length - 1].total_acumulado : 0;
       const saldoPeriodo = entradasPeriodo - saidasPeriodo;
 
-      // 5. Renderizar KPIs
+      // 5. Renderizar KPIs (Removido o Total e fixado a cor do Saldo para Azul)
       const kpisHtml = [
-        { title: 'Total da Base (Filtro)', val: totalMembrosAtual, icon: 'users', color: 'blue' },
         { title: 'Entradas no Período', val: entradasPeriodo, icon: 'user-plus', color: 'emerald' },
         { title: 'Saídas no Período', val: saidasPeriodo, icon: 'user-minus', color: 'rose' },
-        { title: 'Saldo do Período', val: saldoPeriodo, icon: 'activity', color: saldoPeriodo >= 0 ? 'emerald' : 'rose' }
+        { title: 'Saldo do Período', val: saldoPeriodo, icon: 'activity', color: 'blue' }
       ];
 
       document.getElementById('mov-kpis-container').innerHTML = kpisHtml.map(k => `
@@ -926,29 +925,63 @@
           labels: labels,
           datasets: [
             {
-              type: 'line', label: 'Membros Acumulados', data: historicoFiltrado.map(d => d.total_acumulado),
-              borderColor: '#3b82f6', borderWidth: 2, pointRadius: 0, tension: 0.3, yAxisID: 'y'
+              type: 'line', 
+              label: 'Saldo', 
+              data: historicoFiltrado.map(d => d.saldo_diario),
+              borderColor: '#3b82f6', 
+              borderWidth: 2, 
+              pointRadius: 4, 
+              tension: 0.3, 
+              yAxisID: 'y' // Agora usa o eixo 'y' principal
             },
             {
-              type: 'bar', label: 'Entradas', data: historicoFiltrado.map(d => d.entradas),
-              backgroundColor: 'rgba(52, 211, 153, 0.8)', borderRadius: 4, yAxisID: 'y1'
+              type: 'bar', 
+              label: 'Entradas', 
+              data: historicoFiltrado.map(d => d.entradas),
+              backgroundColor: 'rgba(52, 211, 153, 0.8)', 
+              borderRadius: 4, 
+              yAxisID: 'y' // Mudamos de 'y1' para 'y'
             },
             {
-              type: 'bar', label: 'Saídas', data: historicoFiltrado.map(d => -d.saidas),
-              backgroundColor: 'rgba(244, 63, 94, 0.8)', borderRadius: 4, yAxisID: 'y1'
+              type: 'bar', 
+              label: 'Saídas', 
+              data: historicoFiltrado.map(d => -d.saidas),
+              backgroundColor: 'rgba(244, 63, 94, 0.8)', 
+              borderRadius: 4, 
+              yAxisID: 'y' // Mudamos de 'y1' para 'y'
             }
           ]
         },
         options: {
-          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          responsive: true, 
+          maintainAspectRatio: false, 
+          interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { labels: { color: '#cbd5e1' } },
-            tooltip: { callbacks: { label: function(c) { let l = c.dataset.label||''; let v = c.parsed.y; if(l==='Saídas') v = Math.abs(v); return `${l}: ${v}`; } } }
+            tooltip: { 
+              callbacks: { 
+                label: function(c) { 
+                  let l = c.dataset.label||''; 
+                  let v = c.parsed.y; 
+                  if(l==='Saídas') v = Math.abs(v); 
+                  return `${l}: ${v}`; 
+                } 
+              } 
+            }
           },
           scales: {
-            x: { stacked: true, grid: { display: false }, ticks: { color: '#64748b' } },
-            y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#3b82f6' } },
-            y1: { type: 'linear', display: false, position: 'right', stacked: true, grid: { display: false } }
+            x: { 
+              stacked: true, 
+              grid: { display: false }, 
+              ticks: { color: '#64748b' } 
+            },
+            y: { 
+              type: 'linear', 
+              display: true, 
+              position: 'left', 
+              grid: { color: 'rgba(255,255,255,0.05)' }, 
+              ticks: { color: '#64748b' } // Mudei a cor para neutro
+            }
           }
         }
       });
