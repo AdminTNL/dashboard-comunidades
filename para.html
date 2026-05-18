@@ -1173,8 +1173,8 @@
 
     // === MÓDULO 3: USINAS (IMPORTADO DO PARÁ) ===
     const USINAS_DATA_CONFIG = {
-      secureAggregatesUrl: "https://script.google.com/macros/s/AKfycbxTZh5226sPi90-6FG8rWlvrtcRf6F5PmLdJzDnuDk86ImJ5SPgO5MhOmoWj9_2RqH7ig/exec",
-      jsonpCallbackParam: "prefix",
+      // Substitua pelo link real do seu webhook do n8n
+      webhookUrl: "https://webhookn8n.tnledu.shop/webhook/dashboard-usinas?dashboard=para",
       requestTimeoutMs: 15000,
       useEmbeddedFallback: true
     };
@@ -1499,37 +1499,46 @@
       };
     }
 
-    function loadJsonp(url, callbackParam = 'prefix') {
-      return new Promise((resolve, reject) => {
-        const callbackName = `jsonp_cb_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-        const script = document.createElement('script');
-        const separator = url.includes('?') ? '&' : '?';
-        let finished = false;
+    async function loadUsinasDataset() {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), USINAS_DATA_CONFIG.requestTimeoutMs);
 
-        window[callbackName] = function(data) { finished = true; cleanup(); resolve(data); };
+        // Faz a requisição direto para o n8n
+        const response = await fetch(USINAS_DATA_CONFIG.webhookUrl, { 
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        clearTimeout(timeoutId);
 
-        function cleanup() {
-          try { delete window[callbackName]; } catch (_) {}
-          if (script.parentNode) script.parentNode.removeChild(script);
+        if (!response.ok) {
+          throw new Error(`O webhook do n8n retornou erro: ${response.status}`);
         }
 
-        script.onerror = function() { if (finished) return; cleanup(); reject(new Error('Falha ao carregar o Apps Script via JSONP.')); };
+        const data = await response.json();
+        
+        // Tratativa de segurança: Dependendo de como o nó "Respond to Webhook" no n8n é configurado,
+        // ele pode encapsular o JSON do Supabase dentro de um array [ { ... } ]. 
+        // Essa linha garante que sempre pegaremos o objeto principal.
+        const payload = Array.isArray(data) ? data[0] : data;
 
-        script.src = `${url}${separator}${callbackParam}=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
-        document.head.appendChild(script);
+        // Passamos para a sua catraca de segurança que já existe no HTML
+        return normalizeAggregatedPayload(payload);
 
-        setTimeout(() => { if (finished) return; cleanup(); reject(new Error('Tempo esgotado ao carregar o Apps Script.')); }, 15000);
-      });
-    }
-
-    async function loadUsinasDataset() {
-      let lastError = null;
-      if (USINAS_DATA_CONFIG.secureAggregatesUrl) {
-        try { return normalizeAggregatedPayload(await loadJsonp(USINAS_DATA_CONFIG.secureAggregatesUrl, USINAS_DATA_CONFIG.jsonpCallbackParam, USINAS_DATA_CONFIG.requestTimeoutMs)); } 
-        catch (error) { lastError = error; console.error('Erro ao carregar Apps Script:', error); }
+      } catch (error) {
+        console.error('Falha ao buscar dados do n8n para a aba Usinas:', error);
+        
+        // Mantemos o seu fallback de segurança caso o n8n caia
+        if (USINAS_DATA_CONFIG.useEmbeddedFallback) {
+          console.warn("Carregando snapshot de segurança (EMBEDDED_SNAPSHOT).");
+          return EMBEDDED_SNAPSHOT;
+        }
+        
+        throw error;
       }
-      if (USINAS_DATA_CONFIG.useEmbeddedFallback) return EMBEDDED_SNAPSHOT;
-      throw lastError || new Error('Nenhuma fonte de dados configurada');
     }
 
     function bindUsinasEvents() {
