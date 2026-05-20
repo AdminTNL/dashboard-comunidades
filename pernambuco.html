@@ -112,7 +112,7 @@
           Histórico: Carregando...
         </p>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
           <div class="space-y-1">
             <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
             <input type="date" id="comm-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
@@ -133,6 +133,22 @@
             <div class="multi-select-container" id="container-campanhas-comm">
               <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
                 <span class="selected-label">Todas as Campanhas</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Comunidades</label>
+            <div class="multi-select-container" id="container-comunidades-comm">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Comunidades</span>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
               </button>
               <div class="multi-select-dropdown custom-scroll">
@@ -215,7 +231,7 @@
           Histórico: Carregando...
         </p>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
           <div class="space-y-1">
             <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
             <input type="date" id="mov-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
@@ -236,6 +252,22 @@
             <div class="multi-select-container" id="container-campanhas-mov">
               <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
                 <span class="selected-label">Todas as Campanhas</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Comunidades</label>
+            <div class="multi-select-container" id="container-comunidades-mov">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Comunidades</span>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
               </button>
               <div class="multi-select-dropdown custom-scroll">
@@ -399,15 +431,18 @@
     });
 
     function toggleOption(item) {
-      // Removida a linha: item.classList.toggle('selected'); <-- Era ela a vilã!
-      
       const container = item.closest('.multi-select-container');
       const selected = container.querySelectorAll('.multi-select-item.selected:not([onclick^="selectAll"])');
       const label = container.querySelector('.selected-label');
       
-      if (selected.length === 0) label.textContent = "Todas as Campanhas";
+      // NOVA LÓGICA: Descobre se o clique foi no filtro de comunidades ou campanhas
+      const isComunidade = container.id.includes('comunidades');
+      const textoVazio = isComunidade ? "Todas as Comunidades" : "Todas as Campanhas";
+      const textoPlural = isComunidade ? "Comunidades" : "Campanhas";
+      
+      if (selected.length === 0) label.textContent = textoVazio;
       else if (selected.length === 1) label.textContent = selected[0].textContent.trim();
-      else label.textContent = `${selected.length} Campanhas`;
+      else label.textContent = `${selected.length} ${textoPlural}`;
     }
 
     function selectAllCampaigns(btn) {
@@ -418,7 +453,11 @@
         const box = i.querySelector('.icon-box');
         if(box) box.classList.remove('bg-blue-500', 'border-blue-500'); 
       });
-      container.querySelector('.selected-label').textContent = "Todas as Campanhas";
+      
+      // NOVA LÓGICA: Atualiza o texto do botão de limpar com a palavra certa
+      const isComunidade = container.id.includes('comunidades');
+      container.querySelector('.selected-label').textContent = isComunidade ? "Todas as Comunidades" : "Todas as Campanhas";
+      
       btn.parentElement.style.display = 'none';
     }
 
@@ -740,6 +779,7 @@
       const msgs = COMMUNITY_STATE.mensagensProcessadas || [];
       const projectFilter = document.getElementById('comm-project-filter').value;
       const selectedCampaigns = getSelectedCampaigns('container-campanhas-comm');
+      const selectedComunidades = getSelectedCampaigns('container-comunidades-comm');
       const startDate = document.getElementById('comm-start-date').value;
       const endDate = document.getElementById('comm-end-date').value;
       const limitPerPage = parseInt(document.getElementById('comm-limit-filter').value) || 10;
@@ -747,6 +787,7 @@
       let filtered = msgs.filter(msg => {
         if (projectFilter !== 'todos' && msg.projeto !== projectFilter) return false;
         if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(msg.campanha)) return false;
+        if (selectedComunidades.length > 0 && !selectedComunidades.includes(msg.comunidade)) return false;
         if (startDate || endDate) {
           const msgDateStr = (msg.data_evento || '').split('T')[0];
           if (startDate && msgDateStr < startDate) return false;
@@ -822,8 +863,12 @@
     function populateCommunityFilters() {
       const campanhas = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.campanha).filter(Boolean))].sort();
       const projetos = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.projeto).filter(Boolean))].sort();
+      
+      // NOVA LINHA: Extraindo as comunidades únicas
+      const comunidades = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.comunidade).filter(Boolean))].sort();
 
       populateMultiSelect('container-campanhas-comm', campanhas);
+      populateMultiSelect('container-comunidades-comm', comunidades); // NOVA LINHA
       
       const projSelect = document.getElementById('comm-project-filter');
       projSelect.innerHTML = '<option value="todos">Todos os Projetos</option>';
@@ -841,6 +886,7 @@
       document.getElementById('comm-project-filter').value = 'todos';
       document.getElementById('comm-limit-filter').value = '10';
       selectAllCampaigns(document.querySelector('#container-campanhas-comm .multi-select-item'));
+      selectAllCampaigns(document.querySelector('#container-comunidades-comm .multi-select-item'));
       setCommunityDefaultDates(); 
       COMMUNITY_STATE.pagination = {}; renderCommunityDashboard();
     });
@@ -892,7 +938,9 @@
     function populateMovimentacaoFilters() {
       const logs = MOVIMENTACAO_STATE.data.logs_brutos || [];
       const campanhas = [...new Set(logs.map(m => m.campanha).filter(Boolean))].sort();
+      const comunidades = [...new Set(logs.map(m => m.comunidade).filter(Boolean))].sort();
       populateMultiSelect('container-campanhas-mov', campanhas);
+      populateMultiSelect('container-comunidades-mov', comunidades);
     }
 
     function setMovimentacaoDefaultDates() {
@@ -915,6 +963,7 @@
     document.getElementById('mov-reset-filters').addEventListener('click', () => {
       document.getElementById('mov-project-filter').value = 'todos';
       selectAllCampaigns(document.querySelector('#container-campanhas-mov .multi-select-item'));
+      selectAllCampaigns(document.querySelector('#container-comunidades-mov .multi-select-item'));
       setMovimentacaoDefaultDates(); 
       renderMovimentacaoDashboard();
     });
@@ -925,13 +974,16 @@
 
       const projectFilter = document.getElementById('mov-project-filter').value;
       const selectedCampaigns = getSelectedCampaigns('container-campanhas-mov');
+      const selectedComunidades = getSelectedCampaigns('container-comunidades-mov');
       const startDate = document.getElementById('mov-start-date').value;
       const endDate = document.getElementById('mov-end-date').value;
 
       const allLogs = [...data.logs_brutos].sort((a, b) => new Date(a.data_evento) - new Date(b.data_evento));
       
       const campaignFilteredLogs = allLogs.filter(log => {
+          if (projectFilter !== 'todos' && log.projeto !== projectFilter) return false;
           if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(log.campanha)) return false;
+          if (selectedComunidades.length > 0 && !selectedComunidades.includes(log.comunidade)) return false;
           return true;
       });
 
