@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Central</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #020617;
+      color: #f1f5f9;
+      background-image:
+        radial-gradient(at top left, rgba(59, 130, 246, 0.05), transparent 60%),
+        radial-gradient(at bottom right, rgba(16, 185, 129, 0.05), transparent 60%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+
+    input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+    /* Estilos do Multi-Select Customizado */
+    .multi-select-container { position: relative; width: 100%; }
+    .multi-select-dropdown {
+      position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px;
+      overflow-y: auto; z-index: 100; background: #0f172a;
+      border: 1px solid #334155; border-top: none;
+      border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
+      display: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .multi-select-item {
+      padding: 8px 12px; cursor: pointer; display: flex; align-items: center;
+      gap: 8px; font-size: 13px; color: #94a3b8; transition: all 0.2s;
+    }
+    .multi-select-item:hover { background: #1e293b; color: #f1f5f9; }
+    .multi-select-item.selected { color: #3b82f6; background: rgba(59, 130, 246, 0.05); font-weight: 500; }
+    
+    .people-list-scroll { max-height: 350px; overflow-y: auto; }
+
+    /* =========================================
+       Estilos Específicos da Aba Usinas (Pará) 
+       ========================================= */
+    .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.12); }
+    .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.12); }
+    .glow-yellow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.12); }
+    .glow-purple { box-shadow: 0 0 20px rgba(168, 85, 247, 0.12); }
+
+    .custom-table th {
+      text-transform: uppercase; font-size: .7rem; color: #94a3b8; padding: .85rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.10); letter-spacing: .05em; text-align: left;
+      position: sticky; top: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); z-index: 1;
+    }
+    .custom-table td {
+      padding: .85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: .87rem; color: #e2e8f0; vertical-align: top;
+    }
+    .compact-table th { padding: .58rem .72rem; font-size: .64rem; line-height: 1.1; }
+    .compact-table td { padding: .52rem .72rem; font-size: .78rem; line-height: 1.15; }
+    
+    .scoreboard-section { padding: 1rem; }
+    @media (min-width: 640px) { .scoreboard-section { padding: 1.15rem; } }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px;
+      padding: .28rem .6rem; font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .badge-ok { background: rgba(16,185,129,.13); color: #6ee7b7; border-color: rgba(16,185,129,.22); }
+    .badge-info { background: rgba(59,130,246,.13); color: #93c5fd; border-color: rgba(59,130,246,.22); }
+    .badge-warn { background: rgba(234,179,8,.13); color: #fde68a; border-color: rgba(234,179,8,.22); }
+    
+    .mono { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+    
+    .filter-chip { border: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 42, 0.7); border-radius: 1rem; padding: .9rem 1rem; }
+    .date-input-wrap { display: flex; flex-direction: column; gap: .7rem; }
+    .date-text-input {
+      width: 100%; min-width: 0; background: rgba(2, 6, 23, 0.82); color: #fff; outline: none;
+      border: 1px solid rgb(51 65 85 / 1); border-radius: .95rem; padding: .72rem .9rem;
+      font-size: .95rem; letter-spacing: .01em; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .date-text-input:focus { border-color: rgba(59, 130, 246, 0.95); box-shadow: 0 0 0 3px rgba(59,130,246,.12); background: rgba(2, 6, 23, 0.95); }
+    .date-text-input::placeholder { color: #94a3b8; }
+    
+    .date-picker-btn {
+      width: 100%; min-height: 2.65rem; display: inline-flex; align-items: center; justify-content: center;
+      gap: .55rem; border-radius: .95rem; border: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 42, 0.92);
+      color: #cbd5e1; flex-shrink: 0; transition: all .2s ease; font-size: .9rem; font-weight: 600;
+    }
+    .date-picker-btn:hover { background: rgba(30, 41, 59, 0.96); color: #fff; border-color: rgba(59,130,246,.35); }
+    .native-date-input { position: absolute; inset: 0; opacity: 0; pointer-events: none; width: 100%; height: 100%; }
+    
+    .scoreboard-panel { position: relative; border-width: 1px; border-style: solid; transition: all 0.35s ease; }
+    .scoreboard-panel-blue { border-color: rgba(59, 130, 246, 0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(59,130,246,0.06), 0 0 22px rgba(59,130,246,0.10); }
+    .scoreboard-panel-yellow { border-color: rgba(234, 179, 8, 0.30); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(234,179,8,0.06), 0 0 22px rgba(234,179,8,0.10); }
+    .scoreboard-panel-emerald { border-color: rgba(16, 185, 129, 0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(16,185,129,0.06), 0 0 22px rgba(16,185,129,0.10); }
+    .scoreboard-panel-purple { border-color: rgba(168, 85, 247, 0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(168,85,247,0.06), 0 0 22px rgba(168,85,247,0.10); }
+    .scoreboard-header-blue { border-bottom-color: rgba(59, 130, 246, 0.22) !important; }
+    .scoreboard-header-yellow { border-bottom-color: rgba(234, 179, 8, 0.22) !important; }
+    .scoreboard-header-emerald { border-bottom-color: rgba(16, 185, 129, 0.22) !important; }
+    .scoreboard-header-purple { border-bottom-color: rgba(168, 85, 247, 0.22) !important; }
+    .scoreboard-title { display: flex; align-items: center; gap: .75rem; line-height: 1.2; }
+    .scoreboard-title-icon { width: 2rem; height: 2rem; border-radius: .85rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 42, 0.92); flex-shrink: 0; }
+    .scoreboard-title-icon-blue { color: #93c5fd; background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.24); box-shadow: 0 0 18px rgba(59,130,246,0.12); }
+    .scoreboard-title-icon-yellow { color: #fde68a; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.24); box-shadow: 0 0 18px rgba(234,179,8,0.12); }
+    .scoreboard-title-icon-emerald { color: #6ee7b7; background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.24); box-shadow: 0 0 18px rgba(16,185,129,0.12); }
+    .scoreboard-title-icon-purple { color: #d8b4fe; background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.24); box-shadow: 0 0 18px rgba(168,85,247,0.12); }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex">
+
+  <header class="fixed top-0 w-full glass-panel border-b border-slate-800 z-50 h-16 flex items-center px-4 justify-between">
+    <div class="flex items-center gap-4">
+      <button id="sidebar-toggle" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+          <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-400"></i>
+        </div>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400" id="header-title">Carregando...</h1>
+      </div>
+    </div>
+    <div class="text-xs text-slate-500" id="footer-text">Conectando...</div>
+  </header>
+
+  <aside id="sidebar" class="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] glass-panel border-r border-slate-800 transform -translate-x-full transition-transform duration-300 z-40 overflow-y-auto">
+    <div class="p-4 space-y-2" id="sidebar-menu">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
+      
+      <!-- Botões padrão (sempre visíveis) -->
+      <button id="btn-tab-comunidades" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all" data-tab="comunidades">
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+        Engajamento
+      </button>
+
+      <button id="btn-tab-movimentacao" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="movimentacao">
+        <i data-lucide="users" class="w-5 h-5"></i>
+        Movimentação da Base
+      </button>
+
+      <!-- Botão dinâmico PE -->
+      <button id="btn-tab-presenca" class="tab-btn hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="presenca">
+        <i data-lucide="calendar-check" class="w-5 h-5"></i>
+        Encontros Presenciais
+      </button>
+
+      <!-- Botão dinâmico PA -->
+      <button id="btn-tab-usinas" class="tab-btn hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="usinas">
+        <i data-lucide="factory" class="w-5 h-5"></i>
+        Usinas
+      </button>
+    </div>
+  </aside>
+
+  <main id="main-content" class="flex-1 transition-all duration-300 pt-24 px-4 md:px-8 pb-12 min-w-0">
+    
+    <!-- ==============================================
+         ABA 1: COMUNIDADES (ENGAJAMENTO) COMPARTILHADA 
+         ============================================== -->
+    <section id="tab-comunidades" class="tab-content max-w-7xl mx-auto space-y-6">
+      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20 relative z-50">
+        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+          <h3 class="text-sm font-semibold text-slate-200">Filtros da Busca</h3>
+        </div>
+        
+        <p id="history-range-label" class="text-[10px] font-medium text-blue-400/80 uppercase tracking-widest mb-4 ml-1">
+          Histórico: Carregando...
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
+            <input type="date" id="comm-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Fim</label>
+            <input type="date" id="comm-end-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Projeto</label>
+            <select id="comm-project-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="todos">Todos os Projetos</option>
+            </select>
+          </div>
+          
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanhas</label>
+            <div class="multi-select-container" id="container-campanhas-comm">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Campanhas</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Comunidades</label>
+            <div class="multi-select-container" id="container-comunidades-comm">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Comunidades</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Exibir por vez</label>
+            <select id="comm-limit-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="10">10 resultados</option>
+              <option value="25">25 resultados</option>
+              <option value="50">50 resultados</option>
+            </select>
+          </div>
+          <div class="flex gap-2 lg:col-span-1">
+            <button id="comm-reset-filters" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-1" title="Limpar Filtros">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <button id="comm-apply-filters" class="flex-[3] py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-2 shadow-lg shadow-blue-500/20">
+              Aplicar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="comm-kpis-container" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <div id="comm-bi-container" class="hidden mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 glass-panel rounded-2xl p-5 border border-slate-700/50">
+            <div class="flex items-center gap-2 mb-4">
+              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+              <h3 class="text-sm font-semibold text-slate-200">Evolução do Engajamento no Período</h3>
+            </div>
+            <div class="h-56 w-full relative">
+              <canvas id="engagementChart"></canvas>
+            </div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1">
+              <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                <h3 class="text-sm font-semibold text-slate-200">Top 5 Engajados</h3>
+              </div>
+              <div id="bi-ranking-list" class="space-y-1"></div>
+            </div>
+            <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1 flex flex-col justify-between">
+              <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
+                <h3 class="text-sm font-semibold text-slate-200">Maior Engajamento</h3>
+              </div>
+              <div id="bi-top-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="comm-campaigns-container" class="space-y-6"></div>
+    </section>
+
+    <!-- ==============================================
+         ABA 2: MOVIMENTAÇÃO DA BASE COMPARTILHADA 
+         ============================================== -->
+    <section id="tab-movimentacao" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+        <i data-lucide="users" class="w-5 h-5 text-slate-400"></i>
+        <h2 class="text-lg font-bold text-slate-200">Visão Geral da Base de Membros</h2>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20 mb-6 relative z-50">
+        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+          <h3 class="text-sm font-semibold text-slate-200">Filtros da Busca</h3>
+        </div>
+        
+        <p id="mov-history-range-label" class="text-[10px] font-medium text-blue-400/80 uppercase tracking-widest mb-4 ml-1">
+          Histórico: Carregando...
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
+            <input type="date" id="mov-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Fim</label>
+            <input type="date" id="mov-end-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Projeto</label>
+            <select id="mov-project-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="todos">Todos os Projetos</option>
+            </select>
+          </div>
+          
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanhas</label>
+            <div class="multi-select-container" id="container-campanhas-mov">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Campanhas</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Comunidades</label>
+            <div class="multi-select-container" id="container-comunidades-mov">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Comunidades</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex gap-2 lg:col-span-1">
+            <button id="mov-reset-filters" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-1" title="Limpar Filtros">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <button id="mov-apply-filters" class="flex-[3] py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-2 shadow-lg shadow-blue-500/20">
+              Aplicar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mov-kpis-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+      <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-200">Crescimento vs. Evasão</h3>
+            <p class="text-xs text-slate-500 mt-1">Evolução diária de entradas e saídas baseado no filtro.</p>
+          </div>
+        </div>
+        <div class="h-80 w-full relative">
+          <canvas id="movimentacaoChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-panel rounded-2xl p-5 border border-emerald-500/10">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
+            <h3 class="text-sm font-semibold text-slate-200">Novas Entradas no Período</h3>
+          </div>
+          <div id="mov-list-entradas" class="people-list-scroll space-y-2 pr-2 custom-scroll"></div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border border-rose-500/10">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="user-minus" class="w-4 h-4 text-rose-400"></i>
+            <h3 class="text-sm font-semibold text-slate-200">Saídas no Período</h3>
+          </div>
+          <div id="mov-list-saidas" class="people-list-scroll space-y-2 pr-2 custom-scroll"></div>
+        </div>
+      </div>
+      
+      <div class="glass-panel rounded-2xl p-6 border border-blue-500/20 mt-6 shadow-lg shadow-blue-500/5 relative z-10">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-400"></i>
+            <h3 class="text-lg font-bold text-slate-200">Total de Participantes</h3>
+          </div>
+          <div class="text-right">
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Soma do Filtro</p>
+            <p id="mov-total-geral-participantes" class="text-3xl font-black text-blue-400">0</p>
+          </div>
+        </div>
+        
+        <div class="overflow-x-auto max-h-[350px] overflow-y-auto custom-scroll border border-slate-700/50 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="sticky top-0 bg-[#0f172a] shadow-sm z-10">
+              <tr class="text-slate-500 border-b border-slate-800 uppercase tracking-tighter bg-slate-900/90 backdrop-blur-sm">
+                <th class="py-3 px-4">Comunidade</th>
+                <th class="py-3 px-4">Campanha</th>
+                <th class="py-3 px-4 text-right">Qtd. Pessoas</th>
+              </tr>
+            </thead>
+            <tbody id="mov-tabela-participantes-comunidade" class="divide-y divide-slate-800/50 text-slate-300">
+              <!-- Injetado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         ABA 3: ENCONTROS (EXCLUSIVO PERNAMBUCO)
+         ============================================== -->
+    <section id="tab-presenca" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+        <i data-lucide="calendar-check" class="w-5 h-5 text-slate-400"></i>
+        <h2 class="text-lg font-bold text-slate-200">Encontros Presenciais</h2>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/50 flex flex-col md:flex-row gap-4 items-end">
+        <div class="flex-1 space-y-1">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tipo de Reunião</label>
+          <select id="presenca-tipo-filter" onchange="atualizarDatasDisponiveis()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+            <!-- Injetado via JS -->
+          </select>
+        </div>
+        <div class="flex-1 space-y-1">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data do Encontro</label>
+          <select id="presenca-data-filter" onchange="renderPresencaDashboard()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+            <!-- Injetado via JS -->
+          </select>
+        </div>
+        <button onclick="loadPresencaData(true)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all" title="Recarregar dados">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div id="presenca-kpis-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+      <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+        <h3 class="text-sm font-semibold text-slate-200 mb-4">Evolução de Participação</h3>
+        <div class="h-64 w-full relative">
+          <canvas id="presencaLineChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 space-y-4">
+          <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i> Top 3 Lideranças
+          </h3>
+          <div id="presenca-top3-lideres" class="space-y-3"></div>
+        </div>
+        
+        <div class="lg:col-span-2 glass-panel rounded-2xl p-5 border border-slate-700/50">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Ranking Geral de Líderes</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="text-slate-500 border-b border-slate-800 uppercase tracking-tighter">
+                  <th class="py-2">Posição</th>
+                  <th class="py-2">Líder / Indicação</th>
+                  <th class="py-2 text-center">Base Total</th>
+                  <th class="py-2 text-center">Pessoas Levadas</th>
+                  <th class="py-2 text-right">% Ativação</th>
+                </tr>
+              </thead>
+              <tbody id="presenca-tabela-lideres" class="text-slate-300"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/50">
+        <h3 class="text-sm font-semibold text-slate-200 mb-4">Lista de Presença Detalhada (Audit)</h3>
+        <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scroll">
+          <table class="w-full text-left text-xs">
+            <thead class="sticky top-0 bg-[#0f172a] shadow-sm">
+              <tr class="text-slate-500 border-b border-slate-800 uppercase">
+                <th class="py-3 px-2 text-center">Status</th>
+                <th class="py-3 px-2">Participante</th>
+                <th class="py-3 px-2">WhatsApp (Formatado)</th>
+                <th class="py-3 px-2">Líder Responsável</th>
+              </tr>
+            </thead>
+            <tbody id="presenca-tabela-participantes" class="divide-y divide-slate-800/50"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         ABA 4: USINAS (EXCLUSIVO PARÁ)
+         ============================================== -->
+    <section id="tab-usinas" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6 mb-8">
+        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+          <div class="xl:max-w-[24rem] xl:pt-1 self-start">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Filtro principal</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">Usinas</h2>
+            <p class="text-slate-300 text-sm mt-2 max-w-3xl">
+              Selecione um período para responder perguntas como:
+              <span class="text-white font-semibold">“Quantas pessoas entraram na usina em um dia específico?”</span>
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3 w-full xl:w-auto xl:flex-1">
+            <label class="filter-chip relative">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
+              <div class="date-input-wrap">
+                <input id="start-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="start-date" aria-label="Abrir calendário da data inicial">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                  <span>Calendário</span>
+                </button>
+              </div>
+              <input id="start-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
+            </label>
+            <label class="filter-chip relative">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
+              <div class="date-input-wrap">
+                <input id="end-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="end-date" aria-label="Abrir calendário da data final">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                  <span>Calendário</span>
+                </button>
+              </div>
+              <input id="end-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
+            </label>
+            <div class="filter-chip">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Atalhos</span>
+              <div class="flex gap-2 flex-wrap">
+                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="all">Todo o tempo</button>
+                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="month">Mês atual</button>
+                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="30d">30 dias</button>
+              </div>
+            </div>
+            <div class="filter-chip flex flex-col justify-between">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Período aplicado</span>
+              <div id="applied-period" class="text-white font-semibold">Todo o tempo</div>
+            </div>
+            <div class="filter-chip flex flex-col justify-between">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Ação</span>
+              <button id="reset-btn-usinas" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[.99] text-white font-bold py-2.5 rounded-xl transition-all shadow-lg">
+                Redefinir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="global-kpis"></div>
+
+      <div class="glass-panel glow-emerald rounded-3xl p-5 sm:p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold mb-2">Visão consolidada</p>
+            <h3 class="text-xl font-bold text-white">Entradas por usina no período</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-ok">Somente considerar = true</span>
+            <span class="badge badge-info">Semana = segunda a domingo</span>
+          </div>
+        </div>
+        <div class="h-[360px]">
+          <canvas id="chart-overview"></canvas>
+        </div>
+      </div>
+
+      <div class="grid xl:grid-cols-2 gap-6 mb-8" id="usina-cards"></div>
+
+      <div class="glass-panel glow-yellow rounded-3xl scoreboard-section">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-1.5">Gamificação</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Placar das Usinas</h3>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl leading-snug">
+              A líder da semana recebe 100 pontos e as demais recebem proporcionalmente:
+              <span class="text-white font-semibold">(entradas da usina / entradas da líder) × 100</span>.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 xl:justify-end xl:max-w-[38rem]">
+            <span class="badge badge-info" id="period-badge">Período analisado</span>
+            <span class="badge badge-warn" id="monthly-badge">Placar mensal</span>
+          </div>
+        </div>
+
+        <div class="grid xl:grid-cols-12 gap-3 items-start">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-purple rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
+            <div class="scoreboard-card-header mb-2.5">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-purple">
+                  <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                </span>
+                Ranking por pontos no período
+              </h4>
+              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação semanal acumulada considerando apenas o período selecionado.</p>
+            </div>
+            <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
+              <canvas id="chart-scoreboard"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-blue rounded-3xl overflow-hidden xl:col-span-5">
+            <div class="scoreboard-card-header scoreboard-header-blue p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-blue">
+                  <i data-lucide="rows-3" class="w-4 h-4"></i>
+                </span>
+                Tabela do período
+              </h4>
+            </div>
+            <div class="max-h-[208px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Entradas</th></tr></thead>
+                <tbody id="period-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-yellow rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-yellow p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-yellow">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                </span>
+                Placar Mensal
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Entradas</th></tr></thead>
+                <tbody id="monthly-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-emerald rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-emerald p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-emerald">
+                  <i data-lucide="trophy" class="w-4 h-4"></i>
+                </span>
+                Placar Geral
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Semanas</th></tr></thead>
+                <tbody id="general-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // =========================================================================
+    // DICIONÁRIO DE ROTEAMENTO DINÂMICO E CONFIGURAÇÕES DO PROJETO
+    // =========================================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    let PROJETO_ATIVO = urlParams.get('projeto') || 'pe'; // Default para 'pe' se não houver parâmetro
+    
+    const CONFIG_PROJETOS = {
+      pe: { 
+        nome: "Mobiliza PE", 
+        slug: "pernambuco", 
+        abas: ['comunidades', 'movimentacao', 'presenca'] 
+      },
+      pa: { 
+        nome: "Engaja Pará", 
+        slug: "para", 
+        abas: ['comunidades', 'movimentacao', 'usinas'] 
+      },
+      ms: { 
+        nome: "Comunidades MS", 
+        slug: "ms", 
+        abas: ['comunidades', 'movimentacao'] 
+      }
+    };
+    
+    // Fallback seguro caso digitem um projeto que não existe
+    if (!CONFIG_PROJETOS[PROJETO_ATIVO]) {
+        PROJETO_ATIVO = 'pe';
+    }
+    const configAtual = CONFIG_PROJETOS[PROJETO_ATIVO];
+
+    // =========================================================================
+    // ESTADOS GLOBAIS E UTILITÁRIOS
+    // =========================================================================
+    const COMMUNITY_STATE = { dashboardData: null, mensagensProcessadas: [], pagination: {}, isLoaded: false };
+    const MOVIMENTACAO_STATE = { data: null, isLoaded: false };
+    const PRESENCA_STATE = { isLoaded: false };
+    const USINAS_STATE = { dataset: null, filteredDaily: [], charts: {}, rankingPeriod: [], rankingMonthly: [], rankingGeneral: [], activeMonth: null };
+    
+    let engagementChartInstance = null; 
+    let movChartInstance = null;
+    let presencaChartInstance = null;
+
+    function $(id) { return document.getElementById(id); }
+
+    function escapeHtml(unsafe) {
+      return (unsafe || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function formatDateTimeCommunity(isoString) {
+      if (!isoString) return '';
+      const d = new Date(isoString);
+      return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // =========================================================================
+    // INICIALIZAÇÃO DA INTERFACE DINÂMICA
+    // =========================================================================
+    function inicializarInterface() {
+      // Ajusta os Títulos
+      document.getElementById('header-title').textContent = configAtual.nome;
+      document.title = "Dashboard - " + configAtual.nome;
+
+      // Exibe apenas os botões das abas permitidas para o projeto atual
+      configAtual.abas.forEach(aba => {
+        const btn = document.getElementById(`btn-tab-${aba}`);
+        if (btn) btn.classList.remove('hidden');
+      });
+
+      // Simula o clique na primeira aba disponível (geralmente "comunidades")
+      const abaInicial = configAtual.abas[0];
+      const btnInicial = document.getElementById(`btn-tab-${abaInicial}`);
+      if(btnInicial) btnInicial.click();
+    }
+
+    // =========================================================================
+    // CONTROLES DO MULTI-SELECT (COMPARTILHADO)
+    // =========================================================================
+    function toggleMultiSelect(btn) {
+      const dropdown = btn.nextElementSibling;
+      const isVisible = dropdown.style.display === 'block';
+      document.querySelectorAll('.multi-select-dropdown').forEach(d => d.style.display = 'none');
+      dropdown.style.display = isVisible ? 'none' : 'block';
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.multi-select-container')) {
+        document.querySelectorAll('.multi-select-dropdown').forEach(d => d.style.display = 'none');
+      }
+    });
+
+    function toggleOption(item) {
+      const container = item.closest('.multi-select-container');
+      const selected = container.querySelectorAll('.multi-select-item.selected:not([onclick^="selectAll"])');
+      const label = container.querySelector('.selected-label');
+      
+      const isComunidade = container.id.includes('comunidades');
+      const textoVazio = isComunidade ? "Todas as Comunidades" : "Todas as Campanhas";
+      const textoPlural = isComunidade ? "Comunidades" : "Campanhas";
+      
+      if (selected.length === 0) label.textContent = textoVazio;
+      else if (selected.length === 1) label.textContent = selected[0].textContent.trim();
+      else label.textContent = `${selected.length} ${textoPlural}`;
+    }
+
+    function selectAllCampaigns(btn) {
+      const container = btn.closest('.multi-select-container');
+      const items = container.querySelectorAll('.multi-select-item:not([onclick^="selectAll"])');
+      
+      items.forEach(i => {
+        i.classList.remove('selected');
+        const box = i.querySelector('.icon-box');
+        if(box) box.classList.remove('bg-blue-500', 'border-blue-500'); 
+      });
+      
+      const isComunidade = container.id.includes('comunidades');
+      container.querySelector('.selected-label').textContent = isComunidade ? "Todas as Comunidades" : "Todas as Campanhas";
+      btn.parentElement.style.display = 'none';
+    }
+
+    function getSelectedCampaigns(containerId) {
+      const container = document.getElementById(containerId);
+      if(!container) return [];
+      return Array.from(container.querySelectorAll('.multi-select-item.selected:not([onclick^="selectAll"])')).map(el => el.textContent.trim());
+    }
+
+    function populateMultiSelect(containerId, optionsList) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const listElement = container.querySelector('.options-list');
+      listElement.innerHTML = '';
+      optionsList.forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'multi-select-item';
+        div.innerHTML = `<div class="w-3 h-3 rounded border border-slate-500 mr-1 flex items-center justify-center icon-box"></div> ${escapeHtml(opt)}`;
+        div.onclick = function(e) { 
+          e.stopPropagation(); 
+          this.classList.toggle('selected');
+          const box = this.querySelector('.icon-box');
+          if(this.classList.contains('selected')) box.classList.add('bg-blue-500', 'border-blue-500');
+          else box.classList.remove('bg-blue-500', 'border-blue-500');
+          toggleOption(this); 
+        };
+        listElement.appendChild(div);
+      });
+    }
+
+    // =========================================================================
+    // CONTROLE DA BARRA LATERAL E NAVEGAÇÃO ENTRE ABAS
+    // =========================================================================
+    let sidebarOpen = false;
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      sidebarOpen = !sidebarOpen;
+      const sidebar = document.getElementById('sidebar');
+      const main = document.getElementById('main-content');
+      if (sidebarOpen) {
+        sidebar.classList.remove('-translate-x-full');
+        if (window.innerWidth >= 768) main.classList.add('md:ml-64');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        main.classList.remove('md:ml-64');
+      }
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.className = "tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium";
+          // Mantém as ocultas escondidas
+          if(!configAtual.abas.includes(b.getAttribute('data-tab'))) b.classList.add('hidden');
+        });
+        
+        btn.className = "tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all";
+
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+        const targetId = `tab-${btn.getAttribute('data-tab')}`;
+        document.getElementById(targetId).classList.remove('hidden');
+
+        // Lazy Loading Dinâmico (AQUI ESTAVA FALTANDO A PRIMEIRA LINHA!)
+        if (targetId === 'tab-comunidades') loadCommunityData(); 
+        if (targetId === 'tab-movimentacao') loadMovimentacaoData();
+        if (targetId === 'tab-presenca' && PROJETO_ATIVO === 'pe') loadPresencaData();
+        if (targetId === 'tab-usinas' && PROJETO_ATIVO === 'pa') initUsinas();
+
+        if (window.innerWidth < 768) {
+          sidebarOpen = false;
+          document.getElementById('sidebar').classList.add('-translate-x-full');
+        }
+      });
+    });
+
+    // =========================================================================
+    // MÓDULO 1: COMUNIDADES (ENGAJAMENTO) - COMPARTILHADO
+    // =========================================================================
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('toggle-preview-btn')) {
+        const container = e.target.closest('.preview-container');
+        const textSpan = container.querySelector('.preview-text');
+        const isExpanded = container.classList.contains('is-expanded');
+        if (isExpanded) {
+          textSpan.innerHTML = container.getAttribute('data-short');
+          e.target.textContent = 'Ver tudo';
+          container.classList.remove('is-expanded');
+        } else {
+          textSpan.innerHTML = container.getAttribute('data-full').replace(/\n/g, '<br>');
+          e.target.textContent = 'Ver menos';
+          container.classList.add('is-expanded');
+        }
+      }
+    });
+
+    function toggleInteractions(msgId, tipo) {
+      const container = document.getElementById(`list-${msgId}`);
+      const content = document.getElementById(`list-content-${msgId}`);
+      const title = document.getElementById(`list-title-${msgId}`);
+      const msg = COMMUNITY_STATE.mensagensProcessadas.find(m => m.id_mensagem === msgId);
+      if (!msg) return;
+
+      const lista = tipo === 'reacoes' ? (msg.reacoes || []) : (msg.votos || []);
+      const cor = tipo === 'reacoes' ? 'rose' : 'amber';
+      
+      title.textContent = tipo === 'reacoes' ? 'Quem Reagiu' : 'Quem Votou';
+      title.className = `text-xs font-bold uppercase tracking-widest text-${cor}-400`;
+
+      content.innerHTML = lista.map(p => `
+        <div class="flex items-center gap-3 p-2 bg-slate-900/40 rounded-lg border border-slate-800">
+          <div class="w-8 h-8 rounded-full bg-${cor}-500/10 flex items-center justify-center text-${cor}-400 text-[10px] font-bold">
+            ${(p.nome_contato || 'P').substring(0,1).toUpperCase()}
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-slate-200 truncate">${escapeHtml(p.nome_contato || 'Participante')}</p>
+            <p class="text-[10px] text-slate-500 font-mono">${escapeHtml(p.telefone || '')}</p>
+          </div>
+        </div>
+      `).join('');
+      container.classList.remove('hidden');
+    }
+
+    function scrollToMessage(msgId) {
+      const msg = COMMUNITY_STATE.mensagensProcessadas.find(m => m.id_mensagem === msgId);
+      if (!msg) return;
+
+      const campanhaAlvo = msg.campanha || 'Campanha Desconhecida';
+      const projectFilter = document.getElementById('comm-project-filter').value;
+      const selectedCampaigns = getSelectedCampaigns('container-campanhas-comm');
+      const startDate = document.getElementById('comm-start-date').value;
+      const endDate = document.getElementById('comm-end-date').value;
+
+      let filtered = COMMUNITY_STATE.mensagensProcessadas.filter(m => {
+        if (projectFilter !== 'todos' && m.projeto !== projectFilter) return false;
+        if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(m.campanha)) return false;
+        if (startDate || endDate) {
+          const msgDateStr = (m.data_evento || '').split('T')[0];
+          if (startDate && msgDateStr < startDate) return false;
+          if (endDate && msgDateStr > endDate) return false;
+        }
+        return true;
+      });
+
+      const msgsDaCampanha = filtered.filter(m => (m.campanha || 'Campanha Desconhecida') === campanhaAlvo);
+      const posicaoAlvo = msgsDaCampanha.findIndex(m => m.id_mensagem === msgId);
+
+      if (posicaoAlvo !== -1) {
+        const itensNecessarios = posicaoAlvo + 1;
+        const limiteAtual = COMMUNITY_STATE.pagination[campanhaAlvo] || parseInt(document.getElementById('comm-limit-filter').value) || 10;
+        if (itensNecessarios > limiteAtual) {
+          COMMUNITY_STATE.pagination[campanhaAlvo] = itensNecessarios;
+          renderCommunityDashboard();
+        }
+      }
+
+      setTimeout(() => {
+        const element = document.getElementById(`msg-${msgId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('ring-2', 'ring-blue-500', 'bg-blue-500/10', 'transform', 'scale-[1.02]');
+          setTimeout(() => { element.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-500/10', 'transform', 'scale-[1.02]'); }, 2000);
+        }
+      }, 100);
+    }
+
+    function renderCommunityBI(msgs) {
+      const container = document.getElementById('comm-bi-container');
+      if (!msgs || msgs.length === 0) { container.classList.add('hidden'); return; }
+      container.classList.remove('hidden');
+
+      const userMap = {}; const dateMap = {};
+      msgs.forEach(msg => {
+        const processEngagement = (eng, tipo) => {
+          const id = eng.telefone || eng.nome_contato || 'anon';
+          if (!userMap[id]) userMap[id] = { nome: eng.nome_contato || 'Participante', telefone: eng.telefone || '', total: 0 };
+          userMap[id].total++;
+
+          const dateStr = (eng.data_evento || msg.data_evento || '').split('T')[0];
+          if (dateStr) {
+            if (!dateMap[dateStr]) dateMap[dateStr] = 0;
+            dateMap[dateStr]++;
+          }
+        };
+        (msg.reacoes || []).forEach(r => processEngagement(r, 'reacao'));
+        (msg.votos || []).forEach(v => processEngagement(v, 'voto'));
+      });
+
+      const topUsers = Object.values(userMap).sort((a, b) => b.total - a.total).slice(0, 5);
+      document.getElementById('bi-ranking-list').innerHTML = topUsers.map((u, i) => `
+        <div class="flex items-center justify-between p-1.5 hover:bg-slate-800/50 rounded-lg transition-colors border border-transparent hover:border-slate-700">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 shrink-0">${i + 1}º</div>
+            <p class="text-xs font-semibold text-slate-200 truncate" title="${escapeHtml(u.nome)}">${escapeHtml(u.nome)}</p>
+          </div>
+          <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 font-bold shrink-0">${u.total} <span class="hidden sm:inline font-normal opacity-80">ações</span></span>
+        </div>
+      `).join('') || '<p class="text-xs text-slate-500 text-center py-4">Sem interações</p>';
+
+      const topMsg = [...msgs].sort((a, b) => (b.total_engajamentos || 0) - (a.total_engajamentos || 0))[0];
+      const topMsgContainer = document.getElementById('bi-top-msg');
+      if (topMsg && topMsg.total_engajamentos > 0) {
+        const shortPreview = (topMsg.texto_preview || '').length > 70 ? (topMsg.texto_preview || '').substring(0, 70) + '...' : (topMsg.texto_preview || '');
+        topMsgContainer.innerHTML = `
+          <p class="text-xs text-slate-300 italic mb-3 leading-relaxed">"${escapeHtml(shortPreview)}"</p>
+          <div class="flex gap-3 mt-auto">
+              <div class="flex-1 bg-slate-800/50 p-2 rounded-lg text-center border border-slate-700/50">
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Reações</p>
+                <p class="text-sm font-bold text-rose-400">${topMsg.reacoes?.length || 0}</p>
+              </div>
+              <div class="flex-1 bg-slate-800/50 p-2 rounded-lg text-center border border-slate-700/50">
+                <p class="text-[9px] text-slate-500 uppercase font-bold">Votos</p>
+                <p class="text-sm font-bold text-amber-400">${topMsg.votos?.length || 0}</p>
+              </div>
+              <button onclick="scrollToMessage('${topMsg.id_mensagem}')" class="w-full mt-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-blue-500/20 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="eye" class="w-3 h-3"></i> Ver
+              </button>
+          </div>`;
+      } else {
+        topMsgContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Nenhuma mensagem engajada no filtro</p>';
+      }
+
+      const sortedDates = Object.keys(dateMap).sort();
+      const ctx = document.getElementById('engagementChart').getContext('2d');
+      if (engagementChartInstance) engagementChartInstance.destroy();
+      engagementChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sortedDates.map(d => d.split('-').reverse().slice(0,2).join('/')),
+          datasets: [{
+            label: 'Engajamentos', data: sortedDates.map(d => dateMap[d]),
+            borderColor: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.1)',
+            borderWidth: 2, tension: 0.4, fill: true,
+            pointBackgroundColor: '#020617', pointBorderColor: '#34d399', pointBorderWidth: 2, pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#64748b' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    function renderCommunityKpis(msgs) {
+      let reacoes = 0; let votos = 0;
+      msgs.forEach(m => { reacoes += (m.reacoes || []).length; votos += (m.votos || []).length; });
+      const kpis = [
+        { title: 'Mensagens', value: msgs.length, icon: 'message-square', color: 'blue' },
+        { title: 'Engajamentos', value: reacoes + votos, icon: 'activity', color: 'emerald' },
+        { title: 'Total de Reações', value: reacoes, icon: 'heart', color: 'rose' },
+        { title: 'Total de Votos', value: votos, icon: 'bar-chart', color: 'amber' }
+      ];
+      document.getElementById('comm-kpis-container').innerHTML = kpis.map(k => `
+        <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-${k.color}-500 relative overflow-hidden group">
+          <div class="absolute -right-4 -top-4 w-24 h-24 bg-${k.color}-500/10 rounded-full blur-xl group-hover:bg-${k.color}-500/20 transition-colors"></div>
+          <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-2">
+              <i data-lucide="${k.icon}" class="w-5 h-5 text-${k.color}-400"></i>
+              <h3 class="text-sm font-medium text-slate-400">${k.title}</h3>
+            </div>
+            <p class="text-3xl font-bold text-slate-100">${k.value.toLocaleString('pt-BR')}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function createMessageCard(msg) {
+      const reacoes = msg.reacoes || []; const votos = msg.votos || [];
+      const textoReal = msg.texto_preview || "(Sem texto)";
+      const isLong = textoReal.length > 150;
+      const textoCurto = isLong ? textoReal.substring(0, 150) + '...' : textoReal;
+
+      const card = document.createElement('div');
+      card.className = "bg-slate-800/40 rounded-xl p-5 border border-slate-700/50 hover:border-slate-600 transition-colors";
+      card.id = `msg-${msg.id_mensagem}`;
+      card.innerHTML = `
+        <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-1 bg-slate-900/80 rounded-md text-xs font-medium text-slate-300 border border-slate-700">${escapeHtml(msg.tipo || 'Mensagem')}</span>
+              <span class="text-xs text-slate-400">${formatDateTimeCommunity(msg.data_evento)}</span>
+            </div>
+            <h4 class="text-sm font-medium text-slate-200 mt-2">${escapeHtml(msg.comunidade || 'Comunidade')}</h4>
+          </div>
+          <div class="flex gap-4 text-center">
+            <div class="flex flex-col gap-1">
+                <div class="px-3 py-1.5 bg-rose-500/10 rounded-lg border border-rose-500/20">
+                  <p class="text-xs text-rose-400/80 font-medium mb-0.5">Reações</p>
+                  <p class="text-lg font-bold text-rose-400">${reacoes.length}</p>
+                </div>
+                ${reacoes.length > 0 ? `<button onclick="toggleInteractions('${msg.id_mensagem}', 'reacoes')" class="text-[10px] text-rose-400 hover:text-rose-300 underline underline-offset-2">Ver Lista</button>` : ''}
+            </div>
+            <div class="flex flex-col gap-1">
+                <div class="px-3 py-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                  <p class="text-xs text-amber-400/80 font-medium mb-0.5">Votos</p>
+                  <p class="text-lg font-bold text-amber-400">${votos.length}</p>
+                </div>
+                ${votos.length > 0 ? `<button onclick="toggleInteractions('${msg.id_mensagem}', 'votos')" class="text-[10px] text-amber-400 hover:text-amber-300 underline underline-offset-2">Ver Lista</button>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 bg-slate-900/60 rounded-lg p-4 border border-slate-700/50">
+          <div class="flex items-start gap-3">
+            <i data-lucide="message-circle" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i>
+            <div class="text-sm text-slate-300 leading-relaxed preview-container" data-full="${escapeHtml(textoReal)}" data-short="${escapeHtml(textoCurto)}">
+              <span class="preview-text whitespace-pre-wrap">${escapeHtml(textoCurto)}</span>
+              ${isLong ? `<button class="toggle-preview-btn text-blue-400 hover:text-blue-300 ml-1 font-semibold underline decoration-blue-500/30 underline-offset-2">Ver tudo</button>` : ''}
+            </div>
+          </div>
+        </div>
+        <div id="list-${msg.id_mensagem}" class="hidden mt-4 pt-4 border-t border-slate-700/50 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div class="flex items-center justify-between mb-3">
+               <h5 id="list-title-${msg.id_mensagem}" class="text-xs font-bold uppercase tracking-widest text-slate-400">Participantes</h5>
+               <button onclick="document.getElementById('list-${msg.id_mensagem}').classList.add('hidden')" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="list-content-${msg.id_mensagem}" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll"></div>
+        </div>
+      `;
+      return card;
+    }
+
+    function renderCommunityDashboard() {
+      const msgs = COMMUNITY_STATE.mensagensProcessadas || [];
+      const projectFilter = document.getElementById('comm-project-filter').value;
+      const selectedCampaigns = getSelectedCampaigns('container-campanhas-comm');
+      const selectedComunidades = getSelectedCampaigns('container-comunidades-comm');
+      const startDate = document.getElementById('comm-start-date').value;
+      const endDate = document.getElementById('comm-end-date').value;
+      const limitPerPage = parseInt(document.getElementById('comm-limit-filter').value) || 10;
+
+      let filtered = msgs.filter(msg => {
+        if (projectFilter !== 'todos' && msg.projeto !== projectFilter) return false;
+        if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(msg.campanha)) return false;
+        if (selectedComunidades.length > 0 && !selectedComunidades.includes(msg.comunidade)) return false;
+        if (startDate || endDate) {
+          const msgDateStr = (msg.data_evento || '').split('T')[0];
+          if (startDate && msgDateStr < startDate) return false;
+          if (endDate && msgDateStr > endDate) return false;
+        }
+        return true;
+      });
+
+      renderCommunityKpis(filtered);
+      renderCommunityBI(filtered);
+
+      const msgsByCampaign = {};
+      filtered.forEach(msg => {
+        const camp = msg.campanha || 'Campanha Desconhecida';
+        if (!msgsByCampaign[camp]) msgsByCampaign[camp] = [];
+        msgsByCampaign[camp].push(msg);
+      });
+
+      const container = document.getElementById('comm-campaigns-container');
+      container.innerHTML = '';
+      const campanhas = Object.keys(msgsByCampaign).sort();
+      
+      if (campanhas.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 glass-panel rounded-2xl"><i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i><h3 class="text-lg font-medium text-slate-300">Nenhum resultado</h3></div>`;
+        lucide.createIcons();
+        return;
+      }
+
+      campanhas.forEach(campanha => {
+        const campanhaMsgs = msgsByCampaign[campanha];
+        if (!COMMUNITY_STATE.pagination[campanha]) COMMUNITY_STATE.pagination[campanha] = limitPerPage;
+        
+        const currentLimit = COMMUNITY_STATE.pagination[campanha];
+        const msgsToShow = campanhaMsgs.slice(0, currentLimit);
+
+        const campBlock = document.createElement('div');
+        campBlock.className = "glass-panel rounded-2xl p-6 border border-slate-700/50";
+        campBlock.innerHTML = `<div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800"><div class="p-2 bg-blue-500/10 rounded-lg text-blue-400"><i data-lucide="folder" class="w-5 h-5"></i></div><div><h3 class="text-lg font-bold text-slate-200">${escapeHtml(campanha)}</h3><p class="text-xs text-slate-500 mt-0.5">${campanhaMsgs.length} mensagem(ns) no total</p></div></div>`;
+        
+        const cardsGrid = document.createElement('div');
+        cardsGrid.className = "space-y-4";
+        msgsToShow.forEach(msg => cardsGrid.appendChild(createMessageCard(msg)));
+        campBlock.appendChild(cardsGrid);
+
+        if (campanhaMsgs.length > currentLimit) {
+          const loadMoreBtn = document.createElement('button');
+          loadMoreBtn.className = "w-full py-3 mt-5 border border-dashed border-slate-700 rounded-xl text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all text-sm font-medium flex items-center justify-center gap-2 group";
+          loadMoreBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 group-hover:rotate-90 transition-transform"></i> Ver mais resultados (${campanhaMsgs.length - currentLimit} restantes)`;
+          loadMoreBtn.onclick = () => { COMMUNITY_STATE.pagination[campanha] += limitPerPage; renderCommunityDashboard(); };
+          campBlock.appendChild(loadMoreBtn);
+        }
+        container.appendChild(campBlock);
+      });
+      lucide.createIcons();
+    }
+
+    function setCommunityDefaultDates() {
+      const msgs = COMMUNITY_STATE.mensagensProcessadas;
+      if (!msgs || msgs.length === 0) return;
+      const timestamps = msgs.map(m => new Date(m.data_evento).getTime()).filter(t => !isNaN(t));
+      if (timestamps.length === 0) return;
+      
+      const minTs = Math.min(...timestamps);
+      const maxTs = Math.max(...timestamps);
+
+      document.getElementById('comm-start-date').value = new Date(minTs).toISOString().split('T')[0];
+      document.getElementById('comm-end-date').value = new Date(maxTs).toISOString().split('T')[0];
+
+      const label = document.getElementById('history-range-label');
+      if (label) label.textContent = `Histórico Detectado: ${new Date(minTs).toLocaleDateString('pt-BR')} até ${new Date(maxTs).toLocaleDateString('pt-BR')}`;
+    }
+
+    function populateCommunityFilters() {
+      const campanhas = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.campanha).filter(Boolean))].sort();
+      const projetos = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.projeto).filter(Boolean))].sort();
+      const comunidades = [...new Set(COMMUNITY_STATE.mensagensProcessadas.map(m => m.comunidade).filter(Boolean))].sort();
+
+      populateMultiSelect('container-campanhas-comm', campanhas);
+      populateMultiSelect('container-comunidades-comm', comunidades);
+      
+      const projSelect = document.getElementById('comm-project-filter');
+      projSelect.innerHTML = '<option value="todos">Todos os Projetos</option>';
+      projetos.forEach(p => {
+        const opt = document.createElement('option'); opt.value = p; opt.textContent = p;
+        projSelect.appendChild(opt);
+      });
+    }
+
+    document.getElementById('comm-apply-filters').addEventListener('click', () => {
+      COMMUNITY_STATE.pagination = {}; renderCommunityDashboard();
+    });
+    
+    document.getElementById('comm-reset-filters').addEventListener('click', () => {
+      document.getElementById('comm-project-filter').value = 'todos';
+      document.getElementById('comm-limit-filter').value = '10';
+      selectAllCampaigns(document.querySelector('#container-campanhas-comm .multi-select-item'));
+      selectAllCampaigns(document.querySelector('#container-comunidades-comm .multi-select-item'));
+      setCommunityDefaultDates(); 
+      COMMUNITY_STATE.pagination = {}; renderCommunityDashboard();
+    });
+
+    async function loadCommunityData() {
+      if (COMMUNITY_STATE.isLoaded) return; // Evita carregar duas vezes
+      
+      try {
+        // DINÂMICO: Usa a variável do projeto ativo na URL
+        const res = await fetch(`https://webhookn8n.tnledu.shop/webhook/dashboard-engajamento?dashboard=${configAtual.slug}`);
+        const data = await res.json();
+        
+        // Desempacota do Array se necessário
+        let payload = Array.isArray(data) ? data[0] : data;
+        
+        // Desempacota do Nó "Respond to Webhook" do n8n se vier envelopado
+        if (payload && payload.json) {
+            payload = payload.json;
+        }
+
+        COMMUNITY_STATE.dashboardData = payload;
+        COMMUNITY_STATE.mensagensProcessadas = payload.mensagens_processadas || [];
+        COMMUNITY_STATE.isLoaded = true; // Marca como carregado
+        
+        populateCommunityFilters();
+        setCommunityDefaultDates();
+        renderCommunityDashboard();
+        
+        const footerElement = document.getElementById('footer-text');
+        if (footerElement) footerElement.textContent = `Atualizado em ${formatDateTimeCommunity(COMMUNITY_STATE.dashboardData.carregado_em)}`;
+      } catch (error) {
+        console.error("Erro no Engajamento:", error);
+        document.getElementById('comm-campaigns-container').innerHTML = `<div class="text-center py-10 text-rose-400">Erro ao comunicar com n8n.</div>`;
+      }
+    }
+
+    // =========================================================================
+    // MÓDULO 2: MOVIMENTAÇÃO DA BASE - COMPARTILHADO
+    // =========================================================================
+    async function loadMovimentacaoData() {
+      if (MOVIMENTACAO_STATE.isLoaded) return; 
+      try {
+        document.getElementById('mov-kpis-container').innerHTML = '<p class="text-slate-400 text-sm">Buscando histórico...</p>';
+        // DINÂMICO: Usa a variável do projeto ativo
+        const res = await fetch(`https://webhookn8n.tnledu.shop/webhook/dashboard-movimentacoes?dashboard=${configAtual.slug}`);
+        const data = await res.json();
+        
+        let payload = Array.isArray(data) ? data[0] : data;
+        if(payload.get_movimentacao_detalhada) payload = payload.get_movimentacao_detalhada;
+        
+        MOVIMENTACAO_STATE.data = payload;
+        MOVIMENTACAO_STATE.isLoaded = true;
+
+        populateMovimentacaoFilters();
+        setMovimentacaoDefaultDates();
+        renderMovimentacaoDashboard();
+      } catch (error) {
+        document.getElementById('mov-kpis-container').innerHTML = '<p class="text-rose-400 text-sm">Erro ao carregar dados de movimentação.</p>';
+      }
+    }
+
+    function populateMovimentacaoFilters() {
+      const logs = MOVIMENTACAO_STATE.data.logs_brutos || [];
+      const campanhas = [...new Set(logs.map(m => m.campanha).filter(Boolean))].sort();
+      const comunidades = [...new Set(logs.map(m => m.comunidade).filter(Boolean))].sort();
+      populateMultiSelect('container-campanhas-mov', campanhas);
+      populateMultiSelect('container-comunidades-mov', comunidades);
+    }
+
+    function setMovimentacaoDefaultDates() {
+      const logs = MOVIMENTACAO_STATE.data.logs_brutos || [];
+      if (!logs || logs.length === 0) return;
+      const timestamps = logs.map(m => new Date(m.data_evento).getTime()).filter(t => !isNaN(t));
+      if (timestamps.length === 0) return;
+
+      const minTs = Math.min(...timestamps);
+      const maxTs = Math.max(...timestamps);
+
+      document.getElementById('mov-start-date').value = new Date(minTs).toISOString().split('T')[0];
+      document.getElementById('mov-end-date').value = new Date(maxTs).toISOString().split('T')[0];
+
+      const label = document.getElementById('mov-history-range-label');
+      if (label) label.textContent = `Histórico Detectado: ${new Date(minTs).toLocaleDateString('pt-BR')} até ${new Date(maxTs).toLocaleDateString('pt-BR')}`;
+    }
+
+    document.getElementById('mov-apply-filters').addEventListener('click', renderMovimentacaoDashboard);
+    document.getElementById('mov-reset-filters').addEventListener('click', () => {
+      document.getElementById('mov-project-filter').value = 'todos';
+      selectAllCampaigns(document.querySelector('#container-campanhas-mov .multi-select-item'));
+      selectAllCampaigns(document.querySelector('#container-comunidades-mov .multi-select-item'));
+      setMovimentacaoDefaultDates(); 
+      renderMovimentacaoDashboard();
+    });
+
+    function renderMovimentacaoDashboard() {
+      const data = MOVIMENTACAO_STATE.data;
+      if (!data || !data.logs_brutos) return;
+
+      const projectFilter = document.getElementById('mov-project-filter').value;
+      const selectedCampaigns = getSelectedCampaigns('container-campanhas-mov');
+      const selectedComunidades = getSelectedCampaigns('container-comunidades-mov');
+      const startDate = document.getElementById('mov-start-date').value;
+      const endDate = document.getElementById('mov-end-date').value;
+
+      const allLogs = [...data.logs_brutos].sort((a, b) => new Date(a.data_evento) - new Date(b.data_evento));
+      
+      const campaignFilteredLogs = allLogs.filter(log => {
+          if (projectFilter !== 'todos' && log.projeto !== projectFilter) return false;
+          if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(log.campanha)) return false;
+          if (selectedComunidades.length > 0 && !selectedComunidades.includes(log.comunidade)) return false;
+          return true;
+      });
+
+      const dailyStats = {};
+      let runningTotal = 0;
+      
+      campaignFilteredLogs.forEach(log => {
+          const dateStr = (log.data_evento || '').split('T')[0];
+          if(!dateStr) return;
+          
+          if (!dailyStats[dateStr]) dailyStats[dateStr] = { dia: dateStr, entradas: 0, saidas: 0 };
+          
+          if (log.acao === 'entrada') { dailyStats[dateStr].entradas++; runningTotal++; } 
+          else if (log.acao === 'saida') { dailyStats[dateStr].saidas++; runningTotal--; }
+          
+          dailyStats[dateStr].saldo_diario = dailyStats[dateStr].entradas - dailyStats[dateStr].saidas;
+          dailyStats[dateStr].total_acumulado = runningTotal; 
+      });
+
+      let historicoCompleto = Object.values(dailyStats).sort((a, b) => a.dia.localeCompare(b.dia));
+      
+      let entradasPeriodo = 0; let saidasPeriodo = 0;
+      let historicoFiltrado = historicoCompleto.filter(stat => {
+          let isValid = true;
+          if (startDate && stat.dia < startDate) isValid = false;
+          if (endDate && stat.dia > endDate) isValid = false;
+          
+          if (isValid) {
+              entradasPeriodo += stat.entradas;
+              saidasPeriodo += stat.saidas;
+          }
+          return isValid;
+      });
+
+      const saldoPeriodo = entradasPeriodo - saidasPeriodo;
+
+      const kpisHtml = [
+        { title: 'Entradas no Período', val: entradasPeriodo, icon: 'user-plus', color: 'emerald' },
+        { title: 'Saídas no Período', val: saidasPeriodo, icon: 'user-minus', color: 'rose' },
+        { title: 'Saldo do Período', val: saldoPeriodo, icon: 'activity', color: 'blue' }
+      ];
+
+      document.getElementById('mov-kpis-container').innerHTML = kpisHtml.map(k => `
+        <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-${k.color}-500 relative overflow-hidden">
+          <div class="flex items-center gap-3 mb-2">
+            <i data-lucide="${k.icon}" class="w-5 h-5 text-${k.color}-400"></i>
+            <h3 class="text-sm font-medium text-slate-400">${k.title}</h3>
+          </div>
+          <p class="text-3xl font-bold text-slate-100">${k.val}</p>
+        </div>
+      `).join('');
+      
+      lucide.createIcons();
+
+      const labels = historicoFiltrado.map(d => d.dia.split('-').reverse().slice(0,2).join('/'));
+      const ctx = document.getElementById('movimentacaoChart').getContext('2d');
+      if (movChartInstance) movChartInstance.destroy();
+
+      movChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { type: 'line', label: 'Saldo', data: historicoFiltrado.map(d => d.saldo_diario), borderColor: '#3b82f6', borderWidth: 2, pointRadius: 4, tension: 0.3, yAxisID: 'y' },
+            { type: 'bar', label: 'Entradas', data: historicoFiltrado.map(d => d.entradas), backgroundColor: 'rgba(52, 211, 153, 0.8)', borderRadius: 4, yAxisID: 'y' },
+            { type: 'bar', label: 'Saídas', data: historicoFiltrado.map(d => -d.saidas), backgroundColor: 'rgba(244, 63, 94, 0.8)', borderRadius: 4, yAxisID: 'y' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { labels: { color: '#cbd5e1' } }, tooltip: { callbacks: { label: function(c) { let l = c.dataset.label||''; let v = c.parsed.y; if(l==='Saídas') v = Math.abs(v); return `${l}: ${v}`; } } } },
+          scales: { x: { stacked: true, grid: { display: false }, ticks: { color: '#64748b' } }, y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } } }
+        }
+      });
+
+      const logsNoPeriodo = campaignFilteredLogs.filter(log => {
+          const logDate = (log.data_evento || '').split('T')[0];
+          if (startDate && logDate < startDate) return false;
+          if (endDate && logDate > endDate) return false;
+          return true;
+      }).sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento)); 
+
+      const listEntradas = logsNoPeriodo.filter(l => l.acao === 'entrada');
+      const listSaidas = logsNoPeriodo.filter(l => l.acao === 'saida');
+
+      const renderPerson = (p, cor) => `
+        <div class="flex items-center gap-3 p-2 bg-slate-900/40 rounded-lg border border-slate-800">
+          <div class="w-8 h-8 rounded-full bg-${cor}-500/10 flex items-center justify-center text-${cor}-400 text-[10px] font-bold">
+            ${(p.telefone || 'P').substring(0,2)}
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-semibold text-slate-200 truncate">${escapeHtml(p.telefone || 'Participante')}</p>
+            <p class="text-[10px] text-slate-500 truncate">${escapeHtml(p.campanha || '')}</p>
+          </div>
+          <div class="text-[10px] text-slate-500 whitespace-nowrap">${formatDateTimeCommunity(p.data_evento).split(' às ')[0]}</div>
+        </div>
+      `;
+
+      document.getElementById('mov-list-entradas').innerHTML = listEntradas.length > 0 ? listEntradas.map(p => renderPerson(p, 'emerald')).join('') : '<p class="text-xs text-slate-500 py-2">Nenhuma entrada neste período.</p>';
+      document.getElementById('mov-list-saidas').innerHTML = listSaidas.length > 0 ? listSaidas.map(p => renderPerson(p, 'rose')).join('') : '<p class="text-xs text-slate-500 py-2">Nenhuma saída neste período.</p>';
+      
+      const comunidadesInfo = data.comunidades_info || []; 
+      const comunidadesFiltradas = comunidadesInfo.filter(c => {
+        if (projectFilter !== 'todos' && c.projeto && c.projeto !== projectFilter) return false;
+        if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(c.campanha)) return false;
+        if (selectedComunidades.length > 0 && !selectedComunidades.includes(c.nome)) return false;
+        return true;
+      });
+
+      // 2. Calcula o Totalzão (A soma de todas as comunidades que passaram no filtro)
+      const totalGeralParticipantes = comunidadesFiltradas.reduce((acc, curr) => acc + Number(curr.total_participantes || 0), 0);
+      
+      // Atualiza o super número no topo do bloco
+      document.getElementById('mov-total-geral-participantes').textContent = totalGeralParticipantes.toLocaleString('pt-BR');
+
+      // 3. Ordena as comunidades da maior para a menor
+      const comunidadesOrdenadas = comunidadesFiltradas.sort((a, b) => Number(b.total_participantes) - Number(a.total_participantes));
+
+      // 4. Injeta a Tabela no HTML
+      document.getElementById('mov-tabela-participantes-comunidade').innerHTML = comunidadesOrdenadas.length > 0 
+        ? comunidadesOrdenadas.map(c => `
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-3 px-4 font-bold text-slate-200">${escapeHtml(c.nome)}</td>
+              <td class="py-3 px-4 text-slate-500 text-[10px] uppercase font-semibold">${escapeHtml(c.campanha || '-')}</td>
+              <td class="py-3 px-4 text-right font-black text-blue-400 text-sm">${Number(c.total_participantes || 0).toLocaleString('pt-BR')}</td>
+            </tr>
+          `).join('')
+        : `<tr><td colspan="3" class="py-6 text-center text-slate-500 font-medium">Nenhum dado de comunidade encontrado para os filtros atuais.</td></tr>`;
+      
+      // Recarrega os ícones caso algum novo tenha entrado
+      lucide.createIcons();
+    }
+
+    // =========================================================================
+    // MÓDULO 3: ENCONTROS (EXCLUSIVO PERNAMBUCO)
+    // =========================================================================
+    const PRESENCA_STORE = { rawData: null, baseMembros: {}, meetings: {}, liderTotalBase: {} };
+
+    function converterDataBR(dataStr) {
+      if (!dataStr || !dataStr.includes('/')) return new Date(0);
+      const partes = dataStr.split('/');
+      return new Date(partes[2], partes[1] - 1, partes[0]);
+    }
+
+    function isQuartaFeira(dataStr) {
+      const data = converterDataBR(dataStr);
+      return data.getDay() === 3; 
+    }
+
+    async function loadPresencaData(force = false) {
+      if (PROJETO_ATIVO !== 'pe') return; // Segurança extra
+      if (PRESENCA_STATE.isLoaded && !force) return;
+      const url = "https://script.google.com/macros/s/AKfycbytyUSMP01nsa5CGXaFJzqYoCJ79BD_EForqc8gaFMIruaxHSxQRjMijCkTxRClsqRhnw/exec";
+
+      try {
+        const container = document.getElementById('presenca-kpis-container');
+        container.innerHTML = '<div class="col-span-full py-10 text-center text-slate-400 animate-pulse">Calculando taxas de ativação e base de líderes...</div>';
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.ok) {
+          PRESENCA_STORE.liderTotalBase = {};
+          const ignoreKeys = ['ok', 'generatedAt', 'spreadsheetId', 'presenca'];
+          
+          Object.keys(data).forEach(key => {
+            if (!ignoreKeys.includes(key)) {
+              data[key].forEach(m => {
+                const tel = (m['Número formatado'] || '').toString().trim();
+                const lider = (m['ind arrumado'] || 'Não informado').trim();
+                
+                if (tel) {
+                  PRESENCA_STORE.baseMembros[tel] = {
+                    nome: (m['Nome tratado'] || 'Participante').trim(),
+                    lider: lider,
+                    status: (m['Comunidade'] || '❌').trim()
+                  };
+                }
+
+                if (lider !== 'Não informado' && lider !== 'Sem líder' && lider !== '') {
+                  PRESENCA_STORE.liderTotalBase[lider] = (PRESENCA_STORE.liderTotalBase[lider] || 0) + 1;
+                }
+              });
+            }
+          });
+
+          const meetings = {};
+          data.presenca.forEach(p => {
+            const tipo = (p['Reunião'] || 'MobilizaPE').trim();
+            const dataFull = p['Data'] || '';
+            const dataApenas = dataFull.split(' ')[0]; 
+            
+            if (dataApenas.length >= 8 && isQuartaFeira(dataApenas)) {
+              if (!meetings[tipo]) meetings[tipo] = new Set();
+              meetings[tipo].add(dataApenas);
+            }
+          });
+
+          PRESENCA_STORE.meetings = meetings;
+          PRESENCA_STORE.rawData = data.presenca;
+
+          const tipoSelect = document.getElementById('presenca-tipo-filter');
+          tipoSelect.innerHTML = Object.keys(meetings).map(t => `<option value="${t}">${t}</option>`).join('');
+          
+          atualizarDatasDisponiveis();
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    function atualizarDatasDisponiveis() {
+      const tipo = document.getElementById('presenca-tipo-filter').value;
+      const datas = Array.from(PRESENCA_STORE.meetings[tipo] || [])
+        .sort((a, b) => converterDataBR(b) - converterDataBR(a));
+      
+      const dataSelect = document.getElementById('presenca-data-filter');
+      dataSelect.innerHTML = datas.map(d => `<option value="${d}">${d}</option>`).join('');
+      
+      PRESENCA_STATE.isLoaded = true;
+      renderPresencaDashboard();
+    }
+
+    function renderPresencaDashboard() {
+      const tipo = document.getElementById('presenca-tipo-filter').value;
+      const dataSel = document.getElementById('presenca-data-filter').value;
+      const allPresencas = PRESENCA_STORE.rawData || [];
+
+      const presencasDoDia = allPresencas.filter(p => (p['Reunião'] || '').trim() === tipo && p['Data'].startsWith(dataSel));
+      
+      let comMatch = 0;
+      const lideresPresenca = {};
+      const listaParticipantes = [];
+      const numerosVistos = new Set();
+
+      presencasDoDia.forEach(p => {
+        const tel = (p['Formatado'] || '').toString().trim();
+        if (!tel || numerosVistos.has(tel)) return;
+        numerosVistos.add(tel);
+
+        const info = PRESENCA_STORE.baseMembros[tel];
+        const temMatch = !!info;
+        if (temMatch) comMatch++;
+
+        const nome = temMatch ? info.nome : (p['Nome'] || 'Novo Cadastro');
+        const lider = temMatch ? info.lider : 'Sem líder';
+        const status = temMatch ? info.status : '❌';
+
+        if (lider !== 'Sem líder' && lider !== 'Não informado' && lider !== '') {
+          lideresPresenca[lider] = (lideresPresenca[lider] || 0) + 1;
+        }
+        
+        listaParticipantes.push({ nome, tel, lider, status, temMatch });
+      });
+
+      document.getElementById('presenca-kpis-container').innerHTML = `
+        <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-blue-500">
+          <p class="text-xs text-slate-400 uppercase font-bold">Total na Reunião</p>
+          <p class="text-3xl font-bold">${numerosVistos.size}</p>
+        </div>
+        <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-emerald-500">
+          <p class="text-xs text-slate-400 uppercase font-bold">Com Correspondência</p>
+          <p class="text-3xl font-bold">${comMatch}</p>
+        </div>
+        <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-rose-500">
+          <p class="text-xs text-slate-400 uppercase font-bold">Sem Match (Pendentes)</p>
+          <p class="text-3xl font-bold">${numerosVistos.size - comMatch}</p>
+        </div>
+      `;
+
+      renderGraficoLinha(allPresencas.filter(p => (p['Reunião'] || '').trim() === tipo));
+
+      const rankingLideres = Object.entries(lideresPresenca).map(([nome, presentes]) => {
+        const baseTotal = PRESENCA_STORE.liderTotalBase[nome] || presentes;
+        const taxa = ((presentes / baseTotal) * 100).toFixed(1);
+        return { nome, presentes, baseTotal, taxa: parseFloat(taxa) };
+      }).sort((a, b) => b.presentes - a.presentes);
+
+      document.getElementById('presenca-top3-lideres').innerHTML = rankingLideres.slice(0, 3).map((l, i) => `
+        <div class="glass-panel p-4 rounded-xl border border-blue-500/10 relative overflow-hidden">
+          <div class="absolute -right-2 -top-2 text-4xl font-black text-slate-500/10">${i+1}º</div>
+          <p class="text-xs font-bold text-slate-200 truncate mb-1">${l.nome}</p>
+          <div class="flex items-end justify-between">
+            <div>
+              <p class="text-[10px] text-slate-500 uppercase font-bold">Ativação</p>
+              <p class="text-xl font-black text-blue-400">${l.taxa}%</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] text-slate-500 uppercase font-bold">Presentes</p>
+              <p class="text-sm font-bold text-slate-300">${l.presentes} / ${l.baseTotal}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('presenca-tabela-lideres').innerHTML = rankingLideres.map((l, i) => `
+        <tr class="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
+          <td class="py-3 text-slate-500 font-bold">${i+1}º</td>
+          <td class="py-3 font-semibold text-slate-200">${l.nome}</td>
+          <td class="py-3 text-center text-slate-300">${l.baseTotal}</td>
+          <td class="py-3 text-center font-bold text-emerald-400">${l.presentes}</td>
+          <td class="py-3 text-right font-black text-blue-400">${l.taxa}%</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('presenca-tabela-participantes').innerHTML = listaParticipantes.sort((a, b) => b.temMatch - a.temMatch).map(p => `
+        <tr class="hover:bg-slate-800/30 transition-colors">
+          <td class="py-3 px-2 text-center">${p.status}</td>
+          <td class="py-3 px-2">
+            <p class="font-bold text-slate-200">${escapeHtml(p.nome)}</p>
+            <p class="text-[9px] ${p.temMatch ? 'text-emerald-500' : 'text-rose-500'} font-bold uppercase">${p.temMatch ? 'Na Base' : 'Não Cadastrado'}</p>
+          </td>
+          <td class="py-3 px-2 font-mono text-slate-400 text-[11px]">${p.tel}</td>
+          <td class="py-3 px-2 text-blue-400 font-medium text-[11px]">${escapeHtml(p.lider)}</td>
+        </tr>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function renderGraficoLinha(dadosFiltrados) {
+      const vistasPorData = {};
+      
+      dadosFiltrados.forEach(p => {
+        const d = p['Data'].split(' ')[0];
+        const tel = (p['Formatado'] || '').toString().trim();
+        
+        if (d.length >= 8 && tel && isQuartaFeira(d)) {
+          if (!vistasPorData[d]) vistasPorData[d] = new Set();
+          vistasPorData[d].add(tel);
+        }
+      });
+
+      const datasOrdenadas = Object.keys(vistasPorData).sort((a, b) => converterDataBR(a) - converterDataBR(b));
+      const ctx = document.getElementById('presencaLineChart').getContext('2d');
+      if (window.presencaChartInstance) window.presencaChartInstance.destroy();
+      
+      window.presencaChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: datasOrdenadas.map(d => d.substring(0, 5)), 
+          datasets: [{
+            label: 'Participantes Únicos',
+            data: datasOrdenadas.map(d => vistasPorData[d].size),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#64748b' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // MÓDULO 4: USINAS (EXCLUSIVO PARÁ)
+    // =========================================================================
+    const USINAS_DATA_CONFIG = {
+      webhookUrl: "https://webhookn8n.tnledu.shop/webhook/dashboard-usinas?dashboard=para",
+      requestTimeoutMs: 15000,
+      useEmbeddedFallback: true
+    };
+
+    const EMBEDDED_SNAPSHOT = {"generated_at":"2026-04-08T23:06:38.881268+00:00","timezone":"America/Belem","projects":["Cabanagem","Icuí","Jurunas","Marituba","Terra Firme"],"daily_counts":[{"date":"2025-09-24","projeto":"Cabanagem","entries":1},{"date":"2025-09-24","projeto":"Icuí","entries":1},{"date":"2025-09-24","projeto":"Jurunas","entries":1},{"date":"2025-09-24","projeto":"Marituba","entries":1},{"date":"2025-09-25","projeto":"Cabanagem","entries":10},{"date":"2025-09-26","projeto":"Cabanagem","entries":11},{"date":"2025-09-27","projeto":"Cabanagem","entries":138},{"date":"2025-09-28","projeto":"Cabanagem","entries":4},{"date":"2025-09-29","projeto":"Cabanagem","entries":20},{"date":"2025-09-29","projeto":"Icuí","entries":2},{"date":"2025-09-29","projeto":"Marituba","entries":1},{"date":"2025-09-30","projeto":"Cabanagem","entries":13},{"date":"2025-09-30","projeto":"Icuí","entries":1},{"date":"2025-09-30","projeto":"Marituba","entries":1},{"date":"2025-09-30","projeto":"Terra Firme","entries":1},{"date":"2025-10-01","projeto":"Cabanagem","entries":6},{"date":"2025-10-02","projeto":"Cabanagem","entries":3},{"date":"2025-10-03","projeto":"Cabanagem","entries":2},{"date":"2025-10-04","projeto":"Cabanagem","entries":1},{"date":"2025-10-07","projeto":"Cabanagem","entries":2},{"date":"2025-10-09","projeto":"Cabanagem","entries":3},{"date":"2025-10-09","projeto":"Icuí","entries":2},{"date":"2025-10-09","projeto":"Jurunas","entries":1},{"date":"2025-10-09","projeto":"Marituba","entries":1},{"date":"2025-10-13","projeto":"Cabanagem","entries":1},{"date":"2025-10-14","projeto":"Icuí","entries":172},{"date":"2025-10-14","projeto":"Jurunas","entries":1},{"date":"2025-10-15","projeto":"Icuí","entries":3},{"date":"2025-10-17","projeto":"Cabanagem","entries":42},{"date":"2025-10-17","projeto":"Icuí","entries":11},{"date":"2025-10-18","projeto":"Icuí","entries":1},{"date":"2025-10-20","projeto":"Icuí","entries":2},{"date":"2025-10-21","projeto":"Cabanagem","entries":24},{"date":"2025-10-21","projeto":"Icuí","entries":4},{"date":"2025-10-22","projeto":"Cabanagem","entries":7},{"date":"2025-10-22","projeto":"Icuí","entries":3},{"date":"2025-10-23","projeto":"Icuí","entries":85},{"date":"2025-10-24","projeto":"Icuí","entries":8},{"date":"2025-10-25","projeto":"Icuí","entries":9},{"date":"2025-10-28","projeto":"Cabanagem","entries":1},{"date":"2025-10-28","projeto":"Icuí","entries":1},{"date":"2025-10-29","projeto":"Cabanagem","entries":1},{"date":"2025-10-29","projeto":"Icuí","entries":4},{"date":"2025-10-30","projeto":"Icuí","entries":66},{"date":"2025-10-31","projeto":"Icuí","entries":17},{"date":"2025-11-01","projeto":"Icuí","entries":3},{"date":"2025-11-02","projeto":"Icuí","entries":3},{"date":"2025-11-03","projeto":"Cabanagem","entries":9},{"date":"2025-11-03","projeto":"Icuí","entries":6},{"date":"2025-11-04","projeto":"Cabanagem","entries":3},{"date":"2025-11-04","projeto":"Icuí","entries":97},{"date":"2025-11-05","projeto":"Icuí","entries":14},{"date":"2025-11-07","projeto":"Icuí","entries":2},{"date":"2025-11-10","projeto":"Icuí","entries":2},{"date":"2025-11-11","projeto":"Icuí","entries":5},{"date":"2025-11-12","projeto":"Icuí","entries":3},{"date":"2025-11-13","projeto":"Icuí","entries":3},{"date":"2025-11-14","projeto":"Cabanagem","entries":221},{"date":"2025-11-14","projeto":"Icuí","entries":2},{"date":"2025-11-15","projeto":"Cabanagem","entries":8},{"date":"2025-11-16","projeto":"Cabanagem","entries":4},{"date":"2025-11-17","projeto":"Cabanagem","entries":16},{"date":"2025-11-17","projeto":"Jurunas","entries":1},{"date":"2025-11-18","projeto":"Cabanagem","entries":37},{"date":"2025-11-19","projeto":"Cabanagem","entries":9},{"date":"2025-11-19","projeto":"Icuí","entries":6},{"date":"2025-11-20","projeto":"Cabanagem","entries":3},{"date":"2025-11-20","projeto":"Icuí","entries":1},{"date":"2025-11-22","projeto":"Cabanagem","entries":1},{"date":"2025-11-22","projeto":"Icuí","entries":1},{"date":"2025-11-24","projeto":"Cabanagem","entries":1},{"date":"2025-11-25","projeto":"Cabanagem","entries":1},{"date":"2025-11-25","projeto":"Icuí","entries":1},{"date":"2025-11-26","projeto":"Cabanagem","entries":4},{"date":"2025-11-26","projeto":"Icuí","entries":20},{"date":"2025-11-27","projeto":"Icuí","entries":11},{"date":"2025-11-28","projeto":"Icuí","entries":70},{"date":"2025-11-28","projeto":"Marituba","entries":2},{"date":"2025-12-01","projeto":"Cabanagem","entries":21},{"date":"2025-12-01","projeto":"Icuí","entries":2},{"date":"2025-12-02","projeto":"Cabanagem","entries":16},{"date":"2025-12-02","projeto":"Icuí","entries":3},{"date":"2025-12-03","projeto":"Cabanagem","entries":1},{"date":"2025-12-04","projeto":"Icuí","entries":5},{"date":"2025-12-05","projeto":"Cabanagem","entries":1},{"date":"2025-12-08","projeto":"Cabanagem","entries":2},{"date":"2025-12-09","projeto":"Icuí","entries":2},{"date":"2025-12-10","projeto":"Icuí","entries":1},{"date":"2025-12-11","projeto":"Jurunas","entries":2},{"date":"2025-12-16","projeto":"Icuí","entries":32},{"date":"2025-12-16","projeto":"Jurunas","entries":52},{"date":"2025-12-17","projeto":"Jurunas","entries":11},{"date":"2025-12-18","projeto":"Cabanagem","entries":1},{"date":"2025-12-19","projeto":"Icuí","entries":1},{"date":"2025-12-22","projeto":"Icuí","entries":1},{"date":"2025-12-22","projeto":"Jurunas","entries":1},{"date":"2025-12-23","projeto":"Jurunas","entries":115},{"date":"2025-12-24","projeto":"Jurunas","entries":8},{"date":"2025-12-25","projeto":"Jurunas","entries":1},{"date":"2025-12-26","projeto":"Jurunas","entries":3},{"date":"2025-12-29","projeto":"Icuí","entries":1},{"date":"2025-12-29","projeto":"Jurunas","entries":2},{"date":"2025-12-30","projeto":"Jurunas","entries":1},{"date":"2026-01-02","projeto":"Jurunas","entries":3},{"date":"2026-01-04","projeto":"Jurunas","entries":1},{"date":"2026-01-05","projeto":"Jurunas","entries":114},{"date":"2026-01-06","projeto":"Icuí","entries":3},{"date":"2026-01-06","projeto":"Jurunas","entries":70},{"date":"2026-01-07","projeto":"Jurunas","entries":62},{"date":"2026-01-08","projeto":"Cabanagem","entries":4},{"date":"2026-01-08","projeto":"Jurunas","entries":10},{"date":"2026-01-09","projeto":"Jurunas","entries":9},{"date":"2026-01-12","projeto":"Cabanagem","entries":28},{"date":"2026-01-12","projeto":"Icuí","entries":17},{"date":"2026-01-13","projeto":"Cabanagem","entries":16},{"date":"2026-01-13","projeto":"Icuí","entries":12},{"date":"2026-01-14","projeto":"Cabanagem","entries":6},{"date":"2026-01-14","projeto":"Icuí","entries":2},{"date":"2026-01-14","projeto":"Jurunas","entries":22},{"date":"2026-01-15","projeto":"Cabanagem","entries":19},{"date":"2026-01-15","projeto":"Icuí","entries":116},{"date":"2026-01-16","projeto":"Icuí","entries":2},{"date":"2026-01-17","projeto":"Icuí","entries":1},{"date":"2026-01-19","projeto":"Cabanagem","entries":1},{"date":"2026-01-19","projeto":"Icuí","entries":35},{"date":"2026-01-19","projeto":"Jurunas","entries":42},{"date":"2026-01-20","projeto":"Cabanagem","entries":12},{"date":"2026-01-20","projeto":"Icuí","entries":10},{"date":"2026-01-21","projeto":"Jurunas","entries":332},{"date":"2026-01-22","projeto":"Icuí","entries":11},{"date":"2026-01-22","projeto":"Jurunas","entries":8},{"date":"2026-01-23","projeto":"Jurunas","entries":1},{"date":"2026-01-24","projeto":"Icuí","entries":35},{"date":"2026-01-26","projeto":"Icuí","entries":29},{"date":"2026-01-26","projeto":"Jurunas","entries":1},{"date":"2026-01-27","projeto":"Icuí","entries":4},{"date":"2026-01-28","projeto":"Icuí","entries":1},{"date":"2026-01-29","projeto":"Cabanagem","entries":29},{"date":"2026-01-29","projeto":"Icuí","entries":2},{"date":"2026-01-29","projeto":"Jurunas","entries":18},{"date":"2026-01-30","projeto":"Icuí","entries":1},{"date":"2026-01-31","projeto":"Icuí","entries":2},{"date":"2026-02-02","projeto":"Cabanagem","entries":35},{"date":"2026-02-02","projeto":"Icuí","entries":12},{"date":"2026-02-02","projeto":"Marituba","entries":1},{"date":"2026-02-03","projeto":"Cabanagem","entries":26},{"date":"2026-02-03","projeto":"Icuí","entries":19},{"date":"2026-02-03","projeto":"Jurunas","entries":56},{"date":"2026-02-03","projeto":"Marituba","entries":76},{"date":"2026-02-04","projeto":"Cabanagem","entries":67},{"date":"2026-02-04","projeto":"Icuí","entries":14},{"date":"2026-02-04","projeto":"Jurunas","entries":1},{"date":"2026-02-04","projeto":"Marituba","entries":32},{"date":"2026-02-05","projeto":"Cabanagem","entries":27},{"date":"2026-02-05","projeto":"Icuí","entries":11},{"date":"2026-02-05","projeto":"Jurunas","entries":194},{"date":"2026-02-05","projeto":"Marituba","entries":21},{"date":"2026-02-06","projeto":"Icuí","entries":4},{"date":"2026-02-06","projeto":"Jurunas","entries":13},{"date":"2026-02-06","projeto":"Marituba","entries":7},{"date":"2026-02-07","projeto":"Jurunas","entries":1},{"date":"2026-02-07","projeto":"Marituba","entries":2},{"date":"2026-02-08","projeto":"Marituba","entries":1},{"date":"2026-02-09","projeto":"Cabanagem","entries":16},{"date":"2026-02-09","projeto":"Icuí","entries":2},{"date":"2026-02-09","projeto":"Jurunas","entries":4},{"date":"2026-02-09","projeto":"Marituba","entries":4},{"date":"2026-02-09","projeto":"Terra Firme","entries":4},{"date":"2026-02-10","projeto":"Marituba","entries":43},{"date":"2026-02-10","projeto":"Terra Firme","entries":13},{"date":"2026-02-11","projeto":"Icuí","entries":1},{"date":"2026-02-11","projeto":"Jurunas","entries":7},{"date":"2026-02-11","projeto":"Marituba","entries":59},{"date":"2026-02-11","projeto":"Terra Firme","entries":2},{"date":"2026-02-12","projeto":"Cabanagem","entries":31},{"date":"2026-02-12","projeto":"Jurunas","entries":5},{"date":"2026-02-12","projeto":"Marituba","entries":5},{"date":"2026-02-12","projeto":"Terra Firme","entries":5},{"date":"2026-02-13","projeto":"Icuí","entries":4},{"date":"2026-02-13","projeto":"Jurunas","entries":1},{"date":"2026-02-13","projeto":"Marituba","entries":8},{"date":"2026-02-13","projeto":"Terra Firme","entries":1},{"date":"2026-02-14","projeto":"Marituba","entries":1},{"date":"2026-02-15","projeto":"Terra Firme","entries":1},{"date":"2026-02-16","projeto":"Marituba","entries":2},{"date":"2026-02-18","projeto":"Marituba","entries":1},{"date":"2026-02-18","projeto":"Terra Firme","entries":1},{"date":"2026-02-19","projeto":"Icuí","entries":1},{"date":"2026-02-20","projeto":"Marituba","entries":102},{"date":"2026-02-23","projeto":"Cabanagem","entries":66},{"date":"2026-02-23","projeto":"Icuí","entries":1},{"date":"2026-02-23","projeto":"Jurunas","entries":4},{"date":"2026-02-23","projeto":"Marituba","entries":11},{"date":"2026-02-23","projeto":"Terra Firme","entries":9},{"date":"2026-02-24","projeto":"Cabanagem","entries":11},{"date":"2026-02-24","projeto":"Icuí","entries":9},{"date":"2026-02-24","projeto":"Jurunas","entries":2},{"date":"2026-02-24","projeto":"Marituba","entries":75},{"date":"2026-02-24","projeto":"Terra Firme","entries":2},{"date":"2026-02-25","projeto":"Cabanagem","entries":56},{"date":"2026-02-25","projeto":"Icuí","entries":47},{"date":"2026-02-25","projeto":"Jurunas","entries":2},{"date":"2026-02-25","projeto":"Marituba","entries":6},{"date":"2026-02-25","projeto":"Terra Firme","entries":1},{"date":"2026-02-27","projeto":"Jurunas","entries":91},{"date":"2026-02-27","projeto":"Marituba","entries":22},{"date":"2026-02-27","projeto":"Terra Firme","entries":1},{"date":"2026-02-28","projeto":"Terra Firme","entries":6},{"date":"2026-03-02","projeto":"Cabanagem","entries":33},{"date":"2026-03-02","projeto":"Icuí","entries":82},{"date":"2026-03-02","projeto":"Jurunas","entries":1},{"date":"2026-03-02","projeto":"Marituba","entries":4},{"date":"2026-03-02","projeto":"Terra Firme","entries":3},{"date":"2026-03-03","projeto":"Terra Firme","entries":4},{"date":"2026-03-04","projeto":"Cabanagem","entries":27},{"date":"2026-03-04","projeto":"Icuí","entries":48},{"date":"2026-03-04","projeto":"Jurunas","entries":1},{"date":"2026-03-04","projeto":"Marituba","entries":5},{"date":"2026-03-04","projeto":"Terra Firme","entries":2},{"date":"2026-03-05","projeto":"Cabanagem","entries":27},{"date":"2026-03-05","projeto":"Icuí","entries":20},{"date":"2026-03-05","projeto":"Jurunas","entries":5},{"date":"2026-03-05","projeto":"Marituba","entries":21},{"date":"2026-03-05","projeto":"Terra Firme","entries":4},{"date":"2026-03-06","projeto":"Icuí","entries":2},{"date":"2026-03-06","projeto":"Jurunas","entries":2},{"date":"2026-03-06","projeto":"Terra Firme","entries":1},{"date":"2026-03-09","projeto":"Cabanagem","entries":1},{"date":"2026-03-09","projeto":"Marituba","entries":71},{"date":"2026-03-09","projeto":"Terra Firme","entries":10},{"date":"2026-03-10","projeto":"Terra Firme","entries":4},{"date":"2026-03-11","projeto":"Icuí","entries":1},{"date":"2026-03-11","projeto":"Jurunas","entries":15},{"date":"2026-03-11","projeto":"Marituba","entries":8},{"date":"2026-03-11","projeto":"Terra Firme","entries":8},{"date":"2026-03-12","projeto":"Marituba","entries":9},{"date":"2026-03-12","projeto":"Terra Firme","entries":10},{"date":"2026-03-13","projeto":"Icuí","entries":1},{"date":"2026-03-13","projeto":"Marituba","entries":4},{"date":"2026-03-13","projeto":"Terra Firme","entries":4},{"date":"2026-03-16","projeto":"Cabanagem","entries":2},{"date":"2026-03-16","projeto":"Icuí","entries":1},{"date":"2026-03-16","projeto":"Marituba","entries":1},{"date":"2026-03-16","projeto":"Terra Firme","entries":2},{"date":"2026-03-17","projeto":"Icuí","entries":1},{"date":"2026-03-17","projeto":"Marituba","entries":5},{"date":"2026-03-17","projeto":"Terra Firme","entries":2},{"date":"2026-03-18","projeto":"Icuí","entries":4},{"date":"2026-03-18","projeto":"Marituba","entries":10},{"date":"2026-03-18","projeto":"Terra Firme","entries":4},{"date":"2026-03-19","projeto":"Marituba","entries":2},{"date":"2026-03-19","projeto":"Terra Firme","entries":4},{"date":"2026-03-20","projeto":"Terra Firme","entries":1},{"date":"2026-03-21","projeto":"Terra Firme","entries":1},{"date":"2026-03-23","projeto":"Terra Firme","entries":5},{"date":"2026-03-24","projeto":"Icuí","entries":4},{"date":"2026-03-24","projeto":"Jurunas","entries":2},{"date":"2026-03-24","projeto":"Marituba","entries":12},{"date":"2026-03-24","projeto":"Terra Firme","entries":8},{"date":"2026-03-25","projeto":"Terra Firme","entries":1},{"date":"2026-03-26","projeto":"Terra Firme","entries":2},{"date":"2026-03-27","projeto":"Terra Firme","entries":1},{"date":"2026-03-28","projeto":"Terra Firme","entries":1},{"date":"2026-03-30","projeto":"Icuí","entries":47},{"date":"2026-03-30","projeto":"Marituba","entries":17},{"date":"2026-04-08","projeto":"Cabanagem","entries":3},{"date":"2026-04-08","projeto":"Icuí","entries":1},{"date":"2026-04-08","projeto":"Marituba","entries":1}]};
+
+    function parseISODateLocal(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d, 12, 0, 0, 0);
+    }
+
+    function toISODate(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateBR(dateStr) { return new Intl.DateTimeFormat('pt-BR').format(parseISODateLocal(dateStr)); }
+    function formatMonthBR(monthStr) { const [y, m] = monthStr.split('-').map(Number); return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1)); }
+    function formatNumber(value) { return new Intl.NumberFormat('pt-BR').format(Number(value || 0)); }
+    
+    function getDateBounds() {
+      const dates = USINAS_STATE.dataset.daily_counts.map(row => row.date).sort();
+      return { min: dates[0], max: dates[dates.length - 1] };
+    }
+
+    function formatDateInputValue(value) {
+      const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    }
+
+    function parseDateBRToISO(value) {
+      const match = String(value || '').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!match) return null;
+      const [, dd, mm, yyyy] = match;
+      const iso = `${yyyy}-${mm}-${dd}`;
+      const parsed = parseISODateLocal(iso);
+      if (Number.isNaN(parsed.getTime())) return null;
+      if (toISODate(parsed) !== iso) return null;
+      return iso;
+    }
+
+    function syncTextInputFromNative(nativeId, textId) {
+      const nativeInput = $(nativeId); const textInput = $(textId);
+      textInput.value = nativeInput.value ? formatDateBR(nativeInput.value) : '';
+    }
+
+    function applyTextDateValue(nativeId, textId) {
+      const nativeInput = $(nativeId); const textInput = $(textId);
+      textInput.value = formatDateInputValue(textInput.value);
+      const iso = parseDateBRToISO(textInput.value);
+
+      if (iso) { nativeInput.value = iso; textInput.value = formatDateBR(iso); } 
+      else if (!textInput.value.trim()) { nativeInput.value = ''; } 
+      else { syncTextInputFromNative(nativeId, textId); }
+
+      renderUsinasDashboard();
+    }
+
+    function getSelectedRange() { return { start: $('start-date').value || null, end: $('end-date').value || null }; }
+    
+    function normalizeRange(range) {
+      const bounds = getDateBounds();
+      let start = range.start || bounds.min;
+      let end = range.end || bounds.max;
+      if (start > end) [start, end] = [end, start];
+      return { start, end };
+    }
+
+    function getFilteredDaily() {
+      const { start, end } = normalizeRange(getSelectedRange());
+      return USINAS_STATE.dataset.daily_counts.filter(row => row.date >= start && row.date <= end);
+    }
+
+    function getProjects() { return [...USINAS_STATE.dataset.projects]; }
+    
+    function getProjectTotals(rows) {
+      const totals = Object.fromEntries(getProjects().map(project => [project, 0]));
+      rows.forEach(row => { totals[row.projeto] = (totals[row.projeto] || 0) + Number(row.entries || 0); });
+      return totals;
+    }
+
+    function getTotalEntries(rows) { return rows.reduce((sum, row) => sum + Number(row.entries || 0), 0); }
+    function getUniqueDates(rows) { return [...new Set(rows.map(row => row.date))].sort(); }
+    
+    function getWeekStart(dateStr) {
+      const date = parseISODateLocal(dateStr);
+      const day = (date.getDay() + 6) % 7; 
+      date.setDate(date.getDate() - day);
+      return toISODate(date);
+    }
+
+    function getWeekEndFromStart(weekStartStr) {
+      const date = parseISODateLocal(weekStartStr);
+      date.setDate(date.getDate() + 6);
+      return toISODate(date);
+    }
+
+    function getMonthKey(dateStr) { return dateStr.slice(0, 7); }
+
+    function buildWeeklyScoreRows(rows) {
+      const weekProjectMap = new Map();
+      rows.forEach(row => {
+        const weekStart = getWeekStart(row.date);
+        const key = `${weekStart}|${row.projeto}`;
+        weekProjectMap.set(key, (weekProjectMap.get(key) || 0) + Number(row.entries || 0));
+      });
+
+      const weeklyMap = new Map();
+      for (const project of getProjects()) { weeklyMap.set(project, { project, points: 0, entries: 0, weeks: 0 }); }
+
+      const weeks = [...new Set(rows.map(row => getWeekStart(row.date)))].sort();
+      weeks.forEach(weekStart => {
+        const weekEntries = getProjects().map(project => { return { project, entries: weekProjectMap.get(`${weekStart}|${project}`) || 0 }; });
+        const leader = Math.max(...weekEntries.map(item => item.entries), 0);
+        weekEntries.forEach(item => {
+          if (!item.entries || leader === 0) return;
+          const points = Number(((item.entries / leader) * 100).toFixed(2));
+          const current = weeklyMap.get(item.project);
+          current.points += points; current.entries += item.entries; current.weeks += 1;
+        });
+      });
+
+      return [...weeklyMap.values()].map(item => ({ ...item, points: Number(item.points.toFixed(2)) })).sort((a, b) => b.points - a.points || b.entries - a.entries || a.project.localeCompare(b.project));
+    }
+
+    function buildMonthlyScoreRows(rows, monthKey) {
+      const datasetMaxDate = getDateBounds().max;
+      const validWeekStarts = [...new Set(rows.map(row => getWeekStart(row.date)))]
+        .filter(weekStart => getMonthKey(weekStart) === monthKey)
+        .filter(weekStart => getWeekEndFromStart(weekStart) <= datasetMaxDate).sort();
+      const monthlyRows = rows.filter(row => validWeekStarts.includes(getWeekStart(row.date)));
+      return buildWeeklyScoreRows(monthlyRows);
+    }
+
+    function buildDailySeries(rows, project) {
+      const filtered = rows.filter(row => row.projeto === project).sort((a, b) => a.date.localeCompare(b.date));
+      const byDate = new Map(filtered.map(row => [row.date, Number(row.entries || 0)]));
+      const allDates = getUniqueDates(rows);
+      return allDates.map(date => ({ date, entries: byDate.get(date) || 0 }));
+    }
+
+    function getActiveMonthKey() {
+      const { start } = normalizeRange(getSelectedRange());
+      if ($('start-date').value) return start.slice(0, 7);
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function setAppliedPeriodLabel() {
+      const raw = getSelectedRange();
+      if (!raw.start && !raw.end) { $('applied-period').textContent = 'Todo o tempo'; return; }
+      const { start, end } = normalizeRange(raw);
+      $('applied-period').textContent = `${formatDateBR(start)} até ${formatDateBR(end)}`;
+    }
+
+    function getAnalyzedPeriodLabel() {
+      const raw = getSelectedRange();
+      const bounds = !raw.start && !raw.end ? getDateBounds() : normalizeRange(raw);
+      return `Período analisado: ${formatDateBR(bounds.start || bounds.min)} a ${formatDateBR(bounds.end || bounds.max)}`;
+    }
+
+    function renderGlobalKpis(rows) {
+      const totals = getProjectTotals(rows);
+      const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      const leader = entries[0] || ['—', 0];
+      const totalEntries = getTotalEntries(rows);
+      const { start, end } = normalizeRange(getSelectedRange());
+      const startDate = parseISODateLocal(start);
+      const endDate = parseISODateLocal(end);
+      const diffMs = endDate - startDate;
+      const totalDays = Math.max(Math.floor(diffMs / 86400000) + 1, 1);
+      const avgDaily = totalEntries / totalDays;
+      
+      const cards = [
+        { title: 'Leads no período', value: formatNumber(totalEntries), detail: 'Somando todas as usinas', glow: 'glow-blue', icon: 'users' },
+        { title: 'Usina líder', value: leader[0], detail: `${formatNumber(leader[1])} entrada(s)`, glow: 'glow-emerald', icon: 'trophy' },
+        { title: 'Média diária', value: avgDaily.toFixed(1).replace('.', ','), detail: 'Entradas por dia no filtro', glow: 'glow-yellow', icon: 'activity' },
+        { title: 'Usinas monitoradas', value: formatNumber(getProjects().length), detail: getProjects().join(' • '), glow: 'glow-purple', icon: 'factory' }
+      ];
+
+      $('global-kpis').innerHTML = cards.map(card => `
+        <div class="glass-panel ${card.glow} rounded-3xl p-5 sm:p-6 min-h-[130px]">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-3">${card.title}</p>
+              <h3 class="text-2xl sm:text-3xl font-black text-white break-words">${card.value}</h3>
+              <p class="text-sm text-slate-300 mt-3">${card.detail}</p>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-white/10 flex items-center justify-center shrink-0">
+              <i data-lucide="${card.icon}" class="w-5 h-5 text-blue-300"></i>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function destroyChart(name) {
+      if (USINAS_STATE.charts[name]) { USINAS_STATE.charts[name].destroy(); delete USINAS_STATE.charts[name]; }
+    }
+
+    function buildLineChart(canvasId, labels, data, label) {
+      destroyChart(canvasId);
+      const ctx = $(canvasId).getContext('2d');
+      USINAS_STATE.charts[canvasId] = new Chart(ctx, {
+        type: 'line', data: { labels, datasets: [{ label, data, borderWidth: 3, tension: 0.28, fill: false }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cbd5e1' } } },
+          scales: { x: { ticks: { color: '#94a3b8', maxRotation: 0, autoSkip: true }, grid: { color: 'rgba(148,163,184,0.08)' } },
+            y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } } } }
+      });
+    }
+
+    function buildBarChart(canvasId, labels, data, label) {
+      destroyChart(canvasId);
+      const ctx = $(canvasId).getContext('2d');
+      USINAS_STATE.charts[canvasId] = new Chart(ctx, {
+        type: 'bar', data: { labels, datasets: [{ label, data, borderWidth: 1 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cbd5e1' } } },
+          scales: { x: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } },
+            y: { ticks: { color: '#e2e8f0' }, grid: { display: false } } } }
+      });
+    }
+
+    function renderOverviewChart(rows) {
+      const totals = getProjectTotals(rows);
+      const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      buildBarChart('chart-overview', entries.map(item => item[0]), entries.map(item => item[1]), 'Entradas');
+    }
+
+    function renderUsinaCards(rows) {
+      const container = $('usina-cards');
+      const totals = getProjectTotals(rows);
+      container.innerHTML = getProjects().map((project, index) => `
+        <div class="glass-panel rounded-3xl p-5 sm:p-6">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-2">Usina</p>
+              <h3 class="text-xl font-bold text-white">${project}</h3>
+              <p class="text-slate-300 text-sm mt-2">Leads no período: <span class="font-bold text-white mono">${formatNumber(totals[project] || 0)}</span></p>
+            </div>
+            <span class="badge badge-info">Série temporal</span>
+          </div>
+          <div class="h-[260px]"><canvas id="chart-usina-${index}"></canvas></div>
+        </div>
+      `).join('');
+
+      getProjects().forEach((project, index) => {
+        const series = buildDailySeries(rows, project);
+        buildLineChart(`chart-usina-${index}`, series.map(item => formatDateBR(item.date)), series.map(item => item.entries), project);
+      });
+    }
+
+    function renderScoreboard(rows) {
+      const periodRanking = buildWeeklyScoreRows(rows);
+      const activeMonth = getActiveMonthKey();
+      const monthlyRanking = buildMonthlyScoreRows(USINAS_STATE.dataset.daily_counts, activeMonth);
+      const generalRanking = buildWeeklyScoreRows(USINAS_STATE.dataset.daily_counts).map(item => ({ project: item.project, points: item.points, weeks: item.weeks }));
+
+      USINAS_STATE.rankingPeriod = periodRanking; USINAS_STATE.rankingMonthly = monthlyRanking; USINAS_STATE.rankingGeneral = generalRanking; USINAS_STATE.activeMonth = activeMonth;
+
+      $('period-badge').textContent = getAnalyzedPeriodLabel();
+      $('monthly-badge').textContent = `Placar mensal: ${formatMonthBR(activeMonth)}`;
+
+      buildBarChart('chart-scoreboard', periodRanking.map(item => item.project), periodRanking.map(item => item.points), 'Pontos');
+
+      $('period-table-body').innerHTML = periodRanking.map((item, idx) => `<tr><td class="mono">${idx + 1}</td><td class="font-bold text-white">${item.project}</td><td class="mono">${item.points.toFixed(2).replace('.', ',')}</td><td class="mono">${formatNumber(item.entries)}</td></tr>`).join('') || `<tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados no período.</div></td></tr>`;
+      $('monthly-table-body').innerHTML = monthlyRanking.map((item, idx) => `<tr><td class="mono">${idx + 1}</td><td class="font-bold text-white">${item.project}</td><td class="mono">${item.points.toFixed(2).replace('.', ',')}</td><td class="mono">${formatNumber(item.entries)}</td></tr>`).join('') || `<tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados para esse mês.</div></td></tr>`;
+      $('general-table-body').innerHTML = generalRanking.map((item, idx) => `<tr><td class="mono">${idx + 1}</td><td class="font-bold text-white">${item.project}</td><td class="mono">${item.points.toFixed(2).replace('.', ',')}</td><td class="mono">${formatNumber(item.weeks)}</td></tr>`).join('') || `<tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados disponíveis.</div></td></tr>`;
+    }
+
+    function renderUsinasDashboard() {
+      const rows = getFilteredDaily();
+      USINAS_STATE.filteredDaily = rows;
+      setAppliedPeriodLabel();
+      renderGlobalKpis(rows);
+      renderOverviewChart(rows);
+      renderUsinaCards(rows);
+      renderScoreboard(rows);
+      lucide.createIcons();
+    }
+
+    function applyPreset(preset) {
+      const bounds = getDateBounds();
+      const max = parseISODateLocal(bounds.max);
+      let start = null; let end = bounds.max;
+
+      if (preset === 'all') { start = ''; end = ''; } 
+      else if (preset === 'month') { const now = new Date(); start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`; } 
+      else if (preset === '30d') { const startDate = new Date(max); startDate.setDate(startDate.getDate() - 29); start = toISODate(startDate); }
+
+      $('start-date').value = start || ''; $('end-date').value = start ? end : '';
+      renderUsinasDashboard();
+    }
+
+    function normalizeAggregatedPayload(payload) {
+      if (!payload || typeof payload !== 'object') throw new Error('Payload inválido.');
+      const dailyCounts = Array.isArray(payload.daily_counts) ? payload.daily_counts : [];
+      const projects = Array.isArray(payload.projects) ? payload.projects : [];
+
+      const normalizedRows = dailyCounts
+        .map(row => ({ date: String(row.date || '').trim(), projeto: String(row.projeto || '').trim(), entries: Number(row.entries || 0) }))
+        .filter(row => /^\d{4}-\d{2}-\d{2}$/.test(row.date) && row.projeto && Number.isFinite(row.entries) && row.entries >= 0)
+        .sort((a, b) => a.date.localeCompare(b.date) || a.projeto.localeCompare(b.projeto));
+
+      const inferredProjects = normalizedRows.map(row => row.projeto);
+      const finalProjects = [...new Set([...projects, ...inferredProjects].filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+      return {
+        generated_at: payload.generatedAt || payload.generated_at || new Date().toISOString(),
+        timezone: payload.timezone || 'America/Belem', projects: finalProjects, daily_counts: normalizedRows
+      };
+    }
+
+    async function loadUsinasDataset() {
+      try {
+        const res = await fetch(USINAS_DATA_CONFIG.webhookUrl);
+        const data = await res.json();
+        const payload = Array.isArray(data) ? data[0] : data;
+        return normalizeAggregatedPayload(payload);
+      } catch (error) {
+        if (USINAS_DATA_CONFIG.useEmbeddedFallback) return EMBEDDED_SNAPSHOT;
+        throw error;
+      }
+    }
+
+    function bindUsinasEvents() {
+      $('start-date').addEventListener('change', () => { syncTextInputFromNative('start-date', 'start-date-text'); renderUsinasDashboard(); });
+      $('end-date').addEventListener('change', () => { syncTextInputFromNative('end-date', 'end-date-text'); renderUsinasDashboard(); });
+
+      [['start-date', 'start-date-text'], ['end-date', 'end-date-text']].forEach(([nativeId, textId]) => {
+        const textInput = $(textId);
+        textInput.addEventListener('input', () => { textInput.value = formatDateInputValue(textInput.value); });
+        textInput.addEventListener('blur', () => applyTextDateValue(nativeId, textId));
+        textInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); applyTextDateValue(nativeId, textId); } });
+      });
+
+      document.querySelectorAll('[data-picker-target]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = $(btn.dataset.pickerTarget);
+          if (typeof input.showPicker === 'function') input.showPicker();
+          else { input.focus(); input.click(); }
+        });
+      });
+
+      $('reset-btn-usinas').addEventListener('click', () => {
+        $('start-date').value = ''; $('end-date').value = '';
+        syncTextInputFromNative('start-date', 'start-date-text'); syncTextInputFromNative('end-date', 'end-date-text');
+        renderUsinasDashboard();
+      });
+
+      document.querySelectorAll('.preset-btn').forEach(btn => { btn.addEventListener('click', () => applyPreset(btn.dataset.preset)); });
+    }
+
+    async function initUsinas() {
+      if (PROJETO_ATIVO !== 'pa') return;
+      if (USINAS_STATE.dataset) return; // já inicializado
+      try {
+        USINAS_STATE.dataset = await loadUsinasDataset();
+        const bounds = getDateBounds();
+        $('start-date').min = bounds.min; $('start-date').max = bounds.max;
+        $('end-date').min = bounds.min; $('end-date').max = bounds.max;
+        syncTextInputFromNative('start-date', 'start-date-text');
+        syncTextInputFromNative('end-date', 'end-date-text');
+        bindUsinasEvents();
+        renderUsinasDashboard();
+      } catch (error) { console.error("Erro na aba Usinas:", error); }
+    }
+
+    // =========================================================================
+    // INICIALIZAÇÃO DO DASHBOARD UNIFICADO
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      inicializarInterface();
+      // O Lazy Load (loadCommunityData) é acionado pelo clique na aba,
+      // que ocorre no inicializarInterface() -> btnInicial.click()
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
