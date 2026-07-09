@@ -7,7 +7,11 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -589,7 +593,7 @@
 
       <div class="grid xl:grid-cols-2 gap-6 mb-8" id="usina-cards"></div>
 
-      <div class="glass-panel glow-yellow rounded-3xl scoreboard-section">
+      <div id="area-gamificacao" class="glass-panel glow-yellow rounded-3xl scoreboard-section">
         <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-3">
           <div>
             <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-1.5">Gamificação</p>
@@ -599,6 +603,15 @@
               <span class="text-white font-semibold">(entradas da usina / entradas da líder) × 100</span>.
             </p>
           </div>
+          <div class="flex flex-wrap items-center gap-2 xl:justify-end xl:max-w-[38rem]">
+            <span class="badge badge-info" id="period-badge">Período analisado</span>
+            <span class="badge badge-warn" id="monthly-badge">Placar mensal</span>
+            <button onclick="exportarGamificacao(this)" class="ml-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-lg">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              Exportar PNG
+            </button>
+          </div>
+        </div>
           <div class="flex flex-wrap gap-2 xl:justify-end xl:max-w-[38rem]">
             <span class="badge badge-info" id="period-badge">Período analisado</span>
             <span class="badge badge-warn" id="monthly-badge">Placar mensal</span>
@@ -2093,6 +2106,40 @@
       // que ocorre no inicializarInterface() -> btnInicial.click()
       lucide.createIcons();
     });
+    // =========================================================================
+    // FUNÇÃO PARA EXPORTAR PLACAR DAS USINAS
+    // =========================================================================
+    function exportarGamificacao(btn) {
+      // Muda o texto do botão para dar um feedback visual
+      const textoOriginal = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Gerando...';
+      lucide.createIcons();
+      
+      const area = document.getElementById('area-gamificacao');
+      
+      html2canvas(area, {
+        scale: 2, // Isso dobra a resolução (ideal para enviar para clientes)
+        backgroundColor: '#020617', // Mantém o fundo azul escuro do seu dashboard
+        logging: false,
+        useCORS: true
+      }).then(canvas => {
+        // Cria o link para baixar a imagem
+        const link = document.createElement('a');
+        const dataHoje = new Date().toISOString().slice(0,10);
+        link.download = `Placar_Engaja_Para_${dataHoje}.png`; // Nome do arquivo
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // Retorna o botão ao estado normal
+        btn.innerHTML = textoOriginal;
+        lucide.createIcons();
+      }).catch(err => {
+        console.error('Erro ao exportar:', err);
+        alert('Ocorreu um erro ao gerar a imagem.');
+        btn.innerHTML = textoOriginal;
+        lucide.createIcons();
+      });
+    }
   </script>
 </body>
 </html>
