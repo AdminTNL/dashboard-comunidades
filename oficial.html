@@ -1770,7 +1770,6 @@
       }
 
       // Converte os inputs HTML (YYYY-MM-DD) para objetos Date para comparação
-      // Se não preencher, assume limites máximos/mínimos para buscar tudo
       const startObj = dataInicio ? new Date(dataInicio + 'T00:00:00') : new Date(0);
       const endObj = dataFim ? new Date(dataFim + 'T23:59:59') : new Date(8640000000000000);
 
@@ -1781,7 +1780,6 @@
         const dataStr = (p['Data'] || '').split(' ')[0]; // Extrai só o DD/MM/YYYY
         if (!dataStr || dataStr.length < 8) return;
 
-        // Usa a sua função existente para converter DD/MM/YYYY para Date
         const dataEvento = converterDataBR(dataStr);
 
         // Verifica se a data do encontro cai dentro do filtro selecionado
@@ -1789,19 +1787,29 @@
           const tel = (p['Formatado'] || '').toString().trim();
           if (!tel) return;
 
-          // Cruza com a base de membros para pegar o nome padronizado (se existir)
           const info = PRESENCA_STORE.baseMembros[tel];
           const nome = info ? info.nome : (p['Nome'] || tel);
 
           if (!frequenciaMap[tel]) {
-            frequenciaMap[tel] = { nome: nome, contagem: 0 };
+            // Inicializa com um Set para guardar apenas dias ÚNICOS
+            frequenciaMap[tel] = { 
+                nome: nome, 
+                diasParticipados: new Set() 
+            };
           }
-          frequenciaMap[tel].contagem++;
+          // Adiciona a string da data ao Set. Se o Fernando já tiver registro nesse dia, 
+          // o Set simplesmente ignora a duplicidade, garantindo a regra de 1 encontro por dia.
+          frequenciaMap[tel].diasParticipados.add(dataStr);
         }
       });
 
-      // Converte o objeto em array e ordena do maior para o menor
-      const ranking = Object.values(frequenciaMap).sort((a, b) => b.contagem - a.contagem);
+      // Na hora de gerar o ranking, a contagem é o tamanho (.size) do Set de cada pessoa
+      const ranking = Object.values(frequenciaMap)
+        .map(item => ({
+            nome: item.nome,
+            contagem: item.diasParticipados.size // Pega a quantidade de dias únicos
+        }))
+        .sort((a, b) => b.contagem - a.contagem);
 
       if (ranking.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-slate-500 font-medium">Nenhum participante encontrado neste período.</td></tr>';
