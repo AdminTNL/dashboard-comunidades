@@ -1791,7 +1791,7 @@
 
           // Cruza com a base de membros para pegar o nome padronizado (se existir)
           const info = PRESENCA_STORE.baseMembros[tel];
-          const nome = info ? info.nome : (p['Nome'] || 'Desconhecido');
+          const nome = info ? info.nome : (p['Nome'] || tel);
 
           if (!frequenciaMap[tel]) {
             frequenciaMap[tel] = { nome: nome, contagem: 0 };
