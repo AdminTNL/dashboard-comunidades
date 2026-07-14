@@ -1782,8 +1782,8 @@
 
         const dataEvento = converterDataBR(dataStr);
 
-        // Verifica se a data do encontro cai dentro do filtro selecionado
-        if (dataEvento >= startObj && dataEvento <= endObj) {
+        // AJUSTE AQUI: Verifica se está no período E se o dia da semana é quarta-feira (3)
+        if (dataEvento >= startObj && dataEvento <= endObj && dataEvento.getDay() === 3) {
           const tel = (p['Formatado'] || '').toString().trim();
           if (!tel) return;
 
@@ -1797,8 +1797,7 @@
                 diasParticipados: new Set() 
             };
           }
-          // Adiciona a string da data ao Set. Se o Fernando já tiver registro nesse dia, 
-          // o Set simplesmente ignora a duplicidade, garantindo a regra de 1 encontro por dia.
+          // Adiciona a string da data ao Set. Garante 1 encontro por quarta-feira.
           frequenciaMap[tel].diasParticipados.add(dataStr);
         }
       });
@@ -1807,12 +1806,13 @@
       const ranking = Object.values(frequenciaMap)
         .map(item => ({
             nome: item.nome,
-            contagem: item.diasParticipados.size // Pega a quantidade de dias únicos
+            contagem: item.diasParticipados.size // Pega a quantidade de quartas-feiras únicas
         }))
         .sort((a, b) => b.contagem - a.contagem);
 
       if (ranking.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-slate-500 font-medium">Nenhum participante encontrado neste período.</td></tr>';
+        // Mensagem de fallback atualizada para refletir o filtro de quartas-feiras
+        tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-slate-500 font-medium">Nenhum participante encontrado neste período nas quartas-feiras.</td></tr>';
         return;
       }
 
@@ -1831,7 +1831,6 @@
       
       lucide.createIcons();
     }
-
     // =========================================================================
     // MÓDULO 4: USINAS (EXCLUSIVO PARÁ)
     // =========================================================================
