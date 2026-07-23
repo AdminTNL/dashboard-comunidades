@@ -231,7 +231,7 @@
           Histórico: Carregando...
         </p>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
           <div class="space-y-1">
             <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
             <input type="date" id="mov-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
@@ -273,6 +273,22 @@
               <div class="multi-select-dropdown custom-scroll">
                 <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
                   <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Liderança</label>
+            <div class="multi-select-container" id="container-lideres-mov">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todos os Líderes</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todos
                 </div>
                 <div class="options-list"></div>
               </div>
@@ -435,10 +451,19 @@
       const selected = container.querySelectorAll('.multi-select-item.selected:not([onclick^="selectAll"])');
       const label = container.querySelector('.selected-label');
       
-      // NOVA LÓGICA: Descobre se o clique foi no filtro de comunidades ou campanhas
       const isComunidade = container.id.includes('comunidades');
-      const textoVazio = isComunidade ? "Todas as Comunidades" : "Todas as Campanhas";
-      const textoPlural = isComunidade ? "Comunidades" : "Campanhas";
+      const isLider = container.id.includes('lideres');
+      
+      let textoVazio = "Todas as Campanhas";
+      let textoPlural = "Campanhas";
+      
+      if (isComunidade) {
+        textoVazio = "Todas as Comunidades";
+        textoPlural = "Comunidades";
+      } else if (isLider) {
+        textoVazio = "Todos os Líderes";
+        textoPlural = "Líderes";
+      }
       
       if (selected.length === 0) label.textContent = textoVazio;
       else if (selected.length === 1) label.textContent = selected[0].textContent.trim();
@@ -454,9 +479,14 @@
         if(box) box.classList.remove('bg-blue-500', 'border-blue-500'); 
       });
       
-      // NOVA LÓGICA: Atualiza o texto do botão de limpar com a palavra certa
       const isComunidade = container.id.includes('comunidades');
-      container.querySelector('.selected-label').textContent = isComunidade ? "Todas as Comunidades" : "Todas as Campanhas";
+      const isLider = container.id.includes('lideres');
+      
+      let texto = "Todas as Campanhas";
+      if (isComunidade) texto = "Todas as Comunidades";
+      if (isLider) texto = "Todos os Líderes";
+      
+      container.querySelector('.selected-label').textContent = texto;
       
       btn.parentElement.style.display = 'none';
     }
@@ -893,7 +923,6 @@
 
     async function loadCommunityData() {
       try {
-        // Alterado de ms para pe
         const res = await fetch('https://webhookn8n.tnledu.shop/webhook/dashboard-engajamento?dashboard=pernambuco');
         const data = await res.json();
         COMMUNITY_STATE.dashboardData = Array.isArray(data) ? data[0] : data;
@@ -917,7 +946,6 @@
       if (MOVIMENTACAO_STATE.isLoaded) return; 
       try {
         document.getElementById('mov-kpis-container').innerHTML = '<p class="text-slate-400 text-sm">Buscando histórico...</p>';
-        // Alterado de ms para pe
         const res = await fetch('https://webhookn8n.tnledu.shop/webhook/dashboard-movimentacoes?dashboard=pernambuco');
         const data = await res.json();
         
@@ -939,8 +967,11 @@
       const logs = MOVIMENTACAO_STATE.data.logs_brutos || [];
       const campanhas = [...new Set(logs.map(m => m.campanha).filter(Boolean))].sort();
       const comunidades = [...new Set(logs.map(m => m.comunidade).filter(Boolean))].sort();
+      const lideres = [...new Set(logs.map(m => m.indicacao).filter(Boolean))].sort();
+
       populateMultiSelect('container-campanhas-mov', campanhas);
       populateMultiSelect('container-comunidades-mov', comunidades);
+      populateMultiSelect('container-lideres-mov', lideres);
     }
 
     function setMovimentacaoDefaultDates() {
@@ -964,6 +995,10 @@
       document.getElementById('mov-project-filter').value = 'todos';
       selectAllCampaigns(document.querySelector('#container-campanhas-mov .multi-select-item'));
       selectAllCampaigns(document.querySelector('#container-comunidades-mov .multi-select-item'));
+      
+      const btnLideres = document.querySelector('#container-lideres-mov .multi-select-item');
+      if (btnLideres) selectAllCampaigns(btnLideres);
+
       setMovimentacaoDefaultDates(); 
       renderMovimentacaoDashboard();
     });
@@ -975,6 +1010,7 @@
       const projectFilter = document.getElementById('mov-project-filter').value;
       const selectedCampaigns = getSelectedCampaigns('container-campanhas-mov');
       const selectedComunidades = getSelectedCampaigns('container-comunidades-mov');
+      const selectedLideres = getSelectedCampaigns('container-lideres-mov');
       const startDate = document.getElementById('mov-start-date').value;
       const endDate = document.getElementById('mov-end-date').value;
 
@@ -984,6 +1020,7 @@
           if (projectFilter !== 'todos' && log.projeto !== projectFilter) return false;
           if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(log.campanha)) return false;
           if (selectedComunidades.length > 0 && !selectedComunidades.includes(log.comunidade)) return false;
+          if (selectedLideres.length > 0 && !selectedLideres.includes(log.indicacao)) return false;
           return true;
       });
 
