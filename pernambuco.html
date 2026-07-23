@@ -1091,7 +1091,9 @@
       const listSaidas = logsNoPeriodo.filter(l => l.acao === 'saida');
 
       const renderPerson = (p, cor) => {
-        const nomeExibido = p.nome_participante || p.telefone || 'Participante';
+        const nomeExibido = p.telefone && p.nome_participante
+          ? `${p.telefone} - ${p.nome_participante}`
+          : (p.nome_participante || p.telefone || 'Participante');
         const iniciais = (p.nome_participante || p.telefone || 'P').substring(0, 2);
         const foneDigits = String(p.telefone || '').replace(/\D/g, '');
         const waLink = foneDigits ? `https://wa.me/${foneDigits}` : '';
