@@ -172,6 +172,11 @@
         <i data-lucide="factory" class="w-5 h-5"></i>
         Usinas
       </button>
+      <!-- NOVO BOTÃO: NOVO PLACAR USINAS -->
+      <button id="btn-tab-novo-usinas" class="tab-btn hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="novo-usinas">
+        <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
+        Novo Placar
+      </button>
     </div>
   </aside>
 
@@ -742,7 +747,160 @@
         </div>
       </div>
     </section>
+<!-- ==============================================
+         ABA 5: NOVO PLACAR USINAS (SALDO)
+         ============================================== -->
+    <section id="tab-novo-usinas" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6 mb-8">
+        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+          <div class="xl:max-w-[24rem] xl:pt-1 self-start">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Gamificação 2.0</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">Novo Placar</h2>
+            <p class="text-slate-300 text-sm mt-2 max-w-3xl">
+              Placar focado na retenção e crescimento dentro das comunidades <span class="text-white font-semibold">(Entradas vs Saídas)</span>.
+            </p>
+          </div>
 
+          <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3 w-full xl:w-auto xl:flex-1">
+            <label class="filter-chip relative">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
+              <div class="date-input-wrap">
+                <input id="novo-start-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="novo-start-date" aria-label="Abrir calendário">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span>
+                </button>
+              </div>
+              <input id="novo-start-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
+            </label>
+            <label class="filter-chip relative">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
+              <div class="date-input-wrap">
+                <input id="novo-end-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
+                <button type="button" class="date-picker-btn" data-picker-target="novo-end-date" aria-label="Abrir calendário">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span>
+                </button>
+              </div>
+              <input id="novo-end-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
+            </label>
+            <div class="filter-chip">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Atalhos</span>
+              <div class="flex gap-2 flex-wrap">
+                <button class="novo-preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="all">Todo o tempo</button>
+                <button class="novo-preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="month">Mês atual</button>
+                <button class="novo-preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="30d">30 dias</button>
+              </div>
+            </div>
+            <div class="filter-chip flex flex-col justify-between">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Período aplicado</span>
+              <div id="novo-applied-period" class="text-white font-semibold">Todo o tempo</div>
+            </div>
+            <div class="filter-chip flex flex-col justify-between">
+              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Ação</span>
+              <button id="novo-reset-btn" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[.99] text-white font-bold py-2.5 rounded-xl transition-all shadow-lg">
+                Redefinir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="novo-global-kpis"></div>
+
+      <div class="glass-panel glow-emerald rounded-3xl p-5 sm:p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold mb-2">Visão consolidada</p>
+            <h3 class="text-xl font-bold text-white">Saldo Líquido no Período (Entradas - Saídas)</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-ok">Foco em Crescimento Real</span>
+          </div>
+        </div>
+        <div class="h-[360px]">
+          <canvas id="novo-chart-overview"></canvas>
+        </div>
+      </div>
+
+      <div id="area-novo-gamificacao" class="glass-panel glow-yellow rounded-3xl scoreboard-section">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-1.5">Gamificação</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Novo Placar das Usinas</h3>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl leading-snug">
+              O placar considera o Saldo de Entradas vs Saídas. A líder ganha 100pts na semana.<br>
+              <span class="text-white font-semibold">Nota: O Placar Geral inclui os pontos do sistema antigo para manter a justiça.</span>
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 xl:justify-end xl:max-w-[38rem]">
+            <span class="badge badge-info" id="novo-period-badge">Período analisado</span>
+            <span class="badge badge-warn" id="novo-monthly-badge">Placar mensal</span>
+            
+            <button data-html2canvas-ignore="true" onclick="exportarNovoGamificacao(this)" class="ml-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-lg">
+              <i data-lucide="download" class="w-4 h-4"></i> Exportar PNG
+            </button>
+          </div>
+        </div>
+
+        <div class="grid xl:grid-cols-12 gap-3 items-start">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-purple rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
+            <div class="scoreboard-card-header mb-2.5">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-purple"><i data-lucide="bar-chart-3" class="w-4 h-4"></i></span>
+                Pontuação do Período
+              </h4>
+            </div>
+            <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
+              <canvas id="novo-chart-scoreboard"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-blue rounded-3xl overflow-hidden xl:col-span-5">
+            <div class="scoreboard-card-header scoreboard-header-blue p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-blue"><i data-lucide="rows-3" class="w-4 h-4"></i></span>
+                Tabela do Período
+              </h4>
+            </div>
+            <div class="max-h-[208px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Saldo</th></tr></thead>
+                <tbody id="novo-period-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-yellow rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-yellow p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-yellow"><i data-lucide="calendar-days" class="w-4 h-4"></i></span>
+                Placar Mensal
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Saldo</th></tr></thead>
+                <tbody id="novo-monthly-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-emerald rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-emerald p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-emerald"><i data-lucide="trophy" class="w-4 h-4"></i></span>
+                Placar Geral (Atual + Histórico)
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos Totais</th><th>Saldo Com.</th></tr></thead>
+                <tbody id="novo-general-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -761,7 +919,7 @@
       pa: { 
         nome: "Engaja Pará", 
         slug: "para", 
-        abas: ['comunidades', 'movimentacao', 'usinas'] 
+        abas: ['comunidades', 'movimentacao', 'usinas', 'novo-usinas'] 
       },
       ms: { 
         nome: "Comunidades MS", 
@@ -938,6 +1096,7 @@
         if (targetId === 'tab-movimentacao') loadMovimentacaoData();
         if (targetId === 'tab-presenca' && PROJETO_ATIVO === 'pe') loadPresencaData();
         if (targetId === 'tab-usinas' && PROJETO_ATIVO === 'pa') initUsinas();
+        if (targetId === 'tab-novo-usinas' && PROJETO_ATIVO === 'pa') initNovoUsinas();
 
         if (window.innerWidth < 768) {
           sidebarOpen = false;
@@ -2281,6 +2440,271 @@
       // que ocorre no inicializarInterface() -> btnInicial.click()
       lucide.createIcons();
     });
+    // =========================================================================
+    // MÓDULO 5: NOVO PLACAR USINAS (SALDO DE COMUNIDADES)
+    // =========================================================================
+    const PONTUACAO_HISTORICA = {
+      "Icuí": 2900.85,
+      "Cabanagem": 1725.76,
+      "Jurunas": 1064.35,
+      "Marituba": 964.33,
+      "Terra Firme": 454.87
+    };
+
+    const NOVO_USINAS_STATE = { dataset: null, filteredDaily: [], charts: {}, activeMonth: null };
+    const NOVO_USINAS_WEBHOOK = "https://webhookn8n.tnledu.shop/webhook/dashboard-novo-usinas";
+
+    function getNovoDateBounds() {
+      if(!NOVO_USINAS_STATE.dataset || NOVO_USINAS_STATE.dataset.daily_counts.length === 0) return {min:'', max:''};
+      const dates = NOVO_USINAS_STATE.dataset.daily_counts.map(row => row.date).sort();
+      return { min: dates[0], max: dates[dates.length - 1] };
+    }
+
+    function getNovoSelectedRange() { return { start: $('novo-start-date').value || null, end: $('novo-end-date').value || null }; }
+    
+    function normalizeNovoRange(range) {
+      const bounds = getNovoDateBounds();
+      let start = range.start || bounds.min;
+      let end = range.end || bounds.max;
+      if (start > end) [start, end] = [end, start];
+      return { start, end };
+    }
+
+    function getNovoFilteredDaily() {
+      const { start, end } = normalizeNovoRange(getNovoSelectedRange());
+      return NOVO_USINAS_STATE.dataset.daily_counts.filter(row => row.date >= start && row.date <= end);
+    }
+
+    function getNovoProjects() { return [...NOVO_USINAS_STATE.dataset.projects]; }
+
+    function buildNovoWeeklyScoreRows(rows) {
+      const weekProjectMap = new Map();
+      rows.forEach(row => {
+        const weekStart = getWeekStart(row.date);
+        const key = `${weekStart}|${row.projeto}`;
+        if (!weekProjectMap.has(key)) weekProjectMap.set(key, {entradas: 0, saidas: 0});
+        const st = weekProjectMap.get(key);
+        st.entradas += Number(row.entradas || 0);
+        st.saidas += Number(row.saidas || 0);
+      });
+
+      const weeklyMap = new Map();
+      for (const project of getNovoProjects()) { 
+          weeklyMap.set(project, { project, points: 0, saldoTotal: 0, entradas: 0, saidas: 0, weeks: 0 }); 
+      }
+
+      const weeks = [...new Set(rows.map(row => getWeekStart(row.date)))].sort();
+      
+      weeks.forEach(weekStart => {
+        const weekSaldos = getNovoProjects().map(project => {
+          const data = weekProjectMap.get(`${weekStart}|${project}`) || {entradas: 0, saidas: 0};
+          const saldo = data.entradas - data.saidas;
+          return { project, saldo: saldo > 0 ? saldo : 0, entradas: data.entradas, saidas: data.saidas };
+        });
+
+        const leaderSaldo = Math.max(...weekSaldos.map(item => item.saldo), 0);
+
+        weekSaldos.forEach(item => {
+          const current = weeklyMap.get(item.project);
+          current.entradas += item.entradas;
+          current.saidas += item.saidas;
+          current.saldoTotal += (item.entradas - item.saidas);
+          
+          if (item.saldo > 0 && leaderSaldo > 0) {
+             const points = Number(((item.saldo / leaderSaldo) * 100).toFixed(2));
+             current.points += points;
+          }
+          if(item.entradas > 0 || item.saidas > 0) current.weeks += 1;
+        });
+      });
+
+      return [...weeklyMap.values()]
+        .map(item => ({ ...item, points: Number(item.points.toFixed(2)) }))
+        .sort((a, b) => b.points - a.points || b.saldoTotal - a.saldoTotal || a.project.localeCompare(b.project));
+    }
+
+    function buildNovoMonthlyScoreRows(rows, monthKey) {
+      const validRows = rows.filter(row => row.date.startsWith(monthKey));
+      return buildNovoWeeklyScoreRows(validRows);
+    }
+
+    function renderNovoGlobalKpis(rows) {
+      let totalEntradas = 0; let totalSaidas = 0;
+      rows.forEach(r => { totalEntradas += r.entradas; totalSaidas += r.saidas; });
+      const saldoAbsoluto = totalEntradas - totalSaidas;
+      
+      const cards = [
+        { title: 'Saldo do Período', value: formatNumber(saldoAbsoluto), detail: 'Entradas - Saídas', glow: 'glow-blue', icon: 'activity' },
+        { title: 'Entradas Totais', value: formatNumber(totalEntradas), detail: 'Pessoas que entraram', glow: 'glow-emerald', icon: 'user-plus' },
+        { title: 'Saídas Totais', value: formatNumber(totalSaidas), detail: 'Pessoas que saíram', glow: 'glow-yellow', icon: 'user-minus' },
+        { title: 'Usinas Monitoradas', value: formatNumber(getNovoProjects().length), detail: getNovoProjects().join(' • '), glow: 'glow-purple', icon: 'factory' }
+      ];
+
+      $('novo-global-kpis').innerHTML = cards.map(card => `
+        <div class="glass-panel ${card.glow} rounded-3xl p-5 sm:p-6 min-h-[130px]">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-bold mb-3">${card.title}</p>
+              <h3 class="text-2xl sm:text-3xl font-black text-white break-words">${card.value}</h3>
+              <p class="text-sm text-slate-300 mt-3">${card.detail}</p>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-white/10 flex items-center justify-center shrink-0">
+              <i data-lucide="${card.icon}" class="w-5 h-5 text-blue-300"></i>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderNovoOverviewChart(rows) {
+      const totals = {};
+      getNovoProjects().forEach(p => totals[p] = 0);
+      rows.forEach(r => { totals[r.projeto] = (totals[r.projeto] || 0) + (r.entradas - r.saidas); });
+      const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      
+      if(USINAS_STATE.charts['novo-chart-overview']) USINAS_STATE.charts['novo-chart-overview'].destroy();
+      const ctx = $('novo-chart-overview').getContext('2d');
+      USINAS_STATE.charts['novo-chart-overview'] = new Chart(ctx, {
+        type: 'bar', data: { labels: entries.map(e=>e[0]), datasets: [{ label: 'Saldo (Entradas - Saídas)', data: entries.map(e=>e[1]), borderWidth: 1, backgroundColor: '#34d399' }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } }, y: { ticks: { color: '#e2e8f0' }, grid: { display: false } } } }
+      });
+    }
+
+    function renderNovoScoreboard(rows) {
+      const periodRanking = buildNovoWeeklyScoreRows(rows);
+      
+      let activeMonth = '';
+      if ($('novo-start-date').value) activeMonth = $('novo-start-date').value.slice(0, 7);
+      else activeMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      
+      const monthlyRanking = buildNovoMonthlyScoreRows(NOVO_USINAS_STATE.dataset.daily_counts, activeMonth);
+      
+      const allTimeBase = buildNovoWeeklyScoreRows(NOVO_USINAS_STATE.dataset.daily_counts);
+      const generalRanking = allTimeBase.map(item => {
+         const historical = PONTUACAO_HISTORICA[item.project] || 0;
+         return {
+            project: item.project,
+            points: item.points + historical,
+            saldo: item.saldoTotal
+         };
+      }).sort((a, b) => b.points - a.points);
+
+      if(USINAS_STATE.charts['novo-chart-scoreboard']) USINAS_STATE.charts['novo-chart-scoreboard'].destroy();
+      const ctx = $('novo-chart-scoreboard').getContext('2d');
+      USINAS_STATE.charts['novo-chart-scoreboard'] = new Chart(ctx, {
+        type: 'bar', data: { labels: periodRanking.map(item => item.project), datasets: [{ label: 'Pontos', data: periodRanking.map(item => item.points), backgroundColor: '#a855f7' }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false } },
+          scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } }, y: { ticks: { color: '#e2e8f0' }, grid: { display: false } } } }
+      });
+
+      $('novo-period-table-body').innerHTML = periodRanking.map((item, idx) => `<tr><td class="mono">${idx + 1}</td><td class="font-bold text-white">${item.project}</td><td class="mono">${item.points.toFixed(2).replace('.', ',')}</td><td class="mono">${formatNumber(item.saldoTotal)}</td></tr>`).join('') || `<tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados.</div></td></tr>`;
+      $('novo-monthly-table-body').innerHTML = monthlyRanking.map((item, idx) => `<tr><td class="mono">${idx + 1}</td><td class="font-bold text-white">${item.project}</td><td class="mono">${item.points.toFixed(2).replace('.', ',')}</td><td class="mono">${formatNumber(item.saldoTotal)}</td></tr>`).join('') || `<tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados.</div></td></tr>`;
+      $('novo-general-table-body').innerHTML = generalRanking.map((item, idx) => `<tr><td class="mono">${idx + 1}</td><td class="font-bold text-emerald-400">${item.project}</td><td class="mono text-white font-bold">${item.points.toFixed(2).replace('.', ',')}</td><td class="mono">${formatNumber(item.saldo)}</td></tr>`).join('') || `<tr><td colspan="4"><div class="p-4 text-slate-300">Sem dados.</div></td></tr>`;
+    }
+
+    function renderNovoUsinasDashboard() {
+      if(!NOVO_USINAS_STATE.dataset) return;
+      const rows = getNovoFilteredDaily();
+      
+      const raw = getNovoSelectedRange();
+      if (!raw.start && !raw.end) { $('novo-applied-period').textContent = 'Todo o tempo'; }
+      else { const { start, end } = normalizeNovoRange(raw); $('novo-applied-period').textContent = `${formatDateBR(start)} até ${formatDateBR(end)}`; }
+
+      renderNovoGlobalKpis(rows);
+      renderNovoOverviewChart(rows);
+      renderNovoScoreboard(rows);
+      lucide.createIcons();
+    }
+
+    function normalizeNovoPayload(payload) {
+      let dailyCounts = [];
+      if (Array.isArray(payload) && payload.length > 0 && payload[0].projeto) { dailyCounts = payload; } 
+      else if (Array.isArray(payload) && payload.length > 0 && payload[0].daily_counts) { dailyCounts = payload[0].daily_counts; }
+      else if (payload && Array.isArray(payload.daily_counts)) { dailyCounts = payload.daily_counts; }
+
+      const normalizedRows = dailyCounts
+        .map(row => ({ date: String(row.date || '').trim(), projeto: String(row.projeto || '').trim(), entradas: Number(row.entradas || 0), saidas: Number(row.saidas || 0) }))
+        .filter(row => /^\d{4}-\d{2}-\d{2}$/.test(row.date) && row.projeto);
+
+      const projects = [...new Set(normalizedRows.map(row => row.projeto).filter(Boolean))].sort();
+      return { projects: projects, daily_counts: normalizedRows };
+    }
+
+    async function initNovoUsinas() {
+      if (PROJETO_ATIVO !== 'pa') return;
+      if (NOVO_USINAS_STATE.dataset) return; 
+      
+      try {
+        const res = await fetch(NOVO_USINAS_WEBHOOK);
+        const data = await res.json();
+        
+        NOVO_USINAS_STATE.dataset = normalizeNovoPayload(data);
+        
+        const bounds = getNovoDateBounds();
+        if(bounds.min) {
+            $('novo-start-date').min = bounds.min; $('novo-start-date').max = bounds.max;
+            $('novo-end-date').min = bounds.min; $('novo-end-date').max = bounds.max;
+        }
+
+        $('novo-start-date').addEventListener('change', () => { $('novo-start-date-text').value = formatDateBR($('novo-start-date').value); renderNovoUsinasDashboard(); });
+        $('novo-end-date').addEventListener('change', () => { $('novo-end-date-text').value = formatDateBR($('novo-end-date').value); renderNovoUsinasDashboard(); });
+
+        [['novo-start-date', 'novo-start-date-text'], ['novo-end-date', 'novo-end-date-text']].forEach(([nativeId, textId]) => {
+          const txt = $(textId);
+          txt.addEventListener('input', () => txt.value = formatDateInputValue(txt.value));
+          txt.addEventListener('blur', () => {
+             const iso = parseDateBRToISO(txt.value);
+             if(iso) { $(nativeId).value = iso; txt.value = formatDateBR(iso); } else { $(nativeId).value = ''; txt.value = '';}
+             renderNovoUsinasDashboard();
+          });
+        });
+
+        document.querySelectorAll('[data-picker-target^="novo-"]').forEach(btn => {
+          btn.addEventListener('click', () => { const inp = $(btn.dataset.pickerTarget); if(inp.showPicker) inp.showPicker(); else {inp.focus(); inp.click();} });
+        });
+
+        $('novo-reset-btn').addEventListener('click', () => {
+          $('novo-start-date').value = ''; $('novo-end-date').value = '';
+          $('novo-start-date-text').value = ''; $('novo-end-date-text').value = '';
+          renderNovoUsinasDashboard();
+        });
+
+        document.querySelectorAll('.novo-preset-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+             const b = getNovoDateBounds();
+             const max = parseISODateLocal(b.max);
+             let s = null; let e = b.max;
+             const preset = btn.dataset.preset;
+             if (preset === 'all') { s = ''; e = ''; } 
+             else if (preset === 'month') { const now = new Date(); s = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`; } 
+             else if (preset === '30d') { const stDate = new Date(max); stDate.setDate(stDate.getDate() - 29); s = toISODate(stDate); }
+             $('novo-start-date').value = s || ''; $('novo-end-date').value = s ? e : '';
+             $('novo-start-date-text').value = s ? formatDateBR(s) : ''; $('novo-end-date-text').value = e ? formatDateBR(e) : '';
+             renderNovoUsinasDashboard();
+          });
+        });
+
+        renderNovoUsinasDashboard();
+      } catch (error) { 
+          console.error("Erro no Novo Placar Usinas:", error); 
+          $('novo-global-kpis').innerHTML = '<p class="text-rose-500">Erro ao comunicar com n8n (Novo Placar).</p>';
+      }
+    }
+
+    function exportarNovoGamificacao(btn) {
+      const textoOriginal = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Gerando...';
+      lucide.createIcons();
+      
+      html2canvas(document.getElementById('area-novo-gamificacao'), { scale: 2, backgroundColor: '#020617', useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Novo_Placar_Usinas_${new Date().toISOString().slice(0,10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.innerHTML = textoOriginal; lucide.createIcons();
+      }).catch(err => { alert('Erro ao exportar'); btn.innerHTML = textoOriginal; lucide.createIcons(); });
+    }
     // =========================================================================
     // FUNÇÃO PARA EXPORTAR PLACAR DAS USINAS
     // =========================================================================
