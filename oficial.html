@@ -15,8 +15,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Flatpickr (Calendário Profissional) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 
   <style>
+
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background-color: #020617;
@@ -127,6 +138,16 @@
     .scoreboard-title-icon-yellow { color: #fde68a; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.24); box-shadow: 0 0 18px rgba(234,179,8,0.12); }
     .scoreboard-title-icon-emerald { color: #6ee7b7; background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.24); box-shadow: 0 0 18px rgba(16,185,129,0.12); }
     .scoreboard-title-icon-purple { color: #d8b4fe; background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.24); box-shadow: 0 0 18px rgba(168,85,247,0.12); }
+    /* Customização do Flatpickr para o Engaja Pará */
+    .flatpickr-calendar.dark {
+      background: #0f172a; /* bg-slate-900 */
+      border: 1px solid #334155; /* border-slate-700 */
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+      background: #3b82f6; /* bg-blue-500 */
+      border-color: #3b82f6;
+    }
   </style>
 </head>
 <body class="antialiased min-h-screen flex">
@@ -151,31 +172,32 @@
       <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
       
       <!-- Botões padrão (sempre visíveis) -->
-      <button id="btn-tab-comunidades" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all" data-tab="comunidades">
-        <i data-lucide="message-square" class="w-5 h-5"></i>
-        Engajamento
+      <button id="btn-tab-comunidades" class="tab-btn w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all text-left" data-tab="comunidades">
+        <i data-lucide="activity" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Engajamento</span>
       </button>
 
-      <button id="btn-tab-movimentacao" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="movimentacao">
-        <i data-lucide="users" class="w-5 h-5"></i>
-        Movimentação da Base
+      <button id="btn-tab-movimentacao" class="tab-btn w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="movimentacao">
+        <i data-lucide="users" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Movimentação<br>da Base</span>
       </button>
 
       <!-- Botão dinâmico PE -->
-      <button id="btn-tab-presenca" class="tab-btn hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="presenca">
-        <i data-lucide="calendar-check" class="w-5 h-5"></i>
-        Encontros
+      <button id="btn-tab-presenca" class="tab-btn hidden w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="presenca">
+        <i data-lucide="calendar-check-2" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Encontros</span>
       </button>
 
       <!-- Botão dinâmico PA -->
-      <button id="btn-tab-usinas" class="tab-btn hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="usinas">
-        <i data-lucide="factory" class="w-5 h-5"></i>
-        Usinas
+      <button id="btn-tab-usinas" class="tab-btn hidden w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="usinas">
+        <i data-lucide="layout-grid" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Usinas</span>
       </button>
+
       <!-- NOVO BOTÃO: NOVO PLACAR USINAS -->
-      <button id="btn-tab-novo-usinas" class="tab-btn hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium" data-tab="novo-usinas">
-        <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
-        Novo Placar
+      <button id="btn-tab-novo-usinas" class="tab-btn hidden w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="novo-usinas">
+        <i data-lucide="award" class="w-5 h-5 shrink-0 text-amber-400/80"></i>
+        <span class="leading-tight text-amber-400">Novo Placar</span>
       </button>
     </div>
   </aside>
@@ -307,94 +329,121 @@
         <h2 class="text-lg font-bold text-slate-200">Visão Geral da Base de Membros</h2>
       </div>
 
-      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20 mb-6 relative z-30">
-        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
-          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
-          <h3 class="text-sm font-semibold text-slate-200">Filtros da Busca</h3>
-        </div>
-        
-        <p id="mov-history-range-label" class="text-[10px] font-medium text-blue-400/80 uppercase tracking-widest mb-4 ml-1">
-          Histórico: Carregando...
-        </p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
-            <input type="date" id="mov-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Fim</label>
-            <input type="date" id="mov-end-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Projeto</label>
-            <select id="mov-project-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-              <option value="todos">Todos os Projetos</option>
-            </select>
-          </div>
-          
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanhas</label>
-            <div class="multi-select-container" id="container-campanhas-mov">
-              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
-                <span class="selected-label">Todas as Campanhas</span>
-                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
-              </button>
-              <div class="multi-select-dropdown custom-scroll">
-                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
-                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
-                </div>
-                <div class="options-list"></div>
-              </div>
+      <div class="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20 mb-6 relative z-30 border border-slate-700/50">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                <i data-lucide="filter" class="w-5 h-5 text-blue-400"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-200">Filtros da Busca</h3>
+                <p id="mov-history-range-label" class="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-0.5">
+                  Carregando histórico...
+                </p>
             </div>
           </div>
-
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Comunidades</label>
-            <div class="multi-select-container" id="container-comunidades-mov">
-              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
-                <span class="selected-label">Todas as Comunidades</span>
-                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
-              </button>
-              <div class="multi-select-dropdown custom-scroll">
-                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
-                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
-                </div>
-                <div class="options-list"></div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Filtro de Liderança Dinâmico -->
-          <div class="space-y-1 hidden" id="filtro-lideranca-container">
-            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Liderança</label>
-            <div class="multi-select-container" id="container-lideres-mov">
-              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
-                <span class="selected-label">Todos os Líderes</span>
-                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
-              </button>
-              <div class="multi-select-dropdown custom-scroll">
-                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
-                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todos
-                </div>
-                <div class="options-list"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex gap-2 lg:col-span-1">
-            <button id="mov-reset-filters" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-1" title="Limpar Filtros">
-              <i data-lucide="x" class="w-4 h-4"></i>
+          <div class="flex gap-2 w-full md:w-auto">
+            <button id="mov-reset-filters" class="flex-1 md:flex-none px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[.98]" title="Limpar Filtros">
+              <i data-lucide="x-circle" class="w-4 h-4"></i> Limpar
             </button>
-            <button id="mov-apply-filters" class="flex-[3] py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-2 shadow-lg shadow-blue-500/20">
-              Aplicar
+            <button id="mov-apply-filters" class="flex-[2] md:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-[.98]">
+              <i data-lucide="search" class="w-4 h-4"></i> Buscar Dados
             </button>
           </div>
         </div>
-      </div>
+        
+        <div class="space-y-4">
+          
+          <!-- Bloco Superior: Período (Datas largas e com respiro) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/40 p-4 sm:p-5 rounded-2xl border border-slate-800/60">
+             <!-- Data Início -->
+             <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Início do Período</label>
+                <div class="relative w-full">
+                  <i data-lucide="calendar-clock" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 z-10"></i>
+                  <input type="text" id="mov-start-date-visible" placeholder="Data e Hora Inicial" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer font-medium placeholder:text-slate-500" readonly>
+                  <input type="hidden" id="mov-start-date">
+                </div>
+             </div>
+             
+             <!-- Data Fim -->
+             <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fim do Período</label>
+                <div class="relative w-full">
+                  <i data-lucide="calendar-clock" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 z-10"></i>
+                  <input type="text" id="mov-end-date-visible" placeholder="Data e Hora Final" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer font-medium placeholder:text-slate-500" readonly>
+                  <input type="hidden" id="mov-end-date">
+                </div>
+             </div>
+          </div>
+          
+          <!-- Bloco Inferior: Categorias (Projeto, Campanhas, Comunidades, Liderança) -->
+          <div class="flex flex-col sm:flex-row flex-wrap justify-center items-end gap-4 bg-slate-900/40 p-4 sm:p-5 rounded-2xl border border-slate-800/60">
+             
+             <!-- Projeto -->
+             <div class="space-y-1.5 w-full sm:flex-1 max-w-[280px]">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Projeto</label>
+                <select id="mov-project-filter" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 font-medium h-[42px]">
+                  <option value="todos">Todos os Projetos</option>
+                </select>
+             </div>
+
+            <!-- Campanhas -->
+            <div class="space-y-1.5 w-full sm:flex-1 max-w-[280px]">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Campanhas</label>
+              <div class="multi-select-container" id="container-campanhas-mov">
+                <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 text-left flex justify-between items-center font-medium h-[42px]">
+                  <span class="selected-label truncate pr-2">Todas as Campanhas</span>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                </button>
+                <div class="multi-select-dropdown custom-scroll">
+                  <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                  </div>
+                  <div class="options-list"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comunidades -->
+            <div class="space-y-1.5 w-full sm:flex-1 max-w-[280px]">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Comunidades</label>
+              <div class="multi-select-container" id="container-comunidades-mov">
+                <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 text-left flex justify-between items-center font-medium h-[42px]">
+                  <span class="selected-label truncate pr-2">Todas as Comunidades</span>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                </button>
+                <div class="multi-select-dropdown custom-scroll">
+                  <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                  </div>
+                  <div class="options-list"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Liderança -->
+            <div class="space-y-1.5 hidden w-full sm:flex-1 max-w-[280px]" id="filtro-lideranca-container">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Liderança</label>
+              <div class="multi-select-container" id="container-lideres-mov">
+                <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 text-left flex justify-between items-center font-medium h-[42px]">
+                  <span class="selected-label truncate pr-2">Todos os Líderes</span>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                </button>
+                <div class="multi-select-dropdown custom-scroll">
+                  <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todos
+                  </div>
+                  <div class="options-list"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div> <!-- ESSA É A DIV QUE FALTAVA E AGORA ESTÁ AQUI! -->
 
       <div id="mov-kpis-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-
       <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
         <div class="flex items-center justify-between mb-6">
           <div>
@@ -581,61 +630,48 @@
          ABA 4: USINAS (EXCLUSIVO PARÁ)
          ============================================== -->
     <section id="tab-usinas" class="tab-content hidden max-w-7xl mx-auto space-y-6">
-      <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6 mb-8">
-        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
-          <div class="xl:max-w-[24rem] xl:pt-1 self-start">
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Filtro principal</p>
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+          <div class="xl:max-w-[28rem]">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-1">Filtro principal</p>
             <h2 class="text-2xl sm:text-3xl font-black text-white">Usinas</h2>
-            <p class="text-slate-300 text-sm mt-2 max-w-3xl">
-              Selecione um período para responder perguntas como:
-              <span class="text-white font-semibold">“Quantas pessoas entraram na usina em um dia específico?”</span>
+            <p class="text-slate-300 text-sm mt-1">
+              Selecione um período para responder perguntas como: <span class="text-white font-semibold">“Quantas pessoas entraram na usina em um dia específico?”</span>
             </p>
           </div>
 
-          <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3 w-full xl:w-auto xl:flex-1">
-            <label class="filter-chip relative">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
-              <div class="date-input-wrap">
-                <input id="start-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
-                <button type="button" class="date-picker-btn" data-picker-target="start-date" aria-label="Abrir calendário da data inicial">
-                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
-                  <span>Calendário</span>
-                </button>
-              </div>
-              <input id="start-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
-            </label>
-            <label class="filter-chip relative">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
-              <div class="date-input-wrap">
-                <input id="end-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
-                <button type="button" class="date-picker-btn" data-picker-target="end-date" aria-label="Abrir calendário da data final">
-                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
-                  <span>Calendário</span>
-                </button>
-              </div>
-              <input id="end-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
-            </label>
-            <div class="filter-chip">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Atalhos</span>
-              <div class="flex gap-2 flex-wrap">
-                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="all">Todo o tempo</button>
-                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="month">Mês atual</button>
-                <button class="preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="30d">30 dias</button>
-              </div>
+          <!-- Nova Toolbar de Filtros -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 bg-slate-900/60 p-2 sm:p-2.5 rounded-2xl border border-slate-700/50 backdrop-blur-md w-full xl:w-auto shadow-lg">
+            
+            <!-- Input do Flatpickr -->
+            <div class="relative w-full sm:w-[260px] flex-shrink-0">
+              <i data-lucide="calendar-range" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 z-10"></i>
+              <input type="text" id="usinas-date-range" placeholder="Selecione o período..." class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer text-center font-medium placeholder:text-slate-500" readonly>
             </div>
-            <div class="filter-chip flex flex-col justify-between">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Período aplicado</span>
-              <div id="applied-period" class="text-white font-semibold">Todo o tempo</div>
+
+            <!-- Divisor -->
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <!-- Atalhos (Presets) -->
+            <div class="flex gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 custom-scroll hide-scroll-sm">
+              <button class="preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="all">Todo o tempo</button>
+              <button class="preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="month">Mês atual</button>
+              <button class="preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="30d">Últimos 30 dias</button>
             </div>
-            <div class="filter-chip flex flex-col justify-between">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Ação</span>
-              <button id="reset-btn-usinas" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[.99] text-white font-bold py-2.5 rounded-xl transition-all shadow-lg">
-                Redefinir
-              </button>
-            </div>
+
+            <!-- Divisor -->
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <!-- Botão Redefinir (Limpar) -->
+            <button id="reset-btn-usinas" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 active:scale-[.98] font-bold py-2.5 px-4 rounded-xl transition-all" title="Limpar Filtro">
+              <i data-lucide="x-circle" class="w-4 h-4"></i>
+              <span class="sm:hidden text-xs">Limpar Filtro</span>
+            </button>
+            
+            <!-- Inputs Nativos Ocultos (para manter a lógica JS do seu sistema funcionando sem quebrar) -->
+            <input id="start-date" type="hidden">
+            <input id="end-date" type="hidden">
           </div>
         </div>
-      </div>
 
       <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="global-kpis"></div>
 
@@ -751,58 +787,42 @@
          ABA 5: NOVO PLACAR USINAS (SALDO)
          ============================================== -->
     <section id="tab-novo-usinas" class="tab-content hidden max-w-7xl mx-auto space-y-6">
-      <div class="glass-panel glow-blue rounded-3xl p-5 sm:p-6 mb-8">
-        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
-          <div class="xl:max-w-[24rem] xl:pt-1 self-start">
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-2">Gamificação 2.0</p>
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+          <div class="xl:max-w-[28rem]">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-1">Gamificação 2.0</p>
             <h2 class="text-2xl sm:text-3xl font-black text-white">Novo Placar</h2>
-            <p class="text-slate-300 text-sm mt-2 max-w-3xl">
+            <p class="text-slate-300 text-sm mt-1">
               Placar focado na retenção e crescimento dentro das comunidades <span class="text-white font-semibold">(Entradas vs Saídas)</span>.
             </p>
           </div>
 
-          <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3 w-full xl:w-auto xl:flex-1">
-            <label class="filter-chip relative">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data inicial</span>
-              <div class="date-input-wrap">
-                <input id="novo-start-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
-                <button type="button" class="date-picker-btn" data-picker-target="novo-start-date" aria-label="Abrir calendário">
-                  <i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span>
-                </button>
-              </div>
-              <input id="novo-start-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
-            </label>
-            <label class="filter-chip relative">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Data final</span>
-              <div class="date-input-wrap">
-                <input id="novo-end-date-text" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" class="date-text-input" autocomplete="off">
-                <button type="button" class="date-picker-btn" data-picker-target="novo-end-date" aria-label="Abrir calendário">
-                  <i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span>
-                </button>
-              </div>
-              <input id="novo-end-date" type="date" class="native-date-input" tabindex="-1" aria-hidden="true">
-            </label>
-            <div class="filter-chip">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Atalhos</span>
-              <div class="flex gap-2 flex-wrap">
-                <button class="novo-preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="all">Todo o tempo</button>
-                <button class="novo-preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="month">Mês atual</button>
-                <button class="novo-preset-btn px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm" data-preset="30d">30 dias</button>
-              </div>
+          <!-- Nova Toolbar de Filtros -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 bg-slate-900/60 p-2 sm:p-2.5 rounded-2xl border border-slate-700/50 backdrop-blur-md w-full xl:w-auto shadow-lg">
+            
+            <div class="relative w-full sm:w-[260px] flex-shrink-0">
+              <i data-lucide="calendar-range" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 z-10"></i>
+              <input type="text" id="novo-usinas-date-range" placeholder="Selecione o período..." class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer text-center font-medium placeholder:text-slate-500" readonly>
             </div>
-            <div class="filter-chip flex flex-col justify-between">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Período aplicado</span>
-              <div id="novo-applied-period" class="text-white font-semibold">Todo o tempo</div>
+
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <div class="flex gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 custom-scroll hide-scroll-sm">
+              <button class="novo-preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="all">Todo o tempo</button>
+              <button class="novo-preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="month">Mês atual</button>
+              <button class="novo-preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="30d">Últimos 30 dias</button>
             </div>
-            <div class="filter-chip flex flex-col justify-between">
-              <span class="block text-[11px] uppercase tracking-[0.18em] text-slate-400 font-semibold mb-2">Ação</span>
-              <button id="novo-reset-btn" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[.99] text-white font-bold py-2.5 rounded-xl transition-all shadow-lg">
-                Redefinir
-              </button>
-            </div>
+
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <button id="novo-reset-btn" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 active:scale-[.98] font-bold py-2.5 px-4 rounded-xl transition-all" title="Limpar Filtro">
+              <i data-lucide="x-circle" class="w-4 h-4"></i>
+              <span class="sm:hidden text-xs">Limpar Filtro</span>
+            </button>
+            
+            <input id="novo-start-date" type="hidden">
+            <input id="novo-end-date" type="hidden">
           </div>
         </div>
-      </div>
 
       <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="novo-global-kpis"></div>
 
@@ -912,17 +932,17 @@
     
     const CONFIG_PROJETOS = {
       pe: { 
-        nome: "Mobiliza PE", 
+        nome: "Pernambuco", 
         slug: "pernambuco", 
         abas: ['comunidades', 'movimentacao', 'presenca'] 
       },
       pa: { 
-        nome: "Engaja Pará", 
+        nome: "Pará", 
         slug: "para", 
         abas: ['comunidades', 'movimentacao', 'usinas', 'novo-usinas'] 
       },
       ms: { 
-        nome: "Comunidades MS", 
+        nome: "Mato Grosso do Sul", 
         slug: "ms", 
         abas: ['comunidades', 'movimentacao'] 
       },
@@ -1080,12 +1100,13 @@
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => {
-          b.className = "tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium";
-          // Mantém as ocultas escondidas
+          // Aqui eu adicionei o "justify-start" e "text-left" na classe padrão inativa
+          b.className = "tab-btn w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left";
           if(!configAtual.abas.includes(b.getAttribute('data-tab'))) b.classList.add('hidden');
         });
         
-        btn.className = "tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all";
+        // E aqui eu adicionei na classe ativa (quando o botão está azulzinho)
+        btn.className = "tab-btn w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all text-left";
 
         document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
         const targetId = `tab-${btn.getAttribute('data-tab')}`;
@@ -1548,32 +1569,102 @@
       }
     }
 
+    let fpMovStart = null;
+    let fpMovEnd = null;
+
     function setMovimentacaoDefaultDates() {
       const logs = MOVIMENTACAO_STATE.data.logs_brutos || [];
       if (!logs || logs.length === 0) return;
+      
       const timestamps = logs.map(m => new Date(m.data_evento).getTime()).filter(t => !isNaN(t));
       if (timestamps.length === 0) return;
 
-      const minTs = Math.min(...timestamps);
-      const maxTs = Math.max(...timestamps);
+      const absoluteMin = new Date(Math.min(...timestamps));
+      const maxDate = new Date(Math.max(...timestamps));
 
-      document.getElementById('mov-start-date').value = new Date(minTs).toISOString().split('T')[0];
-      document.getElementById('mov-end-date').value = new Date(maxTs).toISOString().split('T')[0];
+      // 1. Configura a Data Final (Último dia registrado, forçando 23:59:59)
+      const end7Days = new Date(maxDate);
+      end7Days.setHours(23, 59, 59, 999);
 
+      // 2. Configura a Data Inicial (Subtrai 6 dias para dar 7 dias totais, forçando 00:00:00)
+      const start7Days = new Date(maxDate);
+      start7Days.setDate(start7Days.getDate() - 6);
+      start7Days.setHours(0, 0, 0, 0);
+
+      // Helper para montar data ISO preservando fuso horário local
+      const pad = (n) => String(n).padStart(2, '0');
+      const toLocalISO = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds() || 0)}`;
+
+      // Atualiza os inputs ocultos que o motor de busca usa
+      $('mov-start-date').value = toLocalISO(start7Days);
+      $('mov-end-date').value = toLocalISO(end7Days);
+
+      // Atualiza o texto visual de histórico detectado para manter a transparência de tudo que tem no banco
       const label = document.getElementById('mov-history-range-label');
-      if (label) label.textContent = `Histórico Detectado: ${new Date(minTs).toLocaleDateString('pt-BR')} até ${new Date(maxTs).toLocaleDateString('pt-BR')}`;
+      if (label) label.textContent = `Histórico Localizado: ${absoluteMin.toLocaleDateString('pt-BR')} até ${maxDate.toLocaleDateString('pt-BR')}`;
+
+      // 3. Configura o Calendário de INÍCIO (Sempre abre nos 7 dias atrás às 00:00)
+      if (!fpMovStart) {
+        fpMovStart = flatpickr("#mov-start-date-visible", {
+          enableTime: true,
+          time_24hr: true,
+          dateFormat: "d/m/Y H:i",
+          defaultDate: start7Days,
+          defaultHour: 0,
+          defaultMinute: 0,
+          locale: "pt",
+          onChange: function(selectedDates) {
+            if (selectedDates.length > 0) {
+              const d = selectedDates[0];
+              d.setSeconds(0); // Garante o primeiro segundo do minuto escolhido
+              $('mov-start-date').value = toLocalISO(d);
+            } else {
+              $('mov-start-date').value = '';
+            }
+          }
+        });
+      } else {
+         fpMovStart.setDate(start7Days);
+      }
+
+      // 4. Configura o Calendário de FIM (Sempre abre no último dia às 23:59)
+      if (!fpMovEnd) {
+        fpMovEnd = flatpickr("#mov-end-date-visible", {
+          enableTime: true,
+          time_24hr: true,
+          dateFormat: "d/m/Y H:i",
+          defaultDate: end7Days,
+          defaultHour: 23,
+          defaultMinute: 59,
+          locale: "pt",
+          onChange: function(selectedDates) {
+            if (selectedDates.length > 0) {
+              const d = selectedDates[0];
+              d.setSeconds(59); // Garante o último segundo do minuto escolhido
+              $('mov-end-date').value = toLocalISO(d);
+            } else {
+              $('mov-end-date').value = '';
+            }
+          }
+        });
+      } else {
+         fpMovEnd.setDate(end7Days);
+      }
     }
 
     document.getElementById('mov-apply-filters').addEventListener('click', renderMovimentacaoDashboard);
+    
     document.getElementById('mov-reset-filters').addEventListener('click', () => {
       document.getElementById('mov-project-filter').value = 'todos';
       selectAllCampaigns(document.querySelector('#container-campanhas-mov .multi-select-item'));
       selectAllCampaigns(document.querySelector('#container-comunidades-mov .multi-select-item'));
-      
-      // Limpa também as seleções de líderes (se o filtro existir na tela)
       const btnLideres = document.querySelector('#container-lideres-mov .multi-select-item');
       if (btnLideres) selectAllCampaigns(btnLideres);
-    
+      
+      // Limpa as instâncias duplas
+      if (fpMovStart) { fpMovStart.destroy(); fpMovStart = null; }
+      if (fpMovEnd) { fpMovEnd.destroy(); fpMovEnd = null; }
+      
       setMovimentacaoDefaultDates(); 
       renderMovimentacaoDashboard();
     });
@@ -1585,31 +1676,31 @@
       const projectFilter = document.getElementById('mov-project-filter').value;
       const selectedCampaigns = getSelectedCampaigns('container-campanhas-mov');
       const selectedComunidades = getSelectedCampaigns('container-comunidades-mov');
-      
-      // 👇 ESSA É A LINHA NOVA QUE VOCÊ VAI ADICIONAR 👇
       const selectedLideres = getSelectedCampaigns('container-lideres-mov'); 
       
-      const startDate = document.getElementById('mov-start-date').value;
-      const endDate = document.getElementById('mov-end-date').value;
+      const startDateStr = document.getElementById('mov-start-date').value;
+      const endDateStr = document.getElementById('mov-end-date').value;
+      
+      // Converte as datas exatas (com horas) para comparação
+      const startDate = startDateStr ? new Date(startDateStr) : new Date(0);
+      const endDate = endDateStr ? new Date(endDateStr) : new Date('2999-12-31T23:59:59');
 
       const allLogs = [...data.logs_brutos].sort((a, b) => new Date(a.data_evento) - new Date(b.data_evento));
       
-      // 👇 AQUI NÓS ADICIONAMOS A REGRA PARA FILTRAR OS LÍDERES 👇
-      const campaignFilteredLogs = allLogs.filter(log => {
+      let runningTotal = 0; 
+      
+      // 1. Filtra primeiro apenas por Projeto/Campanha (Para calcular o acumulado de fundo perfeitamente)
+      const baseFilteredLogs = allLogs.filter(log => {
           if (projectFilter !== 'todos' && log.projeto !== projectFilter) return false;
           if (selectedCampaigns.length > 0 && !selectedCampaigns.includes(log.campanha)) return false;
           if (selectedComunidades.length > 0 && !selectedComunidades.includes(log.comunidade)) return false;
-          // Se o usuário selecionou líderes e este log não é de um deles, removemos da lista
           if (selectedLideres.length > 0 && !selectedLideres.includes(log.indicacao)) return false;
           return true;
       });
 
       const dailyStats = {};
-      let runningTotal = 0;
-      
-      
-      campaignFilteredLogs.forEach(log => {
-          const dateStr = (log.data_evento || '').split('T')[0];
+      baseFilteredLogs.forEach(log => {
+          const dateStr = (log.data_evento || '').split('T')[0]; // Agrupador diário (apenas pro gráfico de barras)
           if(!dateStr) return;
           
           if (!dailyStats[dateStr]) dailyStats[dateStr] = { dia: dateStr, entradas: 0, saidas: 0 };
@@ -1621,20 +1712,29 @@
           dailyStats[dateStr].total_acumulado = runningTotal; 
       });
 
-      let historicoCompleto = Object.values(dailyStats).sort((a, b) => a.dia.localeCompare(b.dia));
+      // 2. Agora aplica o filtro de TEMPO cirúrgico em cima da base 
+      let entradasPeriodo = 0; 
+      let saidasPeriodo = 0;
       
-      let entradasPeriodo = 0; let saidasPeriodo = 0;
-      let historicoFiltrado = historicoCompleto.filter(stat => {
-          let isValid = true;
-          if (startDate && stat.dia < startDate) isValid = false;
-          if (endDate && stat.dia > endDate) isValid = false;
-          
-          if (isValid) {
-              entradasPeriodo += stat.entradas;
-              saidasPeriodo += stat.saidas;
+      const timeFilteredLogs = baseFilteredLogs.filter(log => {
+          const logDate = new Date(log.data_evento);
+          if (logDate >= startDate && logDate <= endDate) {
+              if (log.acao === 'entrada') entradasPeriodo++;
+              if (log.acao === 'saida') saidasPeriodo++;
+              return true;
           }
-          return isValid;
+          return false;
       });
+
+      // Para o gráfico, mostramos os dias que "tocam" no período
+      const startDayOnly = startDateStr ? startDateStr.split('T')[0] : '';
+      const endDayOnly = endDateStr ? endDateStr.split('T')[0] : '';
+      
+      let historicoFiltrado = Object.values(dailyStats).filter(stat => {
+          if (startDayOnly && stat.dia < startDayOnly) return false;
+          if (endDayOnly && stat.dia > endDayOnly) return false;
+          return true;
+      }).sort((a, b) => a.dia.localeCompare(b.dia));
 
       const saldoPeriodo = entradasPeriodo - saidasPeriodo;
 
@@ -1677,18 +1777,11 @@
         }
       });
 
-      const logsNoPeriodo = campaignFilteredLogs.filter(log => {
-          const logDate = (log.data_evento || '').split('T')[0];
-          if (startDate && logDate < startDate) return false;
-          if (endDate && logDate > endDate) return false;
-          return true;
-      }).sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento)); 
-
-      const listEntradas = logsNoPeriodo.filter(l => l.acao === 'entrada');
-      const listSaidas = logsNoPeriodo.filter(l => l.acao === 'saida');
+      // As listas de quem entrou e saiu agora usam a timeFilteredLogs (que reflete o horário exato)
+      const listEntradas = timeFilteredLogs.filter(l => l.acao === 'entrada').reverse();
+      const listSaidas = timeFilteredLogs.filter(l => l.acao === 'saida').reverse();
 
       const renderPerson = (p, cor) => {
-        // Se vier o nome da base, junta. Se não, usa apenas o telefone.
         const nomeExibido = p.telefone && p.nome_participante
           ? `${p.telefone} - ${p.nome_participante}`
           : (p.nome_participante || p.telefone || 'Participante');
@@ -1697,7 +1790,6 @@
         const foneDigits = String(p.telefone || '').replace(/\D/g, '');
         const waLink = foneDigits ? `https://wa.me/${foneDigits}` : '';
         
-        // Se tiver a chave indicacao, cria o aviso de liderança
         const indicacaoHtml = p.indicacao
           ? `<p class="text-[10px] text-${cor}-400/80 truncate font-medium mt-0.5">Indicado por ${escapeHtml(p.indicacao)}</p>`
           : '';
@@ -1711,10 +1803,9 @@
             <p class="text-[10px] text-slate-500 truncate">${escapeHtml(p.campanha || '')}</p>
             ${indicacaoHtml}
           </div>
-          <div class="text-[10px] text-slate-500 whitespace-nowrap self-start">${formatDateTimeCommunity(p.data_evento).split(' às ')[0]}</div>
+          <div class="text-[10px] text-slate-500 whitespace-nowrap self-start">${formatDateTimeCommunity(p.data_evento).split(' às ')[1] || formatDateTimeCommunity(p.data_evento)}</div>
         `;
         
-        // Retorna clicável (para o WhatsApp) se achar número
         return waLink
           ? `<a href="${waLink}" target="_blank" rel="noopener" class="flex items-center gap-3 p-2 bg-slate-900/40 rounded-lg border border-slate-800 hover:border-${cor}-500/40 hover:bg-slate-900/70 transition-colors">${conteudo}</a>`
           : `<div class="flex items-center gap-3 p-2 bg-slate-900/40 rounded-lg border border-slate-800">${conteudo}</div>`;
@@ -1731,16 +1822,11 @@
         return true;
       });
 
-      // 2. Calcula o Totalzão (A soma de todas as comunidades que passaram no filtro)
       const totalGeralParticipantes = comunidadesFiltradas.reduce((acc, curr) => acc + Number(curr.total_participantes || 0), 0);
-      
-      // Atualiza o super número no topo do bloco
       document.getElementById('mov-total-geral-participantes').textContent = totalGeralParticipantes.toLocaleString('pt-BR');
 
-      // 3. Ordena as comunidades da maior para a menor
       const comunidadesOrdenadas = comunidadesFiltradas.sort((a, b) => Number(b.total_participantes) - Number(a.total_participantes));
 
-      // 4. Injeta a Tabela no HTML
       document.getElementById('mov-tabela-participantes-comunidade').innerHTML = comunidadesOrdenadas.length > 0 
         ? comunidadesOrdenadas.map(c => `
             <tr class="hover:bg-slate-800/40 transition-colors">
@@ -1749,9 +1835,8 @@
               <td class="py-3 px-4 text-right font-black text-blue-400 text-sm">${Number(c.total_participantes || 0).toLocaleString('pt-BR')}</td>
             </tr>
           `).join('')
-        : `<tr><td colspan="3" class="py-6 text-center text-slate-500 font-medium">Nenhum dado de comunidade encontrado para os filtros atuais.</td></tr>`;
+        : `<tr><td colspan="3" class="py-6 text-center text-slate-500 font-medium">Nenhum dado encontrado para os filtros atuais.</td></tr>`;
       
-      // Recarrega os ícones caso algum novo tenha entrado
       lucide.createIcons();
     }
 
@@ -2122,7 +2207,14 @@
       renderUsinasDashboard();
     }
 
-    function getSelectedRange() { return { start: $('start-date').value || null, end: $('end-date').value || null }; }
+    function getSelectedRange() {
+      const startInput = $('start-date');
+      const endInput = $('end-date');
+      return { 
+        start: (startInput && startInput.value) ? startInput.value : null, 
+        end: (endInput && endInput.value) ? endInput.value : null 
+      }; 
+    }
     
     function normalizeRange(range) {
       const bounds = getDateBounds();
@@ -2210,13 +2302,6 @@
       if ($('start-date').value) return start.slice(0, 7);
       const now = new Date();
       return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    }
-
-    function setAppliedPeriodLabel() {
-      const raw = getSelectedRange();
-      if (!raw.start && !raw.end) { $('applied-period').textContent = 'Todo o tempo'; return; }
-      const { start, end } = normalizeRange(raw);
-      $('applied-period').textContent = `${formatDateBR(start)} até ${formatDateBR(end)}`;
     }
 
     function getAnalyzedPeriodLabel() {
@@ -2336,7 +2421,9 @@
     function renderUsinasDashboard() {
       const rows = getFilteredDaily();
       USINAS_STATE.filteredDaily = rows;
-      setAppliedPeriodLabel();
+      
+      // A linha "setAppliedPeriodLabel();" que causava o crash foi removida daqui!
+      
       renderGlobalKpis(rows);
       renderOverviewChart(rows);
       renderUsinaCards(rows);
@@ -2355,6 +2442,11 @@
 
       $('start-date').value = start || ''; $('end-date').value = start ? end : '';
       renderUsinasDashboard();
+      
+      if (fpUsinasInstance) {
+        if (start && end) fpUsinasInstance.setDate([parseISODateLocal(start), parseISODateLocal(end)]);
+        else fpUsinasInstance.clear();
+      }
     }
 
     function normalizeAggregatedPayload(payload) {
@@ -2388,32 +2480,35 @@
       }
     }
 
+    let fpUsinasInstance = null;
+
     function bindUsinasEvents() {
-      $('start-date').addEventListener('change', () => { syncTextInputFromNative('start-date', 'start-date-text'); renderUsinasDashboard(); });
-      $('end-date').addEventListener('change', () => { syncTextInputFromNative('end-date', 'end-date-text'); renderUsinasDashboard(); });
-
-      [['start-date', 'start-date-text'], ['end-date', 'end-date-text']].forEach(([nativeId, textId]) => {
-        const textInput = $(textId);
-        textInput.addEventListener('input', () => { textInput.value = formatDateInputValue(textInput.value); });
-        textInput.addEventListener('blur', () => applyTextDateValue(nativeId, textId));
-        textInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); applyTextDateValue(nativeId, textId); } });
-      });
-
-      document.querySelectorAll('[data-picker-target]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const input = $(btn.dataset.pickerTarget);
-          if (typeof input.showPicker === 'function') input.showPicker();
-          else { input.focus(); input.click(); }
-        });
+      // Instancia o Flatpickr no campo de texto
+      fpUsinasInstance = flatpickr("#usinas-date-range", {
+        mode: "range",
+        dateFormat: "d/m/Y",
+        locale: "pt",
+        onChange: function(selectedDates, dateStr, instance) {
+          if (selectedDates.length === 2) {
+            // Quando seleciona início e fim, atualiza os inputs hidden (que o seu JS já usa)
+            $('start-date').value = toISODate(selectedDates[0]);
+            $('end-date').value = toISODate(selectedDates[1]);
+            renderUsinasDashboard();
+          } else if (selectedDates.length === 0) {
+            $('start-date').value = '';
+            $('end-date').value = '';
+            renderUsinasDashboard();
+          }
+        }
       });
 
       $('reset-btn-usinas').addEventListener('click', () => {
-        $('start-date').value = ''; $('end-date').value = '';
-        syncTextInputFromNative('start-date', 'start-date-text'); syncTextInputFromNative('end-date', 'end-date-text');
-        renderUsinasDashboard();
+        fpUsinasInstance.clear();
       });
 
-      document.querySelectorAll('.preset-btn').forEach(btn => { btn.addEventListener('click', () => applyPreset(btn.dataset.preset)); });
+      document.querySelectorAll('.preset-btn').forEach(btn => { 
+        btn.addEventListener('click', () => applyPreset(btn.dataset.preset)); 
+      });
     }
 
     async function initUsinas() {
@@ -2422,13 +2517,18 @@
       try {
         USINAS_STATE.dataset = await loadUsinasDataset();
         const bounds = getDateBounds();
-        $('start-date').min = bounds.min; $('start-date').max = bounds.max;
-        $('end-date').min = bounds.min; $('end-date').max = bounds.max;
-        syncTextInputFromNative('start-date', 'start-date-text');
-        syncTextInputFromNative('end-date', 'end-date-text');
+        
+        // Proteção: Só tenta setar o limite se o input existir no HTML
+        if ($('start-date')) {
+            $('start-date').min = bounds.min; $('start-date').max = bounds.max;
+            $('end-date').min = bounds.min; $('end-date').max = bounds.max;
+        }
+        
         bindUsinasEvents();
         renderUsinasDashboard();
-      } catch (error) { console.error("Erro na aba Usinas:", error); }
+      } catch (error) { 
+        console.error("Erro na aba Usinas:", error); 
+      }
     }
 
     // =========================================================================
@@ -2460,7 +2560,14 @@
       return { min: dates[0], max: dates[dates.length - 1] };
     }
 
-    function getNovoSelectedRange() { return { start: $('novo-start-date').value || null, end: $('novo-end-date').value || null }; }
+    function getNovoSelectedRange() { 
+      const startInput = $('novo-start-date');
+      const endInput = $('novo-end-date');
+      return { 
+        start: (startInput && startInput.value) ? startInput.value : null, 
+        end: (endInput && endInput.value) ? endInput.value : null 
+      }; 
+    }
     
     function normalizeNovoRange(range) {
       const bounds = getNovoDateBounds();
@@ -2607,9 +2714,7 @@
       if(!NOVO_USINAS_STATE.dataset) return;
       const rows = getNovoFilteredDaily();
       
-      const raw = getNovoSelectedRange();
-      if (!raw.start && !raw.end) { $('novo-applied-period').textContent = 'Todo o tempo'; }
-      else { const { start, end } = normalizeNovoRange(raw); $('novo-applied-period').textContent = `${formatDateBR(start)} até ${formatDateBR(end)}`; }
+      // O bloco que procurava o $('novo-applied-period') foi removido daqui!
 
       renderNovoGlobalKpis(rows);
       renderNovoOverviewChart(rows);
@@ -2638,37 +2743,35 @@
       try {
         const res = await fetch(NOVO_USINAS_WEBHOOK);
         const data = await res.json();
-        
         NOVO_USINAS_STATE.dataset = normalizeNovoPayload(data);
         
         const bounds = getNovoDateBounds();
-        if(bounds.min) {
+        
+        // Proteção: Só tenta setar o limite se o input existir no HTML
+        if(bounds.min && $('novo-start-date')) {
             $('novo-start-date').min = bounds.min; $('novo-start-date').max = bounds.max;
             $('novo-end-date').min = bounds.min; $('novo-end-date').max = bounds.max;
         }
 
-        $('novo-start-date').addEventListener('change', () => { $('novo-start-date-text').value = formatDateBR($('novo-start-date').value); renderNovoUsinasDashboard(); });
-        $('novo-end-date').addEventListener('change', () => { $('novo-end-date-text').value = formatDateBR($('novo-end-date').value); renderNovoUsinasDashboard(); });
-
-        [['novo-start-date', 'novo-start-date-text'], ['novo-end-date', 'novo-end-date-text']].forEach(([nativeId, textId]) => {
-          const txt = $(textId);
-          txt.addEventListener('input', () => txt.value = formatDateInputValue(txt.value));
-          txt.addEventListener('blur', () => {
-             const iso = parseDateBRToISO(txt.value);
-             if(iso) { $(nativeId).value = iso; txt.value = formatDateBR(iso); } else { $(nativeId).value = ''; txt.value = '';}
-             renderNovoUsinasDashboard();
-          });
+        let fpNovoUsinasInstance = flatpickr("#novo-usinas-date-range", {
+          mode: "range",
+          dateFormat: "d/m/Y",
+          locale: "pt",
+          onChange: function(selectedDates) {
+            if (selectedDates.length === 2) {
+              if($('novo-start-date')) $('novo-start-date').value = toISODate(selectedDates[0]);
+              if($('novo-end-date')) $('novo-end-date').value = toISODate(selectedDates[1]);
+              renderNovoUsinasDashboard();
+            } else if (selectedDates.length === 0) {
+              if($('novo-start-date')) $('novo-start-date').value = ''; 
+              if($('novo-end-date')) $('novo-end-date').value = '';
+              renderNovoUsinasDashboard();
+            }
+          }
         });
 
-        document.querySelectorAll('[data-picker-target^="novo-"]').forEach(btn => {
-          btn.addEventListener('click', () => { const inp = $(btn.dataset.pickerTarget); if(inp.showPicker) inp.showPicker(); else {inp.focus(); inp.click();} });
-        });
-
-        $('novo-reset-btn').addEventListener('click', () => {
-          $('novo-start-date').value = ''; $('novo-end-date').value = '';
-          $('novo-start-date-text').value = ''; $('novo-end-date-text').value = '';
-          renderNovoUsinasDashboard();
-        });
+        const btnReset = $('novo-reset-btn');
+        if(btnReset) btnReset.addEventListener('click', () => { fpNovoUsinasInstance.clear(); });
 
         document.querySelectorAll('.novo-preset-btn').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -2676,19 +2779,27 @@
              const max = parseISODateLocal(b.max);
              let s = null; let e = b.max;
              const preset = btn.dataset.preset;
+             
              if (preset === 'all') { s = ''; e = ''; } 
              else if (preset === 'month') { const now = new Date(); s = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`; } 
              else if (preset === '30d') { const stDate = new Date(max); stDate.setDate(stDate.getDate() - 29); s = toISODate(stDate); }
-             $('novo-start-date').value = s || ''; $('novo-end-date').value = s ? e : '';
-             $('novo-start-date-text').value = s ? formatDateBR(s) : ''; $('novo-end-date-text').value = e ? formatDateBR(e) : '';
+             
+             if($('novo-start-date')) $('novo-start-date').value = s || ''; 
+             if($('novo-end-date')) $('novo-end-date').value = s ? e : '';
+             
+             if (s && e) fpNovoUsinasInstance.setDate([parseISODateLocal(s), parseISODateLocal(e)]);
+             else fpNovoUsinasInstance.clear();
+             
              renderNovoUsinasDashboard();
           });
         });
 
+        // Força a primeira renderização
         renderNovoUsinasDashboard();
       } catch (error) { 
           console.error("Erro no Novo Placar Usinas:", error); 
-          $('novo-global-kpis').innerHTML = '<p class="text-rose-500">Erro ao comunicar com n8n (Novo Placar).</p>';
+          const kpis = $('novo-global-kpis');
+          if(kpis) kpis.innerHTML = '<p class="text-rose-500">Erro ao comunicar com n8n (Novo Placar).</p>';
       }
     }
 
