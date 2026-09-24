@@ -16,7 +16,8 @@ export async function onRequest({ request, env, next }) {
   const url = new URL(request.url);
   const { pathname, searchParams } = url;
 
-  if (PUBLIC_PATHS.has(pathname)) {
+  // /img/* (favicon, logos) precisa estar acessivel mesmo na tela de login
+  if (PUBLIC_PATHS.has(pathname) || pathname.startsWith('/img/')) {
     return next();
   }
 
