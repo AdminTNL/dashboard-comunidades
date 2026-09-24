@@ -70,6 +70,12 @@
       const abaInicial = configAtual.tabs[0];
       const btnInicial = document.getElementById(`btn-tab-${abaInicial}`);
       if(btnInicial) btnInicial.click();
+
+      // Mostra containers de features exclusivas dentro de abas compartilhadas
+      // (ver PADRAO-EXTENSAO-ABA-COMPARTILHADA.md)
+      const votoRankingPaAtivo = getFeaturesForTab('comunidades').includes('voto-ranking-pa');
+      const votoRankingPaEl = document.getElementById('comm-pa-voto-ranking');
+      if (votoRankingPaEl) votoRankingPaEl.classList.toggle('hidden', !votoRankingPaAtivo);
     }
 
     // =========================================================================

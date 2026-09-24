@@ -12,7 +12,7 @@
       "slug": "para",
       "tabs": ["comunidades", "movimentacao", "usinas", "novo-usinas"],
       "features": {
-        "comunidades": []
+        "comunidades": ["voto-ranking-pa"]
       }
     },
     "ms": {
