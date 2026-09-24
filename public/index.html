@@ -34,7 +34,12 @@
         <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400" id="header-title">Carregando...</h1>
       </div>
     </div>
-    <div class="text-xs text-slate-500" id="footer-text">Conectando...</div>
+    <div class="flex items-center gap-4">
+      <div class="text-xs text-slate-500" id="footer-text">Conectando...</div>
+      <button id="logout-btn" class="p-2 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors" title="Sair">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+      </button>
+    </div>
   </header>
 
   <aside id="sidebar" class="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] glass-panel border-r border-slate-800 transform -translate-x-full transition-transform duration-300 z-40 overflow-y-auto">

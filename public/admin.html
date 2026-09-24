@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Dashboard Central</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #020617;
+      background-image: radial-gradient(at top left, rgba(59,130,246,0.08), transparent 60%), radial-gradient(at bottom right, rgba(16,185,129,0.08), transparent 60%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #f1f5f9;
+      padding: 40px 16px;
+    }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    header h1 { font-size: 22px; margin: 0; }
+    header p { color: #94a3b8; font-size: 13px; margin: 4px 0 0; }
+    #logout-btn {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fda4af;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #logout-btn:hover { background: rgba(244, 63, 94, 0.18); }
+    .grid { display: grid; gap: 12px; }
+    .project-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .project-card:hover { border-color: rgba(59,130,246,0.4); background: rgba(30, 41, 59, 0.7); }
+    .project-card .nome { font-size: 15px; font-weight: 600; }
+    .project-card .chave { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+    .project-card .seta { color: #3b82f6; font-size: 18px; }
+    #empty { color: #64748b; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Painel Administrativo</h1>
+        <p>Escolha um projeto para acessar o dashboard completo.</p>
+      </div>
+      <button id="logout-btn">Sair</button>
+    </header>
+    <div class="grid" id="lista-projetos">
+      <p id="empty">Carregando projetos...</p>
+    </div>
+  </div>
+
+  <script>
+    async function carregarProjetos() {
+      const res = await fetch('/config/projetos.json');
+      const config = await res.json();
+      const container = document.getElementById('lista-projetos');
+      const chaves = Object.keys(config.projects);
+      if (!chaves.length) {
+        container.innerHTML = '<p id="empty">Nenhum projeto cadastrado.</p>';
+        return;
+      }
+      container.innerHTML = chaves.map((chave) => {
+        const p = config.projects[chave];
+        return `
+          <a class="project-card" href="/?projeto=${chave}">
+            <div>
+              <div class="nome">${p.nome}</div>
+              <div class="chave">${chave}</div>
+            </div>
+            <span class="seta">→</span>
+          </a>
+        `;
+      }).join('');
+    }
+    carregarProjetos();
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrar — Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #020617;
+      background-image: radial-gradient(at top left, rgba(59,130,246,0.08), transparent 60%), radial-gradient(at bottom right, rgba(16,185,129,0.08), transparent 60%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #f1f5f9;
+      padding: 16px;
+    }
+    .card {
+      width: 100%;
+      max-width: 360px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 32px 28px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .card h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+    .card p.sub {
+      color: #94a3b8;
+      font-size: 13px;
+      margin: 0 0 24px;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    input[type="password"] {
+      width: 100%;
+      background: rgba(2, 6, 23, 0.85);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #f1f5f9;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 18px;
+    }
+    input[type="password"]:focus { border-color: #3b82f6; }
+    button {
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { opacity: 0.6; cursor: default; }
+    #erro {
+      display: none;
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fda4af;
+      font-size: 13px;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="titulo">Acesso ao Dashboard</h1>
+    <p class="sub" id="subtitulo">Digite a senha para continuar.</p>
+    <div id="erro"></div>
+    <form id="login-form">
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" autocomplete="current-password" required autofocus>
+      <button type="submit" id="btn-entrar">Entrar</button>
+    </form>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const projeto = params.get('projeto') || '';
+    const next = params.get('next') || (projeto ? `/?projeto=${projeto}` : '/admin');
+
+    async function preencherTitulo() {
+      if (!projeto) {
+        document.getElementById('titulo').textContent = 'Acesso Administrativo';
+        document.getElementById('subtitulo').textContent = 'Entre com a senha de admin para ver todos os projetos.';
+        return;
+      }
+      try {
+        const res = await fetch('/config/projetos.json');
+        const config = await res.json();
+        const info = config.projects[projeto];
+        if (info) {
+          document.getElementById('titulo').textContent = `Entrar — ${info.nome}`;
+          document.getElementById('subtitulo').textContent = 'Digite a senha específica deste projeto.';
+        }
+      } catch {
+        // mantém o texto padrão se o fetch falhar
+      }
+    }
+    preencherTitulo();
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-entrar');
+      const erroEl = document.getElementById('erro');
+      erroEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projeto, senha: document.getElementById('senha').value })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || 'Senha incorreta.');
+        }
+        window.location.href = next;
+      } catch (err) {
+        erroEl.textContent = err.message;
+        erroEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    });
+  </script>
+</body>
+</html>

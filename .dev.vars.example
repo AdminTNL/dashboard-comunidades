@@ -7,3 +7,19 @@
 
 SUPABASE_URL=https://SEU-PROJETO.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=coloque-a-service-role-key-aqui
+
+# Segredo usado para assinar o cookie de sessao (HMAC). Gere algo aleatorio e
+# longo (ex.: openssl rand -hex 32) - nunca reaproveite entre ambientes.
+AUTH_SECRET=troque-por-uma-string-aleatoria-longa
+
+# Senha de admin: acessa qualquer projeto via /admin.html
+PASS_ADMIN=
+
+# Uma senha por projeto (chave = PASS_<CHAVE DO PROJETO EM MAIUSCULO>,
+# mesma chave usada em public/config/projetos.json e na URL ?projeto=)
+PASS_PE=
+PASS_PA=
+PASS_MS=
+PASS_ESCALADA=
+PASS_ESCALA6X1=
+PASS_LARA=
