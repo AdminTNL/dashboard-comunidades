@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Central</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Flatpickr (Calendário Profissional) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="antialiased min-h-screen flex">
+
+  <header class="fixed top-0 w-full glass-panel border-b border-slate-800 z-50 h-16 flex items-center px-4 justify-between">
+    <div class="flex items-center gap-4">
+      <button id="sidebar-toggle" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+          <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-400"></i>
+        </div>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400" id="header-title">Carregando...</h1>
+      </div>
+    </div>
+    <div class="text-xs text-slate-500" id="footer-text">Conectando...</div>
+  </header>
+
+  <aside id="sidebar" class="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] glass-panel border-r border-slate-800 transform -translate-x-full transition-transform duration-300 z-40 overflow-y-auto">
+    <div class="p-4 space-y-2" id="sidebar-menu">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 ml-2">Menu Principal</p>
+      
+      <!-- Botões padrão (sempre visíveis) -->
+      <button id="btn-tab-comunidades" class="tab-btn w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium transition-all text-left" data-tab="comunidades">
+        <i data-lucide="activity" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Engajamento</span>
+      </button>
+
+      <button id="btn-tab-movimentacao" class="tab-btn w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="movimentacao">
+        <i data-lucide="users" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Movimentação<br>da Base</span>
+      </button>
+
+      <!-- Botão dinâmico PE -->
+      <button id="btn-tab-presenca" class="tab-btn hidden w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="presenca">
+        <i data-lucide="calendar-check-2" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Encontros</span>
+      </button>
+
+      <!-- Botão dinâmico PA -->
+      <button id="btn-tab-usinas" class="tab-btn hidden w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="usinas">
+        <i data-lucide="layout-grid" class="w-5 h-5 shrink-0 opacity-80"></i>
+        <span class="leading-tight">Usinas</span>
+      </button>
+
+      <!-- NOVO BOTÃO: NOVO PLACAR USINAS -->
+      <button id="btn-tab-novo-usinas" class="tab-btn hidden w-full flex items-center justify-start gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-all font-medium text-left" data-tab="novo-usinas">
+        <i data-lucide="award" class="w-5 h-5 shrink-0 text-amber-400/80"></i>
+        <span class="leading-tight text-amber-400">Novo Placar</span>
+      </button>
+    </div>
+  </aside>
+
+  <main id="main-content" class="flex-1 transition-all duration-300 pt-24 px-4 md:px-8 pb-12 min-w-0">
+    
+    <!-- ==============================================
+         ABA 1: COMUNIDADES (ENGAJAMENTO) COMPARTILHADA 
+         ============================================== -->
+    <section id="tab-comunidades" class="tab-content max-w-7xl mx-auto space-y-6">
+      <div class="glass-panel rounded-2xl p-5 shadow-xl shadow-black/20 relative z-30">
+        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+          <h3 class="text-sm font-semibold text-slate-200">Filtros da Busca</h3>
+        </div>
+        
+        <p id="history-range-label" class="text-[10px] font-medium text-blue-400/80 uppercase tracking-widest mb-4 ml-1">
+          Histórico: Carregando...
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Início</label>
+            <input type="date" id="comm-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Data Fim</label>
+            <input type="date" id="comm-end-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Projeto</label>
+            <select id="comm-project-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="todos">Todos os Projetos</option>
+            </select>
+          </div>
+          
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Campanhas</label>
+            <div class="multi-select-container" id="container-campanhas-comm">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Campanhas</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Comunidades</label>
+            <div class="multi-select-container" id="container-comunidades-comm">
+              <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 text-left flex justify-between items-center">
+                <span class="selected-label">Todas as Comunidades</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <div class="multi-select-dropdown custom-scroll">
+                <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                  <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                </div>
+                <div class="options-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Exibir por vez</label>
+            <select id="comm-limit-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+              <option value="10">10 resultados</option>
+              <option value="25">25 resultados</option>
+              <option value="50">50 resultados</option>
+            </select>
+          </div>
+          <div class="flex gap-2 lg:col-span-1">
+            <button id="comm-reset-filters" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-1" title="Limpar Filtros">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <button id="comm-apply-filters" class="flex-[3] py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex justify-center items-center gap-2 shadow-lg shadow-blue-500/20">
+              Aplicar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="comm-kpis-container" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <div id="comm-bi-container" class="hidden mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 glass-panel rounded-2xl p-5 border border-slate-700/50">
+            <div class="flex items-center gap-2 mb-4">
+              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+              <h3 class="text-sm font-semibold text-slate-200">Evolução do Engajamento no Período</h3>
+            </div>
+            <div class="h-56 w-full relative">
+              <canvas id="engagementChart"></canvas>
+            </div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1">
+              <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                <h3 class="text-sm font-semibold text-slate-200">Top 5 Engajados</h3>
+              </div>
+              <div id="bi-ranking-list" class="space-y-1"></div>
+            </div>
+            <div class="glass-panel rounded-2xl p-4 border border-slate-700/50 flex-1 flex flex-col justify-between">
+              <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
+                <h3 class="text-sm font-semibold text-slate-200">Maior Engajamento</h3>
+              </div>
+              <div id="bi-top-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="comm-campaigns-container" class="space-y-6"></div>
+    </section>
+
+    <!-- ==============================================
+         ABA 2: MOVIMENTAÇÃO DA BASE COMPARTILHADA 
+         ============================================== -->
+    <section id="tab-movimentacao" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+        <i data-lucide="users" class="w-5 h-5 text-slate-400"></i>
+        <h2 class="text-lg font-bold text-slate-200">Visão Geral da Base de Membros</h2>
+      </div>
+
+      <div class="glass-panel rounded-3xl p-5 sm:p-6 shadow-xl shadow-black/20 mb-6 relative z-30 border border-slate-700/50">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                <i data-lucide="filter" class="w-5 h-5 text-blue-400"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-200">Filtros da Busca</h3>
+                <p id="mov-history-range-label" class="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-0.5">
+                  Carregando histórico...
+                </p>
+            </div>
+          </div>
+          <div class="flex gap-2 w-full md:w-auto">
+            <button id="mov-reset-filters" class="flex-1 md:flex-none px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[.98]" title="Limpar Filtros">
+              <i data-lucide="x-circle" class="w-4 h-4"></i> Limpar
+            </button>
+            <button id="mov-apply-filters" class="flex-[2] md:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-[.98]">
+              <i data-lucide="search" class="w-4 h-4"></i> Buscar Dados
+            </button>
+          </div>
+        </div>
+        
+        <div class="space-y-4">
+          
+          <!-- Bloco Superior: Período (Datas largas e com respiro) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/40 p-4 sm:p-5 rounded-2xl border border-slate-800/60">
+             <!-- Data Início -->
+             <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Início do Período</label>
+                <div class="relative w-full">
+                  <i data-lucide="calendar-clock" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 z-10"></i>
+                  <input type="text" id="mov-start-date-visible" placeholder="Data e Hora Inicial" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer font-medium placeholder:text-slate-500" readonly>
+                  <input type="hidden" id="mov-start-date">
+                </div>
+             </div>
+             
+             <!-- Data Fim -->
+             <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fim do Período</label>
+                <div class="relative w-full">
+                  <i data-lucide="calendar-clock" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 z-10"></i>
+                  <input type="text" id="mov-end-date-visible" placeholder="Data e Hora Final" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer font-medium placeholder:text-slate-500" readonly>
+                  <input type="hidden" id="mov-end-date">
+                </div>
+             </div>
+          </div>
+          
+          <!-- Bloco Inferior: Categorias (Projeto, Campanhas, Comunidades, Liderança) -->
+          <div class="flex flex-col sm:flex-row flex-wrap justify-center items-end gap-4 bg-slate-900/40 p-4 sm:p-5 rounded-2xl border border-slate-800/60">
+             
+             <!-- Projeto -->
+             <div class="space-y-1.5 w-full sm:flex-1 max-w-[280px]">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Projeto</label>
+                <select id="mov-project-filter" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 font-medium h-[42px]">
+                  <option value="todos">Todos os Projetos</option>
+                </select>
+             </div>
+
+            <!-- Campanhas -->
+            <div class="space-y-1.5 w-full sm:flex-1 max-w-[280px]">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Campanhas</label>
+              <div class="multi-select-container" id="container-campanhas-mov">
+                <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 text-left flex justify-between items-center font-medium h-[42px]">
+                  <span class="selected-label truncate pr-2">Todas as Campanhas</span>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                </button>
+                <div class="multi-select-dropdown custom-scroll">
+                  <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                  </div>
+                  <div class="options-list"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comunidades -->
+            <div class="space-y-1.5 w-full sm:flex-1 max-w-[280px]">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Comunidades</label>
+              <div class="multi-select-container" id="container-comunidades-mov">
+                <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 text-left flex justify-between items-center font-medium h-[42px]">
+                  <span class="selected-label truncate pr-2">Todas as Comunidades</span>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                </button>
+                <div class="multi-select-dropdown custom-scroll">
+                  <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todas
+                  </div>
+                  <div class="options-list"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Liderança -->
+            <div class="space-y-1.5 hidden w-full sm:flex-1 max-w-[280px]" id="filtro-lideranca-container">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Liderança</label>
+              <div class="multi-select-container" id="container-lideres-mov">
+                <button onclick="toggleMultiSelect(this)" class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 text-left flex justify-between items-center font-medium h-[42px]">
+                  <span class="selected-label truncate pr-2">Todos os Líderes</span>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                </button>
+                <div class="multi-select-dropdown custom-scroll">
+                  <div class="multi-select-item border-b border-slate-800 text-blue-400" style="font-weight:700;" onclick="selectAllCampaigns(this)">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Selecionar Todos
+                  </div>
+                  <div class="options-list"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div> <!-- ESSA É A DIV QUE FALTAVA E AGORA ESTÁ AQUI! -->
+
+      <div id="mov-kpis-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+      <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-200">Crescimento vs. Evasão</h3>
+            <p class="text-xs text-slate-500 mt-1">Evolução diária de entradas e saídas baseado no filtro.</p>
+          </div>
+        </div>
+        <div class="h-80 w-full relative">
+          <canvas id="movimentacaoChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-panel rounded-2xl p-5 border border-emerald-500/10">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
+            <h3 class="text-sm font-semibold text-slate-200">Novas Entradas no Período</h3>
+          </div>
+          <div id="mov-list-entradas" class="people-list-scroll space-y-2 pr-2 custom-scroll"></div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border border-rose-500/10">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="user-minus" class="w-4 h-4 text-rose-400"></i>
+            <h3 class="text-sm font-semibold text-slate-200">Saídas no Período</h3>
+          </div>
+          <div id="mov-list-saidas" class="people-list-scroll space-y-2 pr-2 custom-scroll"></div>
+        </div>
+      </div>
+      
+      <div class="glass-panel rounded-2xl p-6 border border-blue-500/20 mt-6 shadow-lg shadow-blue-500/5 relative z-10">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-400"></i>
+            <h3 class="text-lg font-bold text-slate-200">Total de Participantes</h3>
+          </div>
+          <div class="text-right">
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Soma do Filtro</p>
+            <p id="mov-total-geral-participantes" class="text-3xl font-black text-blue-400">0</p>
+          </div>
+        </div>
+        
+        <div class="overflow-x-auto max-h-[350px] overflow-y-auto custom-scroll border border-slate-700/50 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="sticky top-0 bg-[#0f172a] shadow-sm z-10">
+              <tr class="text-slate-500 border-b border-slate-800 uppercase tracking-tighter bg-slate-900/90 backdrop-blur-sm">
+                <th class="py-3 px-4">Comunidade</th>
+                <th class="py-3 px-4">Campanha</th>
+                <th class="py-3 px-4 text-right">Qtd. Pessoas</th>
+              </tr>
+            </thead>
+            <tbody id="mov-tabela-participantes-comunidade" class="divide-y divide-slate-800/50 text-slate-300">
+              <!-- Injetado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         ABA 3: ENCONTROS (EXCLUSIVO PERNAMBUCO)
+         ============================================== -->
+    <section id="tab-presenca" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+        <i data-lucide="calendar-check" class="w-5 h-5 text-slate-400"></i>
+        <h2 class="text-lg font-bold text-slate-200">Encontros</h2>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/50 flex flex-col md:flex-row gap-4 items-end">
+        <div class="flex-1 space-y-1">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tipo de Reunião</label>
+          <select id="presenca-tipo-filter" onchange="atualizarDatasDisponiveis()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+            <!-- Injetado via JS -->
+          </select>
+        </div>
+        <div class="flex-1 space-y-1">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data do Encontro</label>
+          <select id="presenca-data-filter" onchange="renderPresencaDashboard()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+            <!-- Injetado via JS -->
+          </select>
+        </div>
+        <button onclick="loadPresencaData(true)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all" title="Recarregar dados">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div id="presenca-kpis-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+      <div class="glass-panel rounded-2xl p-6 border border-slate-700/50">
+        <h3 class="text-sm font-semibold text-slate-200 mb-4">Evolução de Participação</h3>
+        <div class="h-64 w-full relative">
+          <canvas id="presencaLineChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 space-y-4">
+          <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i> Top 3 Lideranças
+          </h3>
+          <div id="presenca-top3-lideres" class="space-y-3"></div>
+        </div>
+        
+        <div class="lg:col-span-2 glass-panel rounded-2xl p-5 border border-slate-700/50">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4">Ranking Geral de Líderes</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="text-slate-500 border-b border-slate-800 uppercase tracking-tighter">
+                  <th class="py-2">Posição</th>
+                  <th class="py-2">Líder / Indicação</th>
+                  <th class="py-2 text-center">Base Total</th>
+                  <th class="py-2 text-center">Pessoas Levadas</th>
+                  <th class="py-2 text-right">% Ativação</th>
+                </tr>
+              </thead>
+              <tbody id="presenca-tabela-lideres" class="text-slate-300"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/50">
+        <h3 class="text-sm font-semibold text-slate-200 mb-4">Lista de Presença Detalhada (Audit)</h3>
+        <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scroll">
+          <table class="w-full text-left text-xs">
+            <thead class="sticky top-0 bg-[#0f172a] shadow-sm">
+              <tr class="text-slate-500 border-b border-slate-800 uppercase">
+                <th class="py-3 px-2 text-center">Status</th>
+                <th class="py-3 px-2">Participante</th>
+                <th class="py-3 px-2">WhatsApp (Formatado)</th>
+                <th class="py-3 px-2">Líder Responsável</th>
+              </tr>
+            </thead>
+            <tbody id="presenca-tabela-participantes" class="divide-y divide-slate-800/50"></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/50 mt-6 shadow-lg shadow-blue-500/5">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+              <i data-lucide="bar-chart" class="w-5 h-5 text-blue-400"></i>
+              Frequência de Participação
+            </h3>
+            <p class="text-xs text-slate-500 mt-1">Descubra quem são as pessoas mais ativas nos encontros em um intervalo de tempo.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 items-end mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+          <div class="flex-1 space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data Início</label>
+            <input type="date" id="presenca-freq-inicio" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="flex-1 space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data Fim</label>
+            <input type="date" id="presenca-freq-fim" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+          </div>
+          <button onclick="renderFrequenciaPeriodo()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm rounded-lg transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+            <i data-lucide="search" class="w-4 h-4"></i> Buscar
+          </button>
+        </div>
+
+        <div class="overflow-x-auto max-h-[400px] overflow-y-auto custom-scroll border border-slate-700/50 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="sticky top-0 bg-[#0f172a] shadow-sm z-10">
+              <tr class="text-slate-500 border-b border-slate-800 uppercase tracking-tighter bg-slate-900/90 backdrop-blur-sm">
+                <th class="py-3 px-4">Participante</th>
+                <th class="py-3 px-4 text-right">Total de Encontros</th>
+              </tr>
+            </thead>
+            <tbody id="presenca-tabela-frequencia" class="divide-y divide-slate-800/50 text-slate-300">
+              <tr>
+                <td colspan="2" class="py-8 text-center text-slate-500 font-medium">Selecione o período e clique em Buscar para gerar a lista.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         ABA 4: USINAS (EXCLUSIVO PARÁ)
+         ============================================== -->
+    <section id="tab-usinas" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+          <div class="xl:max-w-[28rem]">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-1">Filtro principal</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">Usinas</h2>
+            <p class="text-slate-300 text-sm mt-1">
+              Selecione um período para responder perguntas como: <span class="text-white font-semibold">“Quantas pessoas entraram na usina em um dia específico?”</span>
+            </p>
+          </div>
+
+          <!-- Nova Toolbar de Filtros -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 bg-slate-900/60 p-2 sm:p-2.5 rounded-2xl border border-slate-700/50 backdrop-blur-md w-full xl:w-auto shadow-lg">
+            
+            <!-- Input do Flatpickr -->
+            <div class="relative w-full sm:w-[260px] flex-shrink-0">
+              <i data-lucide="calendar-range" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 z-10"></i>
+              <input type="text" id="usinas-date-range" placeholder="Selecione o período..." class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer text-center font-medium placeholder:text-slate-500" readonly>
+            </div>
+
+            <!-- Divisor -->
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <!-- Atalhos (Presets) -->
+            <div class="flex gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 custom-scroll hide-scroll-sm">
+              <button class="preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="all">Todo o tempo</button>
+              <button class="preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="month">Mês atual</button>
+              <button class="preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="30d">Últimos 30 dias</button>
+            </div>
+
+            <!-- Divisor -->
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <!-- Botão Redefinir (Limpar) -->
+            <button id="reset-btn-usinas" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 active:scale-[.98] font-bold py-2.5 px-4 rounded-xl transition-all" title="Limpar Filtro">
+              <i data-lucide="x-circle" class="w-4 h-4"></i>
+              <span class="sm:hidden text-xs">Limpar Filtro</span>
+            </button>
+            
+            <!-- Inputs Nativos Ocultos (para manter a lógica JS do seu sistema funcionando sem quebrar) -->
+            <input id="start-date" type="hidden">
+            <input id="end-date" type="hidden">
+          </div>
+        </div>
+
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="global-kpis"></div>
+
+      <div class="glass-panel glow-emerald rounded-3xl p-5 sm:p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold mb-2">Visão consolidada</p>
+            <h3 class="text-xl font-bold text-white">Entradas por usina no período</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-ok">Somente considerar = true</span>
+            <span class="badge badge-info">Semana = segunda a domingo</span>
+          </div>
+        </div>
+        <div class="h-[360px]">
+          <canvas id="chart-overview"></canvas>
+        </div>
+      </div>
+
+      <div class="grid xl:grid-cols-2 gap-6 mb-8" id="usina-cards"></div>
+
+      <div id="area-gamificacao" class="glass-panel glow-yellow rounded-3xl scoreboard-section">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-1.5">Gamificação</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Placar das Usinas</h3>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl leading-snug">
+              A líder da semana recebe 100 pontos e as demais recebem proporcionalmente:
+              <span class="text-white font-semibold">(entradas da usina / entradas da líder) × 100</span>.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 xl:justify-end xl:max-w-[38rem]">
+            <span class="badge badge-info" id="period-badge">Período analisado</span>
+            <span class="badge badge-warn" id="monthly-badge">Placar mensal</span>
+            
+            <button data-html2canvas-ignore="true" onclick="exportarGamificacao(this)" class="ml-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-lg">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              Exportar PNG
+            </button>
+          </div>
+        </div>
+
+        <div class="grid xl:grid-cols-12 gap-3 items-start">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-purple rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
+            <div class="scoreboard-card-header mb-2.5">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-purple">
+                  <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                </span>
+                Ranking por pontos no período
+              </h4>
+              <p class="text-slate-400 text-xs sm:text-sm mt-1 leading-snug">Pontuação semanal acumulada considerando apenas o período selecionado.</p>
+            </div>
+            <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
+              <canvas id="chart-scoreboard"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-blue rounded-3xl overflow-hidden xl:col-span-5">
+            <div class="scoreboard-card-header scoreboard-header-blue p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-blue">
+                  <i data-lucide="rows-3" class="w-4 h-4"></i>
+                </span>
+                Tabela do período
+              </h4>
+            </div>
+            <div class="max-h-[208px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Entradas</th></tr></thead>
+                <tbody id="period-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-yellow rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-yellow p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-yellow">
+                  <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                </span>
+                Placar Mensal
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Entradas</th></tr></thead>
+                <tbody id="monthly-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-emerald rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-emerald p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-emerald">
+                  <i data-lucide="trophy" class="w-4 h-4"></i>
+                </span>
+                Placar Geral
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Semanas</th></tr></thead>
+                <tbody id="general-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<!-- ==============================================
+         ABA 5: NOVO PLACAR USINAS (SALDO)
+         ============================================== -->
+    <section id="tab-novo-usinas" class="tab-content hidden max-w-7xl mx-auto space-y-6">
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+          <div class="xl:max-w-[28rem]">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 font-bold mb-1">Gamificação 2.0</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">Novo Placar</h2>
+            <p class="text-slate-300 text-sm mt-1">
+              Placar focado na retenção e crescimento dentro das comunidades <span class="text-white font-semibold">(Entradas vs Saídas)</span>.
+            </p>
+          </div>
+
+          <!-- Nova Toolbar de Filtros -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 bg-slate-900/60 p-2 sm:p-2.5 rounded-2xl border border-slate-700/50 backdrop-blur-md w-full xl:w-auto shadow-lg">
+            
+            <div class="relative w-full sm:w-[260px] flex-shrink-0">
+              <i data-lucide="calendar-range" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 z-10"></i>
+              <input type="text" id="novo-usinas-date-range" placeholder="Selecione o período..." class="w-full bg-slate-950/50 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer text-center font-medium placeholder:text-slate-500" readonly>
+            </div>
+
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <div class="flex gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 custom-scroll hide-scroll-sm">
+              <button class="novo-preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="all">Todo o tempo</button>
+              <button class="novo-preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="month">Mês atual</button>
+              <button class="novo-preset-btn flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 hover:text-white border border-slate-700/50 text-xs font-semibold text-slate-300 transition-all" data-preset="30d">Últimos 30 dias</button>
+            </div>
+
+            <div class="hidden sm:block w-px h-8 bg-slate-700/50"></div>
+
+            <button id="novo-reset-btn" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 active:scale-[.98] font-bold py-2.5 px-4 rounded-xl transition-all" title="Limpar Filtro">
+              <i data-lucide="x-circle" class="w-4 h-4"></i>
+              <span class="sm:hidden text-xs">Limpar Filtro</span>
+            </button>
+            
+            <input id="novo-start-date" type="hidden">
+            <input id="novo-end-date" type="hidden">
+          </div>
+        </div>
+
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="novo-global-kpis"></div>
+
+      <div class="glass-panel glow-emerald rounded-3xl p-5 sm:p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold mb-2">Visão consolidada</p>
+            <h3 class="text-xl font-bold text-white">Saldo Líquido no Período (Entradas - Saídas)</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-ok">Foco em Crescimento Real</span>
+          </div>
+        </div>
+        <div class="h-[360px]">
+          <canvas id="novo-chart-overview"></canvas>
+        </div>
+      </div>
+
+      <div id="area-novo-gamificacao" class="glass-panel glow-yellow rounded-3xl scoreboard-section">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-yellow-300 font-bold mb-1.5">Gamificação</p>
+            <h3 class="text-lg sm:text-xl font-bold text-white">Novo Placar das Usinas</h3>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl leading-snug">
+              O placar considera o Saldo de Entradas vs Saídas. A líder ganha 100pts na semana.<br>
+              <span class="text-white font-semibold">Nota: O Placar Geral inclui os pontos do sistema antigo para manter a justiça.</span>
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 xl:justify-end xl:max-w-[38rem]">
+            <span class="badge badge-info" id="novo-period-badge">Período analisado</span>
+            <span class="badge badge-warn" id="novo-monthly-badge">Placar mensal</span>
+            
+            <button data-html2canvas-ignore="true" onclick="exportarNovoGamificacao(this)" class="ml-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-lg">
+              <i data-lucide="download" class="w-4 h-4"></i> Exportar PNG
+            </button>
+          </div>
+        </div>
+
+        <div class="grid xl:grid-cols-12 gap-3 items-start">
+          <div class="glass-panel scoreboard-panel scoreboard-panel-purple rounded-3xl p-3.5 sm:p-4 xl:col-span-7">
+            <div class="scoreboard-card-header mb-2.5">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-purple"><i data-lucide="bar-chart-3" class="w-4 h-4"></i></span>
+                Pontuação do Período
+              </h4>
+            </div>
+            <div class="h-[170px] sm:h-[180px] xl:h-[190px]">
+              <canvas id="novo-chart-scoreboard"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-blue rounded-3xl overflow-hidden xl:col-span-5">
+            <div class="scoreboard-card-header scoreboard-header-blue p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-blue"><i data-lucide="rows-3" class="w-4 h-4"></i></span>
+                Tabela do Período
+              </h4>
+            </div>
+            <div class="max-h-[208px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Saldo</th></tr></thead>
+                <tbody id="novo-period-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-yellow rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-yellow p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-yellow"><i data-lucide="calendar-days" class="w-4 h-4"></i></span>
+                Placar Mensal
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos</th><th>Saldo</th></tr></thead>
+                <tbody id="novo-monthly-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-panel scoreboard-panel scoreboard-panel-emerald rounded-3xl overflow-hidden xl:col-span-6">
+            <div class="scoreboard-card-header scoreboard-header-emerald p-3.5 sm:p-4 border-b border-white/10">
+              <h4 class="scoreboard-title text-base sm:text-lg font-bold text-white">
+                <span class="scoreboard-title-icon scoreboard-title-icon-emerald"><i data-lucide="trophy" class="w-4 h-4"></i></span>
+                Placar Geral (Atual + Histórico)
+              </h4>
+            </div>
+            <div class="max-h-[204px] overflow-auto">
+              <table class="w-full custom-table compact-table">
+                <thead><tr><th>Posição</th><th>Usina</th><th>Pontos Totais</th><th>Saldo Com.</th></tr></thead>
+                <tbody id="novo-general-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script src="js/tabs/comunidades.js"></script>
+  <script src="js/tabs/movimentacao.js"></script>
+  <script src="js/tabs/presenca.js"></script>
+  <script src="js/tabs/usinas.js"></script>
+  <script src="js/tabs/novo-usinas.js"></script>
+</body>
+</html>

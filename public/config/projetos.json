@@ -1,0 +1,44 @@
+{
+  "projects": {
+    "pe": {
+      "nome": "Pernambuco",
+      "dbProjeto": "Pernambuco",
+      "slug": "pernambuco",
+      "tabs": ["comunidades", "movimentacao", "presenca"]
+    },
+    "pa": {
+      "nome": "Pará",
+      "dbProjeto": "Pará",
+      "slug": "para",
+      "tabs": ["comunidades", "movimentacao", "usinas", "novo-usinas"],
+      "features": {
+        "comunidades": []
+      }
+    },
+    "ms": {
+      "nome": "Mato Grosso do Sul",
+      "dbProjeto": "Mato Grosso do Sul",
+      "slug": "ms",
+      "tabs": ["comunidades", "movimentacao"]
+    },
+    "escalada": {
+      "nome": "Escalada",
+      "dbProjeto": "Escalada",
+      "slug": "escalada",
+      "tabs": ["comunidades", "movimentacao"]
+    },
+    "escala6x1": {
+      "nome": "Brasil Quer Mais Tempo",
+      "dbProjeto": "Escala 6x1",
+      "slug": "escala6x1",
+      "tabs": ["comunidades", "movimentacao"]
+    },
+    "lara": {
+      "nome": "Lara Santana",
+      "dbProjeto": "Lara Santana",
+      "slug": "lara",
+      "tabs": ["comunidades", "movimentacao"]
+    }
+  },
+  "features": {}
+}

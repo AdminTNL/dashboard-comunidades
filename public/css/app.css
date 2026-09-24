@@ -1,0 +1,126 @@
+
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #020617;
+      color: #f1f5f9;
+      background-image:
+        radial-gradient(at top left, rgba(59, 130, 246, 0.05), transparent 60%),
+        radial-gradient(at bottom right, rgba(16, 185, 129, 0.05), transparent 60%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+
+    input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+    /* Estilos do Multi-Select Customizado */
+    .multi-select-container { position: relative; width: 100%; }
+    .multi-select-dropdown {
+      position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px;
+      overflow-y: auto; z-index: 100; background: #0f172a;
+      border: 1px solid #334155; border-top: none;
+      border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
+      display: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .multi-select-item {
+      padding: 8px 12px; cursor: pointer; display: flex; align-items: center;
+      gap: 8px; font-size: 13px; color: #94a3b8; transition: all 0.2s;
+    }
+    .multi-select-item:hover { background: #1e293b; color: #f1f5f9; }
+    .multi-select-item.selected { color: #3b82f6; background: rgba(59, 130, 246, 0.05); font-weight: 500; }
+    
+    .people-list-scroll { max-height: 350px; overflow-y: auto; }
+
+    /* =========================================
+       Estilos Específicos da Aba Usinas (Pará) 
+       ========================================= */
+    .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.12); }
+    .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.12); }
+    .glow-yellow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.12); }
+    .glow-purple { box-shadow: 0 0 20px rgba(168, 85, 247, 0.12); }
+
+    .custom-table th {
+      text-transform: uppercase; font-size: .7rem; color: #94a3b8; padding: .85rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.10); letter-spacing: .05em; text-align: left;
+      position: sticky; top: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); z-index: 1;
+    }
+    .custom-table td {
+      padding: .85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: .87rem; color: #e2e8f0; vertical-align: top;
+    }
+    .compact-table th { padding: .58rem .72rem; font-size: .64rem; line-height: 1.1; }
+    .compact-table td { padding: .52rem .72rem; font-size: .78rem; line-height: 1.15; }
+    
+    .scoreboard-section { padding: 1rem; }
+    @media (min-width: 640px) { .scoreboard-section { padding: 1.15rem; } }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px;
+      padding: .28rem .6rem; font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .badge-ok { background: rgba(16,185,129,.13); color: #6ee7b7; border-color: rgba(16,185,129,.22); }
+    .badge-info { background: rgba(59,130,246,.13); color: #93c5fd; border-color: rgba(59,130,246,.22); }
+    .badge-warn { background: rgba(234,179,8,.13); color: #fde68a; border-color: rgba(234,179,8,.22); }
+    
+    .mono { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+    
+    .filter-chip { border: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 42, 0.7); border-radius: 1rem; padding: .9rem 1rem; }
+    .date-input-wrap { display: flex; flex-direction: column; gap: .7rem; }
+    .date-text-input {
+      width: 100%; min-width: 0; background: rgba(2, 6, 23, 0.82); color: #fff; outline: none;
+      border: 1px solid rgb(51 65 85 / 1); border-radius: .95rem; padding: .72rem .9rem;
+      font-size: .95rem; letter-spacing: .01em; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .date-text-input:focus { border-color: rgba(59, 130, 246, 0.95); box-shadow: 0 0 0 3px rgba(59,130,246,.12); background: rgba(2, 6, 23, 0.95); }
+    .date-text-input::placeholder { color: #94a3b8; }
+    
+    .date-picker-btn {
+      width: 100%; min-height: 2.65rem; display: inline-flex; align-items: center; justify-content: center;
+      gap: .55rem; border-radius: .95rem; border: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 42, 0.92);
+      color: #cbd5e1; flex-shrink: 0; transition: all .2s ease; font-size: .9rem; font-weight: 600;
+    }
+    .date-picker-btn:hover { background: rgba(30, 41, 59, 0.96); color: #fff; border-color: rgba(59,130,246,.35); }
+    .native-date-input { position: absolute; inset: 0; opacity: 0; pointer-events: none; width: 100%; height: 100%; }
+    
+    .scoreboard-panel { position: relative; border-width: 1px; border-style: solid; transition: all 0.35s ease; }
+    .scoreboard-panel-blue { border-color: rgba(59, 130, 246, 0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(59,130,246,0.06), 0 0 22px rgba(59,130,246,0.10); }
+    .scoreboard-panel-yellow { border-color: rgba(234, 179, 8, 0.30); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(234,179,8,0.06), 0 0 22px rgba(234,179,8,0.10); }
+    .scoreboard-panel-emerald { border-color: rgba(16, 185, 129, 0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(16,185,129,0.06), 0 0 22px rgba(16,185,129,0.10); }
+    .scoreboard-panel-purple { border-color: rgba(168, 85, 247, 0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(168,85,247,0.06), 0 0 22px rgba(168,85,247,0.10); }
+    .scoreboard-header-blue { border-bottom-color: rgba(59, 130, 246, 0.22) !important; }
+    .scoreboard-header-yellow { border-bottom-color: rgba(234, 179, 8, 0.22) !important; }
+    .scoreboard-header-emerald { border-bottom-color: rgba(16, 185, 129, 0.22) !important; }
+    .scoreboard-header-purple { border-bottom-color: rgba(168, 85, 247, 0.22) !important; }
+    .scoreboard-title { display: flex; align-items: center; gap: .75rem; line-height: 1.2; }
+    .scoreboard-title-icon { width: 2rem; height: 2rem; border-radius: .85rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 42, 0.92); flex-shrink: 0; }
+    .scoreboard-title-icon-blue { color: #93c5fd; background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.24); box-shadow: 0 0 18px rgba(59,130,246,0.12); }
+    .scoreboard-title-icon-yellow { color: #fde68a; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.24); box-shadow: 0 0 18px rgba(234,179,8,0.12); }
+    .scoreboard-title-icon-emerald { color: #6ee7b7; background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.24); box-shadow: 0 0 18px rgba(16,185,129,0.12); }
+    .scoreboard-title-icon-purple { color: #d8b4fe; background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.24); box-shadow: 0 0 18px rgba(168,85,247,0.12); }
+    /* Customização do Flatpickr para o Engaja Pará */
+    .flatpickr-calendar.dark {
+      background: #0f172a; /* bg-slate-900 */
+      border: 1px solid #334155; /* border-slate-700 */
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+      background: #3b82f6; /* bg-blue-500 */
+      border-color: #3b82f6;
+    }
