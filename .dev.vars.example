@@ -1,0 +1,9 @@
+# Copie este arquivo para ".dev.vars" (nunca commitado) e preencha com os valores reais
+# do projeto Supabase, pra rodar "npm run dev" localmente com o wrangler.
+#
+# Em produção, essas mesmas chaves devem ser cadastradas em:
+# Cloudflare Dashboard -> Pages -> dashboard-comunidades -> Settings -> Environment variables
+# (como "Secret", não "Plaintext" - especialmente a service role key).
+
+SUPABASE_URL=https://SEU-PROJETO.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=coloque-a-service-role-key-aqui

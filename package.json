@@ -1,0 +1,14 @@
+{
+  "name": "dashboard-comunidades",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --compatibility-date=2026-09-24 --compatibility-flags nodejs_compat"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}
