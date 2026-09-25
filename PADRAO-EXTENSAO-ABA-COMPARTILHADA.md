@@ -1,116 +1,127 @@
 # Padrão: extensão específica de projeto dentro de uma aba compartilhada
 
-Este documento descreve como implementar, no `oficial.html`, uma funcionalidade que é
-específica de **um único projeto** mas vive dentro de uma aba que hoje é
-**100% compartilhada** entre todos os projetos (ex.: `comunidades`/Engajamento,
-`movimentacao`/Movimentação da Base).
+Este documento descreve como implementar, no dashboard unificado (`public/`),
+uma funcionalidade que é específica de **um único projeto** mas vive dentro de
+uma aba que é **100% compartilhada** entre todos os projetos (ex.:
+`comunidades`/Engajamento, `movimentacao`/Movimentação da Base).
 
 Use este documento como instrução de execução quando o pedido for do tipo:
 "preciso adicionar algo só para o projeto X dentro da aba Y, que hoje todo
-mundo usa".
+mundo usa". Para o resto do funcionamento do projeto, veja primeiro o
+`CLAUDE.md` na raiz do repositório.
 
 ## Contexto do sistema (não repetir, só ler antes de agir)
 
-- `oficial.html` é o dashboard unificado de todos os projetos (PE, PA, MS,
-  Escalada, Escala 6x1). Arquivos antigos (`escalada.html`, `para.html`,
-  `pernambuco.html`, `ms.html`) são legados pré-unificação e não devem ser
-  editados.
-- O projeto ativo é definido por `?projeto=xx` na URL e resolvido na variável
-  `PROJETO_ATIVO` / objeto `configAtual` (dicionário `CONFIG_PROJETOS`, no
-  topo do bloco `<script>`).
-- `configAtual.abas` controla quais botões da sidebar (`data-tab`) aparecem
-  para aquele projeto. Isso já resolve o caso de **aba inteira exclusiva**
-  (ex.: `presenca` só existe para PE, `usinas`/`novo-usinas` só para PA).
+- O front-end mora em `public/`: `public/index.html` é o shell (HTML das
+  abas), `public/js/app.js` é o núcleo (boot, utils compartilhados, registro
+  de features), `public/js/tabs/*.js` é um módulo por aba, `public/js/features/*.js`
+  são as features exclusivas de projeto.
+- `public/config/projetos.json` é o manifesto: define, por projeto, `tabs`
+  (quais abas ele vê) e `features` (quais features exclusivas ficam ativas
+  dentro de cada aba compartilhada).
+- `configAtual.tabs` controla abas inteiras exclusivas (ex.: `presenca` só
+  para PE, `usinas`/`novo-usinas` só para PA). **Isso não é o problema deste
+  documento** — se o pedido for "aba inteira nova só pra um projeto", é só
+  mexer no manifesto e criar o módulo em `public/js/tabs/`.
 - O problema que este documento resolve é diferente: a aba **precisa
-  continuar aparecendo para todos**, mas com um pedaço de conteúdo/lógica que
-  só roda para um projeto específico.
+  continuar aparecendo pra todos**, mas com um pedaço de conteúdo/lógica que
+  só roda pra um projeto específico.
 
 ## Princípio
 
-**Nunca duplicar a aba nem criar um arquivo/página separada para o projeto.**
-Isso reintroduz o problema original (mudar em N lugares). Em vez disso,
-tratar a necessidade específica como um **bloco de extensão opcional** dentro
-da mesma aba compartilhada, seguindo o mesmo idioma que o arquivo já usa para
-abas exclusivas (`if (PROJETO_ATIVO === 'pa') { ... }`, visto nas guardas de
-segurança das funções `initUsinas`/`initNovoUsinas`).
+**Nunca duplicar a aba nem criar uma página separada para o projeto.** Em vez
+disso, a feature se registra num mecanismo de plugin (`registerFeature`,
+definido em `public/js/app.js`) e o manifesto decide, por projeto, quais
+features rodam em qual aba. A função de renderização compartilhada da aba não
+sabe nada sobre a feature — só chama `runTabFeatures('<tab>', dados)` no final
+e o registro decide o que rodar.
+
+Exemplo real já implementado: `voto-ranking-pa` (cruzamento de votantes das
+enquetes com a base de comissionados do Pará), dentro da aba `comunidades`.
+Use os arquivos abaixo como referência ao criar uma feature nova.
 
 ## Passo a passo
 
-1. **HTML — container isolado e escondido por padrão**
-   Dentro da seção compartilhada (`<section id="tab-comunidades">` ou
-   equivalente), adicionar um novo bloco com id próprio e classe `hidden`,
-   por exemplo:
+1. **Backend, se precisar de dado novo**: criar `functions/api/<algo>.js`
+   (Cloudflare Pages Function) que chama a RPC do Supabase necessária, usando
+   `functions/_lib/supabase.js` e `functions/_lib/response.js`. Ver
+   `functions/api/pa/voto-ranking.js` como referência. Se a RPC ainda não
+   existe no Supabase, ela precisa ser criada/alterada manualmente pelo
+   usuário no SQL Editor — você não tem acesso direto pra rodar DDL lá.
+
+2. **HTML — container isolado e escondido por padrão**: dentro da seção
+   compartilhada (`<section id="tab-comunidades">` ou equivalente, em
+   `public/index.html`), adicionar um bloco com id próprio e classe `hidden`:
    ```html
-   <div id="comm-pa-extra" class="hidden">
+   <div id="comm-pa-voto-ranking" class="hidden space-y-6">
      <!-- conteúdo específico do projeto aqui -->
    </div>
    ```
-   Não usar `configAtual.abas` para isso — esse array só controla abas
-   inteiras. A visibilidade deste bloco é feita via JS (passo 3).
 
-2. **JS — módulo isolado e comentado**
-   Criar um bloco de funções separado, com o mesmo estilo de comentário de
-   cabeçalho que o arquivo já usa para módulos:
+3. **JS — módulo de feature isolado**: criar `public/js/features/<nome>.js`,
+   com o cabeçalho padrão de módulo, e terminar o arquivo registrando a
+   feature:
    ```js
-   // =========================================================================
-   // MÓDULO X: <NOME DA FEATURE> - EXCLUSIVO <PROJETO>
-   // =========================================================================
-   function renderExtra<Nome><Projeto>(dadosJaFiltrados) {
-     // busca/cruzamento/renderização específica do projeto
+   registerFeature('voto-ranking-pa', {
+     render() {
+       // busca os dados (fetch pra Function do passo 1) e renderiza no
+       // container do passo 2. Recebe os mesmos args que a aba passa pra
+       // runTabFeatures (ex.: as mensagens já filtradas).
+     }
+   });
+   ```
+   Adicionar `<script src="js/features/<nome>.js"></script>` em
+   `public/index.html`, depois dos scripts de `public/js/tabs/`.
+
+4. **Ligar a feature ao projeto no manifesto** (`public/config/projetos.json`):
+   ```json
+   "pa": {
+     "...": "...",
+     "features": { "comunidades": ["voto-ranking-pa"] }
    }
    ```
-   Toda a lógica nova fica dentro dessa função (ou de funções auxiliares
-   dela). Não espalhar `if/else` de projeto dentro das funções
-   compartilhadas existentes.
+   Isso é o que faz `getFeaturesForTab('comunidades')` incluir a feature só
+   pra quem tem ela listada.
 
-3. **Mostrar o bloco só para o projeto certo**
-   Em `inicializarInterface()`, junto com o restante da configuração de UI
-   por projeto:
+5. **Mostrar/esconder o container certo**: em `inicializarInterface()`
+   (`public/js/app.js`), adicionar uma linha:
    ```js
-   if (PROJETO_ATIVO === 'pa') {
-     document.getElementById('comm-pa-extra').classList.remove('hidden');
-   }
+   const votoRankingPaAtivo = getFeaturesForTab('comunidades').includes('voto-ranking-pa');
+   document.getElementById('comm-pa-voto-ranking')?.classList.toggle('hidden', !votoRankingPaAtivo);
    ```
 
-4. **Plugar a execução no fluxo compartilhado com uma única chamada guardada**
-   No final da função de renderização compartilhada da aba (ex.:
-   `renderCommunityDashboard()`), adicionar **uma linha** condicional:
+6. **Plugar a execução no fluxo compartilhado**: no final da função de
+   renderização compartilhada da aba (ex.: `renderCommunityDashboard()` em
+   `public/js/tabs/comunidades.js`), adicionar:
    ```js
-   if (PROJETO_ATIVO === 'pa') renderExtraVotoRankingPA(filtered);
+   runTabFeatures('comunidades', filtered);
    ```
-   Isso reaproveita os dados já carregados/filtrados pela aba compartilhada
-   (mesmos filtros de data, campanha, comunidade etc.) sem duplicar lógica de
-   filtro. A função compartilhada não sabe "o que" a extensão faz — só sabe
-   que, se for aquele projeto, chama a função dele.
+   Isso já existe hoje — uma feature nova na mesma aba não precisa mexer
+   aqui, só se registrar (passo 3) e aparecer no manifesto (passo 4).
 
-5. **Fetch de dados extras, se precisar de outra fonte**
-   Se a feature exigir uma base de dados adicional (ex.: cruzar votantes com
-   uma base própria de PA), fazer esse fetch dentro do módulo isolado do
-   passo 2, não dentro de `loadCommunityData()`. Cachear em um estado próprio
-   (ex.: `const PA_VOTO_STATE = { isLoaded: false, dados: null };`) para não
-   buscar de novo a cada render.
+## Quando isso não é o suficiente
 
-## Quando promover para um mecanismo mais genérico
-
-Esse padrão de `if (PROJETO_ATIVO === 'xx')` direto é intencionalmente
-simples e não deve ser generalizado cedo demais. Só considerar migrar para um
-sistema de hooks (ex.: `PROJECT_HOOKS[PROJETO_ATIVO]?.afterRenderComunidades?.(dados)`)
-se esse padrão precisar se repetir em **3 ou mais pontos diferentes** do
-código. Até lá, a duplicação de um `if` simples é preferível à indireção de
-um sistema de plugins que só tem um usuário.
+Se a feature precisar de um comportamento de plugin mais rico do que
+"renderizar quando a aba compartilhada renderiza" (ex.: rodar num evento
+diferente, expor mais de uma função), estenda o objeto passado pro
+`registerFeature` com mais campos e ajuste `runTabFeatures`/quem a chama —
+mas isso ainda não foi necessário até hoje (uma única feature registrada).
 
 ## Checklist rápido para o agente executar
 
-- [ ] Identificar a aba compartilhada e a função de renderização principal
-      dela.
-- [ ] Criar o container HTML `hidden` dentro da seção da aba.
-- [ ] Criar o módulo JS isolado com o comentário de cabeçalho padrão
-      (`MÓDULO X: ... - EXCLUSIVO <PROJETO>`).
+- [ ] Se precisar de dado novo do Supabase: criar a Function em
+      `functions/api/...` e, se preciso, pedir ao usuário pra rodar o SQL da
+      RPC nova (você não tem acesso direto ao SQL Editor do Supabase).
+- [ ] Criar o container HTML `hidden` dentro da seção da aba compartilhada.
+- [ ] Criar `public/js/features/<nome>.js` terminando com `registerFeature(...)`.
+- [ ] Adicionar o `<script src="js/features/<nome>.js">` em `public/index.html`.
+- [ ] Adicionar a feature em `features.<tab>` do projeto certo em
+      `public/config/projetos.json`.
 - [ ] Mostrar/esconder o container em `inicializarInterface()` conforme
-      `PROJETO_ATIVO`.
-- [ ] Plugar a chamada da função nova como uma única linha condicional no
-      final da função de renderização compartilhada.
-- [ ] Não tocar nos arquivos legados (`escalada.html`, `para.html`,
-      `pernambuco.html`, `ms.html`).
-- [ ] Não adicionar `if` de projeto espalhado dentro da lógica compartilhada
-      além do ponto único de chamada do passo 4.
+      `getFeaturesForTab(...)`.
+- [ ] Confirmar que `runTabFeatures('<tab>', ...)` já é chamado no final da
+      função de renderização compartilhada daquela aba (geralmente já é).
+- [ ] Não tocar nos arquivos em `legado/` (histórico pré-unificação, fora de
+      uso).
+- [ ] Não adicionar `if (PROJETO_ATIVO === 'xx')` espalhado dentro da lógica
+      compartilhada — isso é exatamente o que o registro de features evita.
