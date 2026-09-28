@@ -16,6 +16,73 @@
           container.classList.add('is-expanded');
         }
       }
+
+      const userRow = e.target.closest('.bi-user-row');
+      if (userRow) {
+        abrirPerfilEngajamento(userRow.getAttribute('data-person-id'));
+      }
+    });
+
+    // =========================================================================
+    // PERFIL DE ENGAJAMENTO (modal do Top 5 Engajados) - COMPARTILHADO
+    // =========================================================================
+    let COMMUNITY_BI_FILTERED = [];
+
+    function abrirPerfilEngajamento(personId) {
+      const acoes = [];
+      const comunidadesSet = new Set();
+      let nomeExibicao = personId;
+
+      COMMUNITY_BI_FILTERED.forEach(msg => {
+        const checar = (lista, tipo) => {
+          (lista || []).forEach(item => {
+            const id = item.telefone || item.nome_contato || 'anon';
+            if (id !== personId) return;
+            if (item.nome_contato) nomeExibicao = item.nome_contato;
+            if (msg.comunidade) comunidadesSet.add(msg.comunidade);
+            acoes.push({ tipo, msg, data: item.data_evento || msg.data_evento });
+          });
+        };
+        checar(msg.reacoes, 'reacao');
+        checar(msg.votos, 'voto');
+      });
+
+      acoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+      document.getElementById('perfil-nome').textContent = nomeExibicao;
+      document.getElementById('perfil-comunidades').innerHTML = comunidadesSet.size
+        ? [...comunidadesSet].map(c => `<span class="text-[10px] bg-blue-500/10 text-blue-300 px-2 py-1 rounded-full border border-blue-500/20">${escapeHtml(c)}</span>`).join('')
+        : '<span class="text-[10px] text-slate-500">Nenhuma comunidade identificada</span>';
+
+      document.getElementById('perfil-lista-acoes').innerHTML = acoes.length
+        ? acoes.map(a => {
+            const cor = a.tipo === 'voto' ? 'amber' : 'rose';
+            const label = a.tipo === 'voto' ? 'Voto' : 'Reação';
+            const textoCompleto = a.msg.texto_preview || '(Sem texto)';
+            const preview = textoCompleto.length > 160 ? textoCompleto.slice(0, 160) + '…' : textoCompleto;
+            return `
+              <div class="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
+                <div class="flex items-center flex-wrap gap-2 mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-${cor}-500/10 text-${cor}-400 border-${cor}-500/20">${label}</span>
+                  <span class="text-[10px] text-slate-500">${formatDateTimeCommunity(a.data)}</span>
+                  <span class="text-[10px] text-slate-500 truncate">· ${escapeHtml(a.msg.campanha || '')} · ${escapeHtml(a.msg.comunidade || '')}</span>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">${escapeHtml(preview)}</p>
+              </div>
+            `;
+          }).join('')
+        : '<p class="text-xs text-slate-500 text-center py-6">Nenhuma ação encontrada para esse período/filtro.</p>';
+
+      document.getElementById('perfil-engajamento-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function fecharPerfilEngajamento() {
+      document.getElementById('perfil-engajamento-modal').classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') fecharPerfilEngajamento();
     });
 
     function toggleInteractions(msgId, tipo) {
@@ -93,11 +160,13 @@
       if (!msgs || msgs.length === 0) { container.classList.add('hidden'); return; }
       container.classList.remove('hidden');
 
+      COMMUNITY_BI_FILTERED = msgs;
+
       const userMap = {}; const dateMap = {};
       msgs.forEach(msg => {
         const processEngagement = (eng, tipo) => {
           const id = eng.telefone || eng.nome_contato || 'anon';
-          if (!userMap[id]) userMap[id] = { nome: eng.nome_contato || 'Participante', telefone: eng.telefone || '', total: 0 };
+          if (!userMap[id]) userMap[id] = { id, nome: eng.nome_contato || 'Participante', telefone: eng.telefone || '', total: 0 };
           userMap[id].total++;
 
           const dateStr = (eng.data_evento || msg.data_evento || '').split('T')[0];
@@ -112,13 +181,13 @@
 
       const topUsers = Object.values(userMap).sort((a, b) => b.total - a.total).slice(0, 5);
       document.getElementById('bi-ranking-list').innerHTML = topUsers.map((u, i) => `
-        <div class="flex items-center justify-between p-1.5 hover:bg-slate-800/50 rounded-lg transition-colors border border-transparent hover:border-slate-700">
+        <button type="button" class="bi-user-row w-full flex items-center justify-between p-1.5 hover:bg-slate-800/50 rounded-lg transition-colors border border-transparent hover:border-slate-700 text-left" data-person-id="${escapeHtml(u.id)}" title="Ver perfil de engajamento">
           <div class="flex items-center gap-3 min-w-0">
             <div class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 shrink-0">${i + 1}º</div>
             <p class="text-xs font-semibold text-slate-200 truncate" title="${escapeHtml(u.nome)}">${escapeHtml(u.nome)}</p>
           </div>
           <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 font-bold shrink-0">${u.total} <span class="hidden sm:inline font-normal opacity-80">ações</span></span>
-        </div>
+        </button>
       `).join('') || '<p class="text-xs text-slate-500 text-center py-4">Sem interações</p>';
 
       const topMsg = [...msgs].sort((a, b) => (b.total_engajamentos || 0) - (a.total_engajamentos || 0))[0];
