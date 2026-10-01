@@ -178,6 +178,34 @@ Google Sheets por trás, que não faz parte deste repositório.
 - `AUTH_SECRET` assina os cookies — sem ele o middleware recusa tudo com
   500. É uma variável de ambiente só, não vai pro banco nem pro código.
 
+## Embed no Painel de Mobilizacao (login automatico em iframe)
+
+O Painel de Mobilizacao (`https://painel-mobilizacao.netlify.app`) embute este
+dashboard em iframe, ja logado no projeto da base aberta. Cookie nao serve
+aqui (`SameSite=Strict` + Safari bloqueia cookie de terceiros), entao o embed
+autentica por token em header:
+
+1. A Netlify Function do Painel (apos validar a senha da base la) assina um
+   **launch token** de ~2 min (`{ proj, aud: 'embed-launch', exp }`, HMAC com
+   `EMBED_SECRET`) e monta `/?projeto=<chave>&embed_token=<token>`.
+2. `functions/_middleware.js` aceita o launch token **so na carga da pagina
+   principal** e so se o `proj` do token bater com `?projeto=`.
+3. `public/js/embed-auth.js` remove o token da URL, troca-o em
+   `POST /api/embed-exchange` por um token de sessao de 8h (assinado com
+   `AUTH_SECRET`, so em memoria) e injeta `Authorization: Bearer` em todo
+   `fetch` para `/api/*`. O middleware aceita Bearer alem do cookie.
+4. Toda resposta leva `Content-Security-Policy: frame-ancestors 'self' <origens>`.
+   Origens: env `EMBED_ALLOWED_ORIGINS` (separadas por espaco), padrao
+   `https://painel-mobilizacao.netlify.app`.
+
+- Env nova: `EMBED_SECRET` (Secret, nos dois ambientes, **igual** a do Painel,
+  diferente do `AUTH_SECRET`).
+- `/css/*` e `/js/*` agora sao publicos (precisam carregar no iframe sem cookie).
+  **Nao colocar segredo nem dado de projeto nesses arquivos.**
+- Projeto novo no manifesto funciona no embed sem mudar nada aqui: o token
+  carrega a chave do projeto.
+- O launch token nunca aceita `proj: 'admin'`.
+
 ## Rodando local
 
 ```bash
