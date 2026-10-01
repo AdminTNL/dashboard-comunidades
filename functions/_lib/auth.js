@@ -72,4 +72,29 @@ export function newSessionPayload(proj) {
   return { proj, exp: Math.floor(Date.now() / 1000) + SESSION_DURATION_SECONDS };
 }
 
+// --- Embed no Painel de Mobilizacao (iframe cross-site) ---
+// Cookie SameSite=Strict nao e enviado em iframe de outro dominio (e o Safari
+// bloqueia cookie de terceiros), entao o embed usa token no header Authorization.
+// O Painel gera um "launch token" curto, assinado com EMBED_SECRET (segredo
+// compartilhado), que e trocado aqui por um token de sessao assinado com AUTH_SECRET.
+export const EMBED_SESSION_DURATION_SECONDS = 60 * 60 * 8; // 8 horas
+
+// Valida o launch token do Painel. Nunca aceita 'admin': o embed e sempre de um projeto.
+export async function verifyEmbedLaunch(token, env) {
+  if (!env.EMBED_SECRET) return null;
+  const payload = await verifySession(token, env.EMBED_SECRET);
+  if (!payload || payload.aud !== 'embed-launch') return null;
+  if (typeof payload.proj !== 'string' || !payload.proj || payload.proj === 'admin') return null;
+  return payload;
+}
+
+export function embedSessionPayload(proj) {
+  return { proj, via: 'embed', exp: Math.floor(Date.now() / 1000) + EMBED_SESSION_DURATION_SECONDS };
+}
+
+export function readBearerToken(request) {
+  const match = (request.headers.get('Authorization') || '').match(/^Bearer\s+(\S+)$/i);
+  return match ? match[1] : null;
+}
+
 export { SESSION_DURATION_SECONDS };

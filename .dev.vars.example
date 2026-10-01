@@ -12,6 +12,15 @@ SUPABASE_SERVICE_ROLE_KEY=coloque-a-service-role-key-aqui
 # longo (ex.: openssl rand -hex 32) - nunca reaproveite entre ambientes.
 AUTH_SECRET=troque-por-uma-string-aleatoria-longa
 
+# Segredo compartilhado com o Painel de Mobilizacao (mesma var EMBED_SECRET la).
+# O Painel assina um token curto de embed com ele; aqui validamos a assinatura.
+# Use um valor diferente do AUTH_SECRET.
+EMBED_SECRET=troque-por-outra-string-aleatoria-longa
+
+# Opcional: origens que podem embutir o dashboard em iframe (separadas por espaco).
+# Padrao: https://painel-mobilizacao.netlify.app
+EMBED_ALLOWED_ORIGINS=
+
 # Senha de admin: acessa qualquer projeto via /admin.html
 PASS_ADMIN=
 
