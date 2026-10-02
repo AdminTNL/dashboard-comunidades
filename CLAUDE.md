@@ -202,8 +202,15 @@ autentica por token em header:
   diferente do `AUTH_SECRET`).
 - `/css/*` e `/js/*` agora sao publicos (precisam carregar no iframe sem cookie).
   **Nao colocar segredo nem dado de projeto nesses arquivos.**
-- Projeto novo no manifesto funciona no embed sem mudar nada aqui: o token
-  carrega a chave do projeto.
+- Projeto novo no manifesto funciona no embed sem mudar nada **aqui**: o token
+  carrega a chave do projeto. O que falta fica no repositório do Painel (lista
+  de bases e mapeamento), ver passo 5 de "Como adicionar um projeto novo".
+- Lado do Painel: `AdminTNL/painel-mobilizacao`, function
+  `netlify/functions/comunidades-embed.js` (gera o launch token e a URL) e
+  `COMMUNITY_DASHBOARD_BASES` em `src/config.js` (quais bases mostram o embed).
+  O Painel só gera o embed para quem passou pela senha da base lá (token
+  `painel-access`); a mesma `EMBED_SECRET` assina os dois tipos de token, separados
+  pelo campo `aud`.
 - O launch token nunca aceita `proj: 'admin'`.
 
 ## Rodando local
@@ -281,6 +288,18 @@ do projeto no painel do Cloudflare:
    variables, nos dois ambientes).
 4. Não precisa mexer em n8n nem em nenhuma outra config — as Functions em
    `functions/api/[projeto]/...` já são genéricas por manifesto.
+5. **Se o projeto também deve aparecer embutido no Painel de Mobilização**
+   (ver "Embed no Painel de Mobilizacao"), há um passo no **outro repositório**,
+   `AdminTNL/painel-mobilizacao` (que tem dono diferente: precisa de PR e
+   revisão de lá):
+   - Incluir o código da base em `COMMUNITY_DASHBOARD_BASES`, em `src/config.js`.
+   - Se a chave do projeto aqui **não** for o código da base em minúsculas
+     (ex.: base `BQMT` no Painel = projeto `escala6x1` aqui), mapear também em
+     `PROJETO_POR_BASE`, em `netlify/functions/comunidades-embed.js`.
+   - Se a chave for igual ao código da base em minúsculas (ex.: `LARA` → `lara`),
+     só o primeiro item basta. A function do Painel confere o projeto no
+     `/config/projetos.json` deste dashboard, então nada muda aqui.
+   - Nada disso é necessário se o projeto não for aparecer no Painel.
 
 ## Como adicionar uma aba inteira exclusiva de um projeto
 
