@@ -6,6 +6,13 @@ funciona hoje, o histórico de como chegou nesse estado, e o que fazer pra
 continuar mexendo nele sem quebrar nada. Leia isso inteiro antes de propor
 qualquer mudança estrutural.
 
+## Contexto da Stack (Atlas)
+
+O mapa de contexto da Stack está no clone do Atlas, em `$ATLAS_PATH`. Antes de mexer
+aqui, leia `$ATLAS_PATH/AGENTS.md` e a ficha deste projeto em
+`$ATLAS_PATH/projetos/dashboard-comunidades.md`.
+Se `ATLAS_PATH` não estiver definida, peça ao usuário o caminho do clone do Atlas.
+
 ## O que é este projeto
 
 Um dashboard interno (não é produto público) que mostra métricas de
