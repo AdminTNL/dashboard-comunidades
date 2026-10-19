@@ -229,6 +229,27 @@ npm run dev                       # wrangler pages dev public, já com nodejs_co
 ```
 Abre em `http://localhost:8788`.
 
+## Fluxo de branches
+
+Segue o padrão do time, descrito no Atlas em `processos/desenvolvimento.md`:
+`tarefa → develop → main`.
+
+- `main`: produção. Um push nela dispara o deploy de produção no Cloudflare Pages.
+  Só recebe o PR `develop → main`, aprovado pelo dono da conta `AdminTNL`.
+- `develop`: integração e homologação. Toda tarefa nasce dela e volta por PR, com
+  squash. Antes de subir para a `main`, conferir o resultado. Se o Cloudflare Pages gerar
+  deploy de preview para a `develop`, a URL aparece no painel do projeto (confirmar lá;
+  a configuração de previews não está documentada aqui).
+- Tarefa: branch `<prefixo>/<descricao>` (`feature/`, `fix/`, `docs/`, `chore/`), curta,
+  apagada logo após o merge.
+- Ao abrir um PR, confirme que a base é `develop`. Nunca dar push direto na `main` nem na
+  `develop`.
+- Quem abriu o PR não o aprova. O Claude pode revisar e comentar, mas a aprovação é humana.
+- `develop → main` é merge commit, nunca squash, e só depois do "pode subir" do dono do
+  produto. Não existe hotfix: toda correção segue o mesmo caminho.
+- Não ligar a exclusão automática de branch após o merge neste repositório: ela apagaria a
+  `develop` no PR `develop → main`.
+
 ## Deploy (Cloudflare Pages)
 
 Git integration já configurada (push em `main` dispara deploy). Configuração
